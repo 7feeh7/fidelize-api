@@ -10,7 +10,9 @@
 		"knex": "node --env-file=.env --import tsx ./node_modules/knex/bin/cli.js --knexfile src/database/knexfile.ts",
 		"migrate:make": "yarn knex migrate:make",
 		"migrate:latest": "yarn knex migrate:latest",
-		"migrate:rollback": "yarn knex migrate:rollback"
+		"migrate:rollback": "yarn knex migrate:rollback",
+		"test": "vitest run",
+		"test:watch": "vitest"
 	},
 	"dependencies": {
 		"bcrypt": "6.0.0",
@@ -23,6 +25,8 @@
 		"@biomejs/biome": "2.5.15",
 		"@types/bcrypt": "6.0.0",
 		"@types/express": "5.0.6",
-		"tsx": "4.23.15"
+		"tsx": "4.23.15",
+		"vite": "^8.3.4",
+		"vitest": "^5.0.5"
 	}
 }
