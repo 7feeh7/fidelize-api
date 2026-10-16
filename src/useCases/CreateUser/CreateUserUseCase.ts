@@ -12,7 +12,7 @@ export class CreateUserUseCase {
 	async execute(data: ICreateUserRequestDTO) {
 		const userAlreadyExists = await this.userRepository.findByEmail(data.email);
 		if (userAlreadyExists) {
-			throw new Error("User already exists");
+			throw new Error("O usuário já existe");
 		}
 
 		const hashedPassword = await this.hashProvider.generateHash(data.password);

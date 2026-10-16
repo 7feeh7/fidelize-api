@@ -1,6 +1,5 @@
 import type { Knex } from "knex";
 
-// O CLI do knex muda o cwd para a pasta deste arquivo, por isso o caminho das migrations é relativo a ela.
 const config: Knex.Config = {
 	client: "pg",
 	connection: {

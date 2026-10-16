@@ -59,7 +59,7 @@ describe("CreateUserUseCase", () => {
 				email: "maria@example.com",
 				password: "senha-plana",
 			}),
-		).rejects.toThrow("User already exists");
+		).rejects.toThrow("O usuário já existe");
 
 		expect(hashProvider.generateHash).not.toHaveBeenCalled();
 		expect(userRepository.save).not.toHaveBeenCalled();
