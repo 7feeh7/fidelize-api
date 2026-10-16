@@ -1,19 +1,28 @@
 {
 	"name": "fidelize-api",
 	"version": "1.0.0",
-	"main": "index.js",
+	"main": "index.ts",
 	"license": "MIT",
-	"type": "module",
 	"scripts": {
-		"start": "node src/server.js",
-		"start:dev": "node --watch src/server.js",
-		"format": "biome format --write"
+		"start": "node dist/server.js",
+		"start:dev": "tsx watch --env-file=.env src/server.ts",
+		"format": "biome format --write",
+		"knex": "node --env-file=.env --import tsx ./node_modules/knex/bin/cli.js --knexfile src/database/knexfile.ts",
+		"migrate:make": "yarn knex migrate:make",
+		"migrate:latest": "yarn knex migrate:latest",
+		"migrate:rollback": "yarn knex migrate:rollback"
 	},
 	"dependencies": {
+		"bcrypt": "6.0.0",
 		"express": "5.3.0",
-		"knex": "^3.3.0"
+		"knex": "3.3.0",
+		"pg": "8.23.1",
+		"typescript": "7.0.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.15"
+		"@biomejs/biome": "2.5.15",
+		"@types/bcrypt": "6.0.0",
+		"@types/express": "5.0.6",
+		"tsx": "4.23.15"
 	}
 }

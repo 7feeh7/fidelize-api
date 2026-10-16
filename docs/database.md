@@ -1,0 +1,24 @@
+# Banco de dados
+
+A aplicação usa PostgreSQL com [Knex](https://knexjs.org/) como query builder.
+
+## Migrations
+
+As migrations ficam em `src/database/migrations/`.
+
+| Comando                    | Descrição                             |
+| -------------------------- | ------------------------------------- |
+| `yarn migrate:make <nome>` | Cria uma nova migration               |
+| `yarn migrate:latest`      | Executa as migrations pendentes       |
+| `yarn migrate:rollback`    | Desfaz o último lote de migrations    |
+| `yarn knex <comando>`      | Executa qualquer outro comando do CLI |
+
+## Variáveis de ambiente
+
+| Variável      | Descrição           |
+| ------------- | ------------------- |
+| `DB_HOST`     | Host do PostgreSQL  |
+| `DB_PORT`     | Porta do PostgreSQL |
+| `DB_USER`     | Usuário             |
+| `DB_PASSWORD` | Senha               |
+| `DB_NAME`     | Nome do banco       |
