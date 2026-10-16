@@ -33,7 +33,9 @@ describe("CreateUserUseCase", () => {
 
 		await sut.execute(request);
 
-		expect(userRepository.findByEmail).toHaveBeenCalledWith("maria@example.com");
+		expect(userRepository.findByEmail).toHaveBeenCalledWith(
+			"maria@example.com",
+		);
 		expect(hashProvider.generateHash).toHaveBeenCalledWith("senha-plana");
 		expect(userRepository.save).toHaveBeenCalledTimes(1);
 
