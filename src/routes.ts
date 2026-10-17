@@ -24,6 +24,12 @@ import { setLoyaltyRuleActiveController } from "./useCases/SetLoyaltyRuleActive"
 import { listCustomerRewardsController } from "./useCases/ListCustomerRewards";
 import { cancelCustomerRewardController } from "./useCases/CancelCustomerReward";
 import { grantManualCustomerRewardController } from "./useCases/GrantManualCustomerReward";
+import { listMessageTemplatesController } from "./useCases/ListMessageTemplates";
+import { getMessageTemplateController } from "./useCases/GetMessageTemplate";
+import { createMessageTemplateController } from "./useCases/CreateMessageTemplate";
+import { updateMessageTemplateController } from "./useCases/UpdateMessageTemplate";
+import { setMessageTemplateActiveController } from "./useCases/SetMessageTemplateActive";
+import { previewMessageTemplateController } from "./useCases/PreviewMessageTemplate";
 
 const router = Router();
 
@@ -128,6 +134,30 @@ router.patch("/loyalty-rules/:id", (request, response) => {
 
 router.patch("/loyalty-rules/:id/active", (request, response) => {
 	setLoyaltyRuleActiveController.handle(request, response);
+});
+
+router.get("/message-templates", (request, response) => {
+	listMessageTemplatesController.handle(request, response);
+});
+
+router.get("/message-templates/:id", (request, response) => {
+	getMessageTemplateController.handle(request, response);
+});
+
+router.post("/message-templates", (request, response) => {
+	createMessageTemplateController.handle(request, response);
+});
+
+router.patch("/message-templates/:id", (request, response) => {
+	updateMessageTemplateController.handle(request, response);
+});
+
+router.patch("/message-templates/:id/active", (request, response) => {
+	setMessageTemplateActiveController.handle(request, response);
+});
+
+router.post("/message-templates/preview", (request, response) => {
+	previewMessageTemplateController.handle(request, response);
 });
 
 export { router };
