@@ -14,6 +14,8 @@ export interface MessageListItem {
 	customerName: string;
 	customerPhone: string;
 	sentByName: string | null;
+	returnReminderServiceName: string | null;
+	returnReminderAppointmentDate: string | null;
 }
 
 export interface IMessagesRepository {

@@ -32,6 +32,10 @@ function mapRowToListItem(row: Record<string, unknown>): MessageListItem {
 		customerName: row.customer_name as string,
 		customerPhone: row.customer_phone as string,
 		sentByName: (row.sent_by_name as string | null) ?? null,
+		returnReminderServiceName:
+			(row.return_reminder_service_name as string | null) ?? null,
+		returnReminderAppointmentDate:
+			(row.return_reminder_appointment_date as string | null) ?? null,
 	};
 }
 
@@ -69,11 +73,18 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		return this.connection("messages as m")
 			.join("customers as c", "m.customer_id", "c.id")
 			.leftJoin("users as u", "m.sent_by", "u.id")
+			.leftJoin("appointment_items as ai", "ai.id", "m.appointment_item_id")
+			.leftJoin("appointments as a", "a.id", "ai.appointment_id")
+			.leftJoin("services as s", "s.id", "ai.service_id")
 			.select(
 				"m.*",
 				"c.name as customer_name",
 				"c.phone as customer_phone",
 				"u.name as sent_by_name",
+				"s.name as return_reminder_service_name",
+				this.connection.raw(
+					"a.appointment_date::date as return_reminder_appointment_date",
+				),
 			);
 	}
 

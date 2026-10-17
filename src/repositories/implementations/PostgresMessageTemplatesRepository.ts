@@ -1,6 +1,7 @@
 import type { Knex } from "knex";
 import {
 	MessageTemplate,
+	type AutomaticMessageTemplateType,
 	type MessageTemplateType,
 } from "@/entities/MessageTemplate";
 import type { IMessageTemplatesRepository } from "../IMessageTemplatesRepository";
@@ -35,6 +36,20 @@ export class PostgresMessageTemplatesRepository
 	async findById(id: string): Promise<MessageTemplate | null> {
 		const row = await this.connection("message_templates")
 			.where({ id })
+			.first();
+
+		if (!row) {
+			return null;
+		}
+
+		return mapRowToMessageTemplate(row);
+	}
+
+	async findActiveAutomaticByType(
+		type: AutomaticMessageTemplateType,
+	): Promise<MessageTemplate | null> {
+		const row = await this.connection("message_templates")
+			.where({ type, active: true })
 			.first();
 
 		if (!row) {

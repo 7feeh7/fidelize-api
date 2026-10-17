@@ -18,12 +18,21 @@ export interface MessageDTO {
 	sentAt: string | null;
 	sentBy: string | null;
 	sentByName: string | null;
+	returnReminderServiceName: string | null;
+	returnReminderAppointmentDate: string | null;
 	whatsappUrl: string | null;
 	createdAt: string;
 }
 
 export function mapMessageToDTO(item: MessageListItem): MessageDTO {
-	const { message, customerName, customerPhone, sentByName } = item;
+	const {
+		message,
+		customerName,
+		customerPhone,
+		sentByName,
+		returnReminderServiceName,
+		returnReminderAppointmentDate,
+	} = item;
 	const whatsappUrl =
 		message.status === "PENDING"
 			? buildWhatsAppLink(customerPhone, message.content)
@@ -44,6 +53,8 @@ export function mapMessageToDTO(item: MessageListItem): MessageDTO {
 		sentAt: message.sentAt?.toISOString() ?? null,
 		sentBy: message.sentBy,
 		sentByName,
+		returnReminderServiceName,
+		returnReminderAppointmentDate,
 		whatsappUrl,
 		createdAt: message.createdAt.toISOString(),
 	};

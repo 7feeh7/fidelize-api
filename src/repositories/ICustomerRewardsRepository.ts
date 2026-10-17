@@ -29,5 +29,8 @@ export interface ICustomerRewardsRepository {
 		customerId: string,
 		status?: CustomerRewardStatus,
 	): Promise<CustomerRewardListItem[]>;
+	findSoonestExpiringAvailable(
+		customerId: string,
+	): Promise<CustomerRewardListItem | null>;
 	update(reward: CustomerReward): Promise<void>;
 }

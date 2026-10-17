@@ -3,6 +3,7 @@ import type { IAppointmentsRepository } from "@/repositories/IAppointmentsReposi
 import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import { formatLoyaltyRuleRewardSummary } from "@/utils/loyaltyRulePresentation";
+import { daysBetweenDateOnly } from "@/utils/dateOnly";
 import {
 	extractFirstName,
 	type MessageTemplateVariableValues,
@@ -25,14 +26,6 @@ function formatDayMonth(date: Date): string {
 	return `${day}/${month}`;
 }
 
-function daysSince(date: Date, reference = new Date()): number {
-	const start = new Date(date);
-	start.setHours(0, 0, 0, 0);
-	const end = new Date(reference);
-	end.setHours(0, 0, 0, 0);
-	return Math.floor((end.getTime() - start.getTime()) / 86_400_000);
-}
-
 export class BuildMessageTemplateVariableValuesService {
 	constructor(
 		private customersRepository: ICustomersRepository,
@@ -40,7 +33,10 @@ export class BuildMessageTemplateVariableValuesService {
 		private customerRewardsRepository: ICustomerRewardsRepository,
 	) {}
 
-	async execute(customerId?: string): Promise<MessageTemplateVariableValues> {
+	async execute(
+		customerId?: string,
+		referenceDate = new Date(),
+	): Promise<MessageTemplateVariableValues> {
 		if (!customerId) {
 			return { ...SAMPLE_MESSAGE_TEMPLATE_VARIABLES };
 		}
@@ -73,28 +69,73 @@ export class BuildMessageTemplateVariableValuesService {
 					values.servico = primaryItem.serviceName;
 				}
 
-				values.dias = String(daysSince(detail.appointmentDate));
+				values.dias = String(
+					daysBetweenDateOnly(
+						detail.appointmentDate.toISOString().slice(0, 10),
+						referenceDate.toISOString().slice(0, 10),
+					),
+				);
 			}
 		}
 
-		const rewards = await this.customerRewardsRepository.listByCustomerId(
-			customerId,
-			"AVAILABLE",
-		);
-		const reward = rewards[0];
-
-		if (reward) {
-			values.beneficio = formatLoyaltyRuleRewardSummary({
-				rewardType: reward.rewardType as LoyaltyRewardType,
-				rewardValue: reward.rewardValue,
-				freeServiceName: reward.freeServiceName,
-			});
-
-			if (reward.reward.expiresAt) {
-				values.validade = formatDayMonth(reward.reward.expiresAt);
-			}
-		}
+		await this.applySoonestAvailableReward(values, customerId);
 
 		return values;
+	}
+
+	async buildForReturnReminder(input: {
+		customerId: string;
+		customerName: string;
+		serviceName: string;
+		appointmentDate: string;
+		referenceDate?: Date;
+	}): Promise<{
+		variables: MessageTemplateVariableValues;
+		customerRewardId: string | null;
+	}> {
+		const referenceDate = input.referenceDate ?? new Date();
+		const referenceDateOnly = referenceDate.toISOString().slice(0, 10);
+
+		const variables: MessageTemplateVariableValues = {
+			nome: extractFirstName(input.customerName),
+			servico: input.serviceName,
+			dias: String(
+				daysBetweenDateOnly(input.appointmentDate, referenceDateOnly),
+			),
+			negocio: getBusinessName(),
+		};
+
+		const customerRewardId = await this.applySoonestAvailableReward(
+			variables,
+			input.customerId,
+		);
+
+		return { variables, customerRewardId };
+	}
+
+	private async applySoonestAvailableReward(
+		values: MessageTemplateVariableValues,
+		customerId: string,
+	): Promise<string | null> {
+		const reward =
+			await this.customerRewardsRepository.findSoonestExpiringAvailable(
+				customerId,
+			);
+
+		if (!reward) {
+			return null;
+		}
+
+		values.beneficio = formatLoyaltyRuleRewardSummary({
+			rewardType: reward.rewardType as LoyaltyRewardType,
+			rewardValue: reward.rewardValue,
+			freeServiceName: reward.freeServiceName,
+		});
+
+		if (reward.reward.expiresAt) {
+			values.validade = formatDayMonth(reward.reward.expiresAt);
+		}
+
+		return reward.reward.id as string;
 	}
 }

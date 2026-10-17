@@ -37,6 +37,8 @@ import { updateMessageContentController } from "./useCases/UpdateMessageContent"
 import { markMessageSentController } from "./useCases/MarkMessageSent";
 import { cancelMessageController } from "./useCases/CancelMessage";
 import { getMessageWhatsAppLinkController } from "./useCases/GetMessageWhatsAppLink";
+import { runDailyRoutineController } from "./useCases/RunDailyRoutine";
+import { getCustomerReturnSummaryController } from "./useCases/GetCustomerReturnSummary";
 
 const router = Router();
 
@@ -78,6 +80,10 @@ router.post("/customers", (request, response) => {
 
 router.get("/customers/:customerId/rewards", (request, response) => {
 	listCustomerRewardsController.handle(request, response);
+});
+
+router.get("/customers/:customerId/return-summary", (request, response) => {
+	getCustomerReturnSummaryController.handle(request, response);
 });
 
 router.post("/customers/:customerId/rewards", (request, response) => {
@@ -193,6 +199,10 @@ router.patch("/messages/:id/cancel", (request, response) => {
 
 router.get("/messages/:id/whatsapp-link", (request, response) => {
 	getMessageWhatsAppLinkController.handle(request, response);
+});
+
+router.post("/daily-routine/run", (request, response) => {
+	runDailyRoutineController.handle(request, response);
 });
 
 export { router };

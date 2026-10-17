@@ -144,6 +144,23 @@ export class PostgresCustomerRewardsRepository
 			});
 	}
 
+	async findSoonestExpiringAvailable(
+		customerId: string,
+	): Promise<CustomerRewardListItem | null> {
+		const row = await this.buildDetailQuery()
+			.where("cr.customer_id", customerId)
+			.where("cr.status", "AVAILABLE")
+			.orderByRaw("cr.expires_at ASC NULLS LAST")
+			.orderBy("cr.granted_at", "asc")
+			.first();
+
+		if (!row) {
+			return null;
+		}
+
+		return mapRowToListItem(row);
+	}
+
 	async listByCustomerId(
 		customerId: string,
 		status?: CustomerRewardStatus,
