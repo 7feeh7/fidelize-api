@@ -113,6 +113,47 @@ export class BuildMessageTemplateVariableValuesService {
 		return { variables, customerRewardId };
 	}
 
+	async buildForBirthday(input: {
+		customerId: string;
+		customerName: string;
+		customerRewardId?: string | null;
+		referenceDate?: Date;
+	}): Promise<{
+		variables: MessageTemplateVariableValues;
+		customerRewardId: string | null;
+	}> {
+		const variables: MessageTemplateVariableValues = {
+			nome: extractFirstName(input.customerName),
+			negocio: getBusinessName(),
+		};
+
+		let customerRewardId = input.customerRewardId ?? null;
+
+		if (customerRewardId) {
+			const reward =
+				await this.customerRewardsRepository.findDetailById(customerRewardId);
+
+			if (reward) {
+				variables.beneficio = formatLoyaltyRuleRewardSummary({
+					rewardType: reward.rewardType as LoyaltyRewardType,
+					rewardValue: reward.rewardValue,
+					freeServiceName: reward.freeServiceName,
+				});
+
+				if (reward.reward.expiresAt) {
+					variables.validade = formatDayMonth(reward.reward.expiresAt);
+				}
+			}
+		} else {
+			customerRewardId = await this.applySoonestAvailableReward(
+				variables,
+				input.customerId,
+			);
+		}
+
+		return { variables, customerRewardId };
+	}
+
 	private async applySoonestAvailableReward(
 		values: MessageTemplateVariableValues,
 		customerId: string,

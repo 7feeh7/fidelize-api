@@ -31,6 +31,9 @@ function mapRowToListItem(row: Record<string, unknown>): MessageListItem {
 		message: mapRowToMessage(row),
 		customerName: row.customer_name as string,
 		customerPhone: row.customer_phone as string,
+		customerDateOfBirth: row.customer_date_of_birth
+			? (row.customer_date_of_birth as string).slice(0, 10)
+			: null,
 		sentByName: (row.sent_by_name as string | null) ?? null,
 		returnReminderServiceName:
 			(row.return_reminder_service_name as string | null) ?? null,
@@ -80,6 +83,7 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 				"m.*",
 				"c.name as customer_name",
 				"c.phone as customer_phone",
+				this.connection.raw("c.date_of_birth::date as customer_date_of_birth"),
 				"u.name as sent_by_name",
 				"s.name as return_reminder_service_name",
 				this.connection.raw(
@@ -163,5 +167,20 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		await this.connection("messages").where({ id }).update({
 			status: "CANCELED",
 		});
+	}
+
+	async existsBirthdayMessageForYear(
+		customerId: string,
+		calendarYear: number,
+	): Promise<boolean> {
+		const row = await this.connection("messages")
+			.where({
+				customer_id: customerId,
+				type: "BIRTHDAY",
+			})
+			.whereRaw("EXTRACT(YEAR FROM scheduled_for::date) = ?", [calendarYear])
+			.first();
+
+		return Boolean(row);
 	}
 }

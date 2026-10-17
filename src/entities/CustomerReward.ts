@@ -13,6 +13,7 @@ export class CustomerReward {
 	public loyaltyRuleId!: string;
 	public referralId!: string | null;
 	public appointmentId!: string | null;
+	public grantYear!: number | null;
 	public status!: CustomerRewardStatus;
 	public grantedAt!: Date;
 	public expiresAt!: Date | null;

@@ -13,6 +13,7 @@ export interface MessageListItem {
 	message: Message;
 	customerName: string;
 	customerPhone: string;
+	customerDateOfBirth: string | null;
 	sentByName: string | null;
 	returnReminderServiceName: string | null;
 	returnReminderAppointmentDate: string | null;
@@ -27,4 +28,8 @@ export interface IMessagesRepository {
 	updateContent(id: string, content: string): Promise<void>;
 	markSent(id: string, sentBy: string, sentAt: Date): Promise<void>;
 	cancel(id: string): Promise<void>;
+	existsBirthdayMessageForYear(
+		customerId: string,
+		calendarYear: number,
+	): Promise<boolean>;
 }

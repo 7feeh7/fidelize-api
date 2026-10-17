@@ -19,6 +19,11 @@ export interface ICustomerRewardsRepository {
 		loyaltyRuleId: string,
 		referralId: string | null,
 	): Promise<boolean>;
+	existsBirthdayGrantForYear(
+		customerId: string,
+		loyaltyRuleId: string,
+		grantYear: number,
+	): Promise<boolean>;
 	findById(id: string): Promise<CustomerReward | null>;
 	findDetailById(id: string): Promise<CustomerRewardListItem | null>;
 	findUsedDetailByAppointmentId(

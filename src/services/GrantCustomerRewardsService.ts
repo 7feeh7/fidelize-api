@@ -151,6 +151,7 @@ export class GrantCustomerRewardsService {
 				loyaltyRuleId,
 				referralId,
 				appointmentId: null,
+				grantYear: null,
 				status: "AVAILABLE",
 				grantedAt,
 				expiresAt: computeExpiresAt(grantedAt, record.rule.validDays),

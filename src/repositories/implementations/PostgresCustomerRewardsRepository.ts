@@ -32,6 +32,7 @@ function mapRowToCustomerReward(row: Record<string, unknown>): CustomerReward {
 			loyaltyRuleId: row.loyalty_rule_id as string,
 			referralId: (row.referral_id as string | null) ?? null,
 			appointmentId: (row.appointment_id as string | null) ?? null,
+			grantYear: (row.grant_year as number | null) ?? null,
 			status: row.status as CustomerRewardStatus,
 			grantedAt: new Date(row.granted_at as string),
 			expiresAt: row.expires_at
@@ -55,6 +56,7 @@ export class PostgresCustomerRewardsRepository
 			loyalty_rule_id: reward.loyaltyRuleId,
 			referral_id: reward.referralId,
 			appointment_id: reward.appointmentId,
+			grant_year: reward.grantYear,
 			status: reward.status,
 			granted_at: reward.grantedAt,
 			expires_at: reward.expiresAt,
@@ -76,6 +78,22 @@ export class PostgresCustomerRewardsRepository
 				"COALESCE(referral_id, ?::uuid) = COALESCE(?, ?::uuid)",
 				[NULL_REFERRAL_SENTINEL, referralId, NULL_REFERRAL_SENTINEL],
 			)
+			.first();
+
+		return Boolean(row);
+	}
+
+	async existsBirthdayGrantForYear(
+		customerId: string,
+		loyaltyRuleId: string,
+		grantYear: number,
+	): Promise<boolean> {
+		const row = await this.connection("customer_rewards")
+			.where({
+				customer_id: customerId,
+				loyalty_rule_id: loyaltyRuleId,
+				grant_year: grantYear,
+			})
 			.first();
 
 		return Boolean(row);

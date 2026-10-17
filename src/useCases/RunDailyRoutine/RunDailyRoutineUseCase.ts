@@ -18,6 +18,13 @@ export class RunDailyRoutineUseCase {
 				skippedNoActiveTemplate: result.returnReminders.skippedNoActiveTemplate,
 				executedAt: result.returnReminders.executedAt.toISOString(),
 			},
+			birthdays: {
+				generatedCount: result.birthdays.generatedCount,
+				grantedCount: result.birthdays.grantedCount,
+				skippedNoActiveTemplate: result.birthdays.skippedNoActiveTemplate,
+				skippedNoActiveRule: result.birthdays.skippedNoActiveRule,
+				executedAt: result.birthdays.executedAt.toISOString(),
+			},
 		};
 	}
 }

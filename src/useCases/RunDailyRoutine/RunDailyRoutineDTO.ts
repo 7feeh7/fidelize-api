@@ -8,4 +8,11 @@ export interface IRunDailyRoutineResponseDTO {
 		skippedNoActiveTemplate: boolean;
 		executedAt: string;
 	};
+	birthdays: {
+		generatedCount: number;
+		grantedCount: number;
+		skippedNoActiveTemplate: boolean;
+		skippedNoActiveRule: boolean;
+		executedAt: string;
+	};
 }
