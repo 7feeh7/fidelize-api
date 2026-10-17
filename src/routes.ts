@@ -16,6 +16,11 @@ import { listUsersController } from "./useCases/ListUsers";
 import { listReferralsController } from "./useCases/ListReferrals";
 import { createReferralController } from "./useCases/CreateReferral";
 import { cancelReferralController } from "./useCases/CancelReferral";
+import { listLoyaltyRulesController } from "./useCases/ListLoyaltyRules";
+import { getLoyaltyRuleController } from "./useCases/GetLoyaltyRule";
+import { createLoyaltyRuleController } from "./useCases/CreateLoyaltyRule";
+import { updateLoyaltyRuleController } from "./useCases/UpdateLoyaltyRule";
+import { setLoyaltyRuleActiveController } from "./useCases/SetLoyaltyRuleActive";
 
 const router = Router();
 
@@ -85,6 +90,26 @@ router.post("/referrals", (request, response) => {
 
 router.patch("/referrals/:id/cancel", (request, response) => {
 	cancelReferralController.handle(request, response);
+});
+
+router.get("/loyalty-rules", (request, response) => {
+	listLoyaltyRulesController.handle(request, response);
+});
+
+router.get("/loyalty-rules/:id", (request, response) => {
+	getLoyaltyRuleController.handle(request, response);
+});
+
+router.post("/loyalty-rules", (request, response) => {
+	createLoyaltyRuleController.handle(request, response);
+});
+
+router.patch("/loyalty-rules/:id", (request, response) => {
+	updateLoyaltyRuleController.handle(request, response);
+});
+
+router.patch("/loyalty-rules/:id/active", (request, response) => {
+	setLoyaltyRuleActiveController.handle(request, response);
 });
 
 export { router };
