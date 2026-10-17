@@ -16,6 +16,8 @@ describe("AuthenticateUserUseCase", () => {
 		userRepository = {
 			findByEmail: vi.fn(),
 			save: vi.fn(),
+			findById: vi.fn(),
+			listAll: vi.fn(),
 		};
 		hashProvider = {
 			generateHash: vi.fn(),

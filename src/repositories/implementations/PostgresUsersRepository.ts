@@ -26,4 +26,28 @@ export class PostgresUsersRepository implements IUsersRepository {
 			row.id,
 		);
 	}
+
+	async findById(id: string): Promise<User | null> {
+		const row = await this.connection("users").where({ id }).first();
+
+		if (!row) {
+			return null;
+		}
+
+		return new User(
+			{ name: row.name, email: row.email, password: row.password },
+			row.id,
+		);
+	}
+
+	async listAll() {
+		const rows = await this.connection("users")
+			.select("id", "name")
+			.orderBy("name", "asc");
+
+		return rows.map((row) => ({
+			id: row.id as string,
+			name: row.name as string,
+		}));
+	}
 }

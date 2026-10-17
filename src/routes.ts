@@ -8,6 +8,11 @@ import { deactivateServiceController } from "./useCases/DeactivateService";
 import { listServicesController } from "./useCases/ListServices";
 import { authenticateUserController } from "./useCases/AuthenticateUser";
 import { createUserController } from "./useCases/CreateUser";
+import { createAppointmentController } from "./useCases/CreateAppointment";
+import { listAppointmentsController } from "./useCases/ListAppointments";
+import { getAppointmentController } from "./useCases/GetAppointment";
+import { updateAppointmentController } from "./useCases/UpdateAppointment";
+import { listUsersController } from "./useCases/ListUsers";
 
 const router = Router();
 
@@ -17,6 +22,26 @@ router.post("/login", (request, response) => {
 
 router.post("/users", (request, response) => {
 	createUserController.handle(request, response);
+});
+
+router.get("/users", (request, response) => {
+	listUsersController.handle(request, response);
+});
+
+router.get("/appointments", (request, response) => {
+	listAppointmentsController.handle(request, response);
+});
+
+router.post("/appointments", (request, response) => {
+	createAppointmentController.handle(request, response);
+});
+
+router.get("/appointments/:id", (request, response) => {
+	getAppointmentController.handle(request, response);
+});
+
+router.patch("/appointments/:id", (request, response) => {
+	updateAppointmentController.handle(request, response);
 });
 
 router.get("/customers", (request, response) => {
