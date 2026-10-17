@@ -4,6 +4,8 @@ import { deactivateCustomerController } from "./useCases/DeactivateCustomer";
 import { listCustomersController } from "./useCases/ListCustomers";
 import { updateCustomerController } from "./useCases/UpdateCustomer";
 import { createServiceController } from "./useCases/CreateService";
+import { deactivateServiceController } from "./useCases/DeactivateService";
+import { listServicesController } from "./useCases/ListServices";
 import { authenticateUserController } from "./useCases/AuthenticateUser";
 import { createUserController } from "./useCases/CreateUser";
 
@@ -33,8 +35,16 @@ router.delete("/customers/:id", (request, response) => {
 	deactivateCustomerController.handle(request, response);
 });
 
+router.get("/services", (request, response) => {
+	listServicesController.handle(request, response);
+});
+
 router.post("/services", (request, response) => {
 	createServiceController.handle(request, response);
+});
+
+router.delete("/services/:id", (request, response) => {
+	deactivateServiceController.handle(request, response);
 });
 
 export { router };

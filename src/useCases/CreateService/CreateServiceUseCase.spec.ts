@@ -10,7 +10,10 @@ describe("CreateServiceUseCase", () => {
 	beforeEach(() => {
 		servicesRepository = {
 			findByName: vi.fn(),
+			findActiveById: vi.fn(),
 			save: vi.fn(),
+			listAll: vi.fn(),
+			deactivate: vi.fn(),
 		};
 		sut = new CreateServiceUseCase(servicesRepository);
 	});
