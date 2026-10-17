@@ -26,6 +26,8 @@ export class ListCustomersUseCase {
 				id: customer.id as string,
 				name: customer.name,
 				phone: customer.phone,
+				dateOfBirth: customer.dateOfBirth,
+				leadSource: customer.leadSource,
 			})),
 			page,
 			totalPages,

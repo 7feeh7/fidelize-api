@@ -7,6 +7,7 @@ export async function up(knex: Knex): Promise<void> {
 		table.string("phone", 20).notNullable().unique();
 		table.date("date_of_birth").nullable();
 		table.string("lead_source", 20).notNullable();
+		table.boolean("active").notNullable().defaultTo(true);
 		table.timestamps(true, true);
 	});
 }

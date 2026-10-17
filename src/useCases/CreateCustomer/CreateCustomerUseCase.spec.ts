@@ -10,8 +10,11 @@ describe("CreateCustomerUseCase", () => {
 	beforeEach(() => {
 		customersRepository = {
 			findByPhone: vi.fn(),
+			findActiveById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
+			update: vi.fn(),
+			deactivate: vi.fn(),
 		};
 		sut = new CreateCustomerUseCase(customersRepository);
 	});

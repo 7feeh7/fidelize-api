@@ -10,8 +10,11 @@ describe("ListCustomersUseCase", () => {
 	beforeEach(() => {
 		customersRepository = {
 			findByPhone: vi.fn(),
+			findActiveById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
+			update: vi.fn(),
+			deactivate: vi.fn(),
 		};
 		sut = new ListCustomersUseCase(customersRepository);
 	});
@@ -23,6 +26,7 @@ describe("ListCustomersUseCase", () => {
 				phone: "11999998888",
 				dateOfBirth: null,
 				leadSource: "INSTAGRAM",
+				active: true,
 			},
 			"customer-id",
 		);
@@ -40,7 +44,15 @@ describe("ListCustomersUseCase", () => {
 			search: "ana",
 		});
 		expect(result).toEqual({
-			data: [{ id: "customer-id", name: "Ana Lima", phone: "11999998888" }],
+			data: [
+				{
+					id: "customer-id",
+					name: "Ana Lima",
+					phone: "11999998888",
+					dateOfBirth: null,
+					leadSource: "INSTAGRAM",
+				},
+			],
 			page: 2,
 			totalPages: 2,
 		});

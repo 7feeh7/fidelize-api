@@ -13,9 +13,13 @@ export class Customer {
 	public phone!: string;
 	public dateOfBirth!: string | null;
 	public leadSource!: LeadSource;
+	public active!: boolean;
 
 	constructor(props: Omit<Customer, "id">, id?: string) {
 		Object.assign(this, props);
 		this.id = id ?? crypto.randomUUID();
+		if (this.active === undefined) {
+			this.active = true;
+		}
 	}
 }

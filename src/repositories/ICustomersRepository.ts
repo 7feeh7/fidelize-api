@@ -14,5 +14,8 @@ export interface ListCustomersResult {
 export interface ICustomersRepository {
 	save(customer: Customer): Promise<void>;
 	findByPhone(phone: string): Promise<Customer | null>;
+	findActiveById(id: string): Promise<Customer | null>;
 	list(params: ListCustomersParams): Promise<ListCustomersResult>;
+	update(customer: Customer): Promise<void>;
+	deactivate(id: string): Promise<void>;
 }

@@ -1,6 +1,8 @@
 import { Router } from "express";
 import { createCustomerController } from "./useCases/CreateCustomer";
+import { deactivateCustomerController } from "./useCases/DeactivateCustomer";
 import { listCustomersController } from "./useCases/ListCustomers";
+import { updateCustomerController } from "./useCases/UpdateCustomer";
 import { createServiceController } from "./useCases/CreateService";
 import { authenticateUserController } from "./useCases/AuthenticateUser";
 import { createUserController } from "./useCases/CreateUser";
@@ -21,6 +23,14 @@ router.get("/customers", (request, response) => {
 
 router.post("/customers", (request, response) => {
 	createCustomerController.handle(request, response);
+});
+
+router.patch("/customers/:id", (request, response) => {
+	updateCustomerController.handle(request, response);
+});
+
+router.delete("/customers/:id", (request, response) => {
+	deactivateCustomerController.handle(request, response);
 });
 
 router.post("/services", (request, response) => {

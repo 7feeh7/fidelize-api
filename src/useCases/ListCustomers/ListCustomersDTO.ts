@@ -8,6 +8,8 @@ export interface IListCustomersItemDTO {
 	id: string;
 	name: string;
 	phone: string;
+	dateOfBirth: string | null;
+	leadSource: string;
 }
 
 export interface IListCustomersResponseDTO {
