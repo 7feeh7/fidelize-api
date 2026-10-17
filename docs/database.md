@@ -13,6 +13,12 @@ As migrations ficam em `src/database/migrations/`.
 | `yarn migrate:rollback`    | Desfaz o último lote de migrations    |
 | `yarn knex <comando>`      | Executa qualquer outro comando do CLI |
 
+## Tabelas principais
+
+| Tabela        | Descrição resumida                                      |
+| ------------- | ------------------------------------------------------- |
+| `referrals`   | Indicações entre clientes (`PENDING`, `CONVERTED`, `CANCELED`) |
+
 ## Variáveis de ambiente
 
 | Variável      | Descrição           |

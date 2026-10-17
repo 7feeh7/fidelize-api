@@ -22,12 +22,15 @@ export class ListCustomersUseCase {
 		const totalPages = total === 0 ? 0 : Math.ceil(total / perPage);
 
 		return {
-			data: items.map((customer) => ({
-				id: customer.id as string,
-				name: customer.name,
-				phone: customer.phone,
-				dateOfBirth: customer.dateOfBirth,
-				leadSource: customer.leadSource,
+			data: items.map((item) => ({
+				id: item.customer.id as string,
+				name: item.customer.name,
+				phone: item.customer.phone,
+				dateOfBirth: item.customer.dateOfBirth,
+				leadSource: item.customer.leadSource,
+				referrerId: item.referrerId,
+				referrerName: item.referrerName,
+				referralsMadeCount: item.referralsMadeCount,
 			})),
 			page,
 			totalPages,

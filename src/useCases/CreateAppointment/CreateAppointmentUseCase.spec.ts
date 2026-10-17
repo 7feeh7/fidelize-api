@@ -5,6 +5,7 @@ import { User } from "@/entities/User";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
+import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
 import { CreateAppointmentUseCase } from "./CreateAppointmentUseCase";
 
@@ -13,6 +14,7 @@ describe("CreateAppointmentUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let servicesRepository: IServicesRepository;
 	let usersRepository: IUsersRepository;
+	let referralsRepository: IReferralsRepository;
 	let sut: CreateAppointmentUseCase;
 
 	const activeCustomer = new Customer(
@@ -54,6 +56,7 @@ describe("CreateAppointmentUseCase", () => {
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			list: vi.fn(),
+			countByCustomerId: vi.fn(),
 		};
 		customersRepository = {
 			findByPhone: vi.fn(),
@@ -76,12 +79,23 @@ describe("CreateAppointmentUseCase", () => {
 			findById: vi.fn(),
 			listAll: vi.fn(),
 		};
+		referralsRepository = {
+			save: vi.fn(),
+			findByReferredId: vi.fn(),
+			findById: vi.fn(),
+			update: vi.fn(),
+			list: vi.fn(),
+			countByReferrerId: vi.fn(),
+			convertPendingByReferredId: vi.fn(),
+		};
 		sut = new CreateAppointmentUseCase(
 			appointmentsRepository,
 			customersRepository,
 			servicesRepository,
 			usersRepository,
+			referralsRepository,
 		);
+		vi.mocked(appointmentsRepository.countByCustomerId).mockResolvedValue(1);
 	});
 
 	it("registra atendimento calculando subtotal, total e data de retorno", async () => {
@@ -112,6 +126,32 @@ describe("CreateAppointmentUseCase", () => {
 		expect(appointment?.total).toBe(80);
 		expect(appointment?.userId).toBe("user-id");
 		expect(items?.[0]?.returnDueDate).toBe("2026-11-16");
+		expect(referralsRepository.convertPendingByReferredId).toHaveBeenCalledWith(
+			"customer-id",
+			new Date("2026-10-17T14:30:00.000Z"),
+		);
+	});
+
+	it("não converte indicação quando não é o primeiro atendimento", async () => {
+		vi.mocked(customersRepository.findActiveById).mockResolvedValue(
+			activeCustomer,
+		);
+		vi.mocked(usersRepository.findById).mockResolvedValue(loggedUser);
+		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
+			activeService,
+		);
+		vi.mocked(appointmentsRepository.countByCustomerId).mockResolvedValue(2);
+
+		await sut.execute({
+			customerId: "customer-id",
+			appointmentDate: "2026-10-17T14:30:00.000Z",
+			loggedUserId: "user-id",
+			items: [{ serviceId: "service-id", price: 80 }],
+		});
+
+		expect(
+			referralsRepository.convertPendingByReferredId,
+		).not.toHaveBeenCalled();
 	});
 
 	it("usa o usuário logado quando nenhum profissional é informado", async () => {

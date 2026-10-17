@@ -1,6 +1,7 @@
 import { Appointment } from "@/entities/Appointment";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
+import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
 import {
@@ -20,6 +21,7 @@ export class CreateAppointmentUseCase {
 		private customersRepository: ICustomersRepository,
 		private servicesRepository: IServicesRepository,
 		private usersRepository: IUsersRepository,
+		private referralsRepository: IReferralsRepository,
 	) {}
 
 	async execute(data: ICreateAppointmentRequestDTO): Promise<void> {
@@ -72,5 +74,15 @@ export class CreateAppointmentUseCase {
 		});
 
 		await this.appointmentsRepository.saveWithItems(appointment, items);
+
+		const appointmentCount =
+			await this.appointmentsRepository.countByCustomerId(data.customerId);
+
+		if (appointmentCount === 1) {
+			await this.referralsRepository.convertPendingByReferredId(
+				data.customerId,
+				appointmentDate,
+			);
+		}
 	}
 }

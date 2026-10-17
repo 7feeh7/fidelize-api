@@ -13,6 +13,9 @@ import { listAppointmentsController } from "./useCases/ListAppointments";
 import { getAppointmentController } from "./useCases/GetAppointment";
 import { updateAppointmentController } from "./useCases/UpdateAppointment";
 import { listUsersController } from "./useCases/ListUsers";
+import { listReferralsController } from "./useCases/ListReferrals";
+import { createReferralController } from "./useCases/CreateReferral";
+import { cancelReferralController } from "./useCases/CancelReferral";
 
 const router = Router();
 
@@ -70,6 +73,18 @@ router.post("/services", (request, response) => {
 
 router.delete("/services/:id", (request, response) => {
 	deactivateServiceController.handle(request, response);
+});
+
+router.get("/referrals", (request, response) => {
+	listReferralsController.handle(request, response);
+});
+
+router.post("/referrals", (request, response) => {
+	createReferralController.handle(request, response);
+});
+
+router.patch("/referrals/:id/cancel", (request, response) => {
+	cancelReferralController.handle(request, response);
 });
 
 export { router };

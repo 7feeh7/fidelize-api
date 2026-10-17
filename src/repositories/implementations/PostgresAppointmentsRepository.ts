@@ -214,4 +214,13 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 			})),
 		};
 	}
+
+	async countByCustomerId(customerId: string): Promise<number> {
+		const row = await this.connection("appointments")
+			.where({ customer_id: customerId })
+			.count<{ count: string }>("id as count")
+			.first();
+
+		return Number(row?.count ?? 0);
+	}
 }

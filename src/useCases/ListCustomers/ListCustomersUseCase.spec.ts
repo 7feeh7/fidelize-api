@@ -32,7 +32,14 @@ describe("ListCustomersUseCase", () => {
 		);
 
 		vi.mocked(customersRepository.list).mockResolvedValue({
-			items: [customer],
+			items: [
+				{
+					customer,
+					referrerId: null,
+					referrerName: null,
+					referralsMadeCount: 0,
+				},
+			],
 			total: 11,
 		});
 
@@ -51,6 +58,9 @@ describe("ListCustomersUseCase", () => {
 					phone: "11999998888",
 					dateOfBirth: null,
 					leadSource: "INSTAGRAM",
+					referrerId: null,
+					referrerName: null,
+					referralsMadeCount: 0,
 				},
 			],
 			page: 2,

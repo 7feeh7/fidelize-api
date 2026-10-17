@@ -1,13 +1,21 @@
 import { Customer, LEAD_SOURCES } from "@/entities/Customer";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
+import type { CreateReferralUseCase } from "../CreateReferral/CreateReferralUseCase";
 import type { ICreateCustomerRequestDTO } from "./CreateCustomerDTO";
 
 export class CreateCustomerUseCase {
-	constructor(private customersRepository: ICustomersRepository) {}
+	constructor(
+		private customersRepository: ICustomersRepository,
+		private createReferralUseCase: CreateReferralUseCase,
+	) {}
 
 	async execute(data: ICreateCustomerRequestDTO) {
 		if (!LEAD_SOURCES.includes(data.leadSource)) {
 			throw new Error("Origem do lead inválida");
+		}
+
+		if (data.leadSource === "INDICACAO" && !data.referrerId?.trim()) {
+			throw new Error("Informe quem indicou o cliente");
 		}
 
 		const customerAlreadyExists = await this.customersRepository.findByPhone(
@@ -25,5 +33,12 @@ export class CreateCustomerUseCase {
 		});
 
 		await this.customersRepository.save(customer);
+
+		if (data.leadSource === "INDICACAO" && data.referrerId?.trim()) {
+			await this.createReferralUseCase.execute({
+				referrerId: data.referrerId.trim(),
+				referredId: customer.id as string,
+			});
+		}
 	}
 }

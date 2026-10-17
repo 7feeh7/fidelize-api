@@ -6,8 +6,15 @@ export interface ListCustomersParams {
 	search?: string;
 }
 
+export interface CustomerListRecord {
+	customer: Customer;
+	referrerId: string | null;
+	referrerName: string | null;
+	referralsMadeCount: number;
+}
+
 export interface ListCustomersResult {
-	items: Customer[];
+	items: CustomerListRecord[];
 	total: number;
 }
 

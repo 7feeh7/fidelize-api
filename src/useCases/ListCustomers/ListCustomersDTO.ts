@@ -10,6 +10,9 @@ export interface IListCustomersItemDTO {
 	phone: string;
 	dateOfBirth: string | null;
 	leadSource: string;
+	referrerId: string | null;
+	referrerName: string | null;
+	referralsMadeCount: number;
 }
 
 export interface IListCustomersResponseDTO {

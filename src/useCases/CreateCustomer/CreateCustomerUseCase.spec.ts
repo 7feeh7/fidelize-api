@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
+import type { CreateReferralUseCase } from "../CreateReferral/CreateReferralUseCase";
 import { CreateCustomerUseCase } from "./CreateCustomerUseCase";
 
 describe("CreateCustomerUseCase", () => {
 	let customersRepository: ICustomersRepository;
+	let createReferralUseCase: CreateReferralUseCase;
 	let sut: CreateCustomerUseCase;
 
 	beforeEach(() => {
@@ -16,7 +18,13 @@ describe("CreateCustomerUseCase", () => {
 			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
-		sut = new CreateCustomerUseCase(customersRepository);
+		createReferralUseCase = {
+			execute: vi.fn(),
+		} as unknown as CreateReferralUseCase;
+		sut = new CreateCustomerUseCase(
+			customersRepository,
+			createReferralUseCase,
+		);
 	});
 
 	it("persiste novo cliente quando o telefone está disponível", async () => {
@@ -41,6 +49,23 @@ describe("CreateCustomerUseCase", () => {
 		expect(savedCustomer?.phone).toBe("11999998888");
 		expect(savedCustomer?.dateOfBirth).toBe("1990-05-15");
 		expect(savedCustomer?.leadSource).toBe("INSTAGRAM");
+		expect(createReferralUseCase.execute).not.toHaveBeenCalled();
+	});
+
+	it("cria indicação quando a origem é indicação", async () => {
+		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
+
+		await sut.execute({
+			name: "Ana Lima",
+			phone: "21988887777",
+			leadSource: "INDICACAO",
+			referrerId: "referrer-id",
+		});
+
+		expect(createReferralUseCase.execute).toHaveBeenCalledWith({
+			referrerId: "referrer-id",
+			referredId: expect.any(String),
+		});
 	});
 
 	it("persiste cliente sem data de nascimento quando não informada", async () => {
@@ -50,11 +75,24 @@ describe("CreateCustomerUseCase", () => {
 			name: "Ana Lima",
 			phone: "21988887777",
 			leadSource: "INDICACAO",
+			referrerId: "referrer-id",
 		});
 
 		const savedCustomer = vi.mocked(customersRepository.save).mock
 			.calls[0]?.[0];
 		expect(savedCustomer?.dateOfBirth).toBeNull();
+	});
+
+	it("exige indicador quando a origem é indicação", async () => {
+		await expect(
+			sut.execute({
+				name: "Ana Lima",
+				phone: "21988887777",
+				leadSource: "INDICACAO",
+			}),
+		).rejects.toThrow("Informe quem indicou o cliente");
+
+		expect(customersRepository.save).not.toHaveBeenCalled();
 	});
 
 	it("lança erro quando o telefone já está cadastrado", async () => {

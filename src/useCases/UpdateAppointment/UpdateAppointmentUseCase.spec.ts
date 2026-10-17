@@ -23,6 +23,7 @@ describe("UpdateAppointmentUseCase", () => {
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			list: vi.fn(),
+			countByCustomerId: vi.fn(),
 		};
 		customersRepository = {
 			findByPhone: vi.fn(),

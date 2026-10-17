@@ -60,4 +60,5 @@ export interface IAppointmentsRepository {
 	findById(id: string): Promise<Appointment | null>;
 	findDetailById(id: string): Promise<AppointmentDetail | null>;
 	list(params: ListAppointmentsParams): Promise<ListAppointmentsResult>;
+	countByCustomerId(customerId: string): Promise<number>;
 }
