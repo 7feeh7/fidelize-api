@@ -12,21 +12,23 @@ export class CreateAppointmentController {
 				loggedUserId,
 				userId,
 				discountAmount,
+				customerRewardId,
 				notes,
 				items,
 			} = request.body;
 
-			await this.createAppointmentUseCase.execute({
+			const { grantedRewards } = await this.createAppointmentUseCase.execute({
 				customerId,
 				appointmentDate,
 				loggedUserId,
 				userId,
 				discountAmount,
+				customerRewardId,
 				notes,
 				items,
 			});
 
-			return response.status(201).json();
+			return response.status(201).json({ grantedRewards });
 		} catch (err: unknown) {
 			return response.status(400).json({
 				message: (err as Error).message || "Unexpected error",

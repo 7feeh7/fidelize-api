@@ -1,4 +1,4 @@
-import type { LoyaltyRule } from "@/entities/LoyaltyRule";
+import type { LoyaltyRule, LoyaltyTriggerType } from "@/entities/LoyaltyRule";
 
 export interface LoyaltyRuleRecord {
 	rule: LoyaltyRule;
@@ -11,4 +11,7 @@ export interface ILoyaltyRulesRepository {
 	listAll(): Promise<LoyaltyRuleRecord[]>;
 	update(rule: LoyaltyRule): Promise<void>;
 	setActive(id: string, active: boolean): Promise<void>;
+	listActiveByTriggerType(
+		triggerType: LoyaltyTriggerType,
+	): Promise<LoyaltyRuleRecord[]>;
 }

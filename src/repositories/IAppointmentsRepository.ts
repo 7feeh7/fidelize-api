@@ -1,3 +1,4 @@
+import type { Knex } from "knex";
 import type { Appointment } from "@/entities/Appointment";
 import type { AppointmentItem } from "@/entities/AppointmentItem";
 
@@ -52,6 +53,7 @@ export interface IAppointmentsRepository {
 	saveWithItems(
 		appointment: Appointment,
 		items: AppointmentItem[],
+		trx?: Knex.Transaction,
 	): Promise<void>;
 	updateWithItems(
 		appointment: Appointment,
@@ -60,5 +62,8 @@ export interface IAppointmentsRepository {
 	findById(id: string): Promise<Appointment | null>;
 	findDetailById(id: string): Promise<AppointmentDetail | null>;
 	list(params: ListAppointmentsParams): Promise<ListAppointmentsResult>;
-	countByCustomerId(customerId: string): Promise<number>;
+	countByCustomerId(
+		customerId: string,
+		trx?: Knex.Transaction,
+	): Promise<number>;
 }

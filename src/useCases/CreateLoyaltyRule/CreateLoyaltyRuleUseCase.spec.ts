@@ -17,6 +17,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 			listAll: vi.fn(),
 			update: vi.fn(),
 			setActive: vi.fn(),
+			listActiveByTriggerType: vi.fn(),
 		};
 		servicesRepository = {
 			save: vi.fn(),

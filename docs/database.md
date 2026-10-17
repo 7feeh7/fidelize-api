@@ -19,6 +19,7 @@ As migrations ficam em `src/database/migrations/`.
 | --------------- | ------------------------------------------------------- |
 | `referrals`     | Indicações entre clientes (`PENDING`, `CONVERTED`, `CANCELED`) |
 | `loyalty_rules` | Regras de fidelidade (gatilho, recompensa, validade, status) |
+| `customer_rewards` | Benefícios concedidos aos clientes (status, validade, origem) |
 
 ## Variáveis de ambiente
 

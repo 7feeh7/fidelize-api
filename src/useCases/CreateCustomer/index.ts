@@ -16,6 +16,7 @@ const createReferralUseCase = new CreateReferralUseCase(
 const createCustomerUseCase = new CreateCustomerUseCase(
 	postgresCustomersRepository,
 	createReferralUseCase,
+	connection,
 );
 const createCustomerController = new CreateCustomerController(
 	createCustomerUseCase,

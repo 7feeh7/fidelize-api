@@ -13,6 +13,15 @@ export interface IGetAppointmentResponseDTO {
 	discountAmount: number;
 	total: number;
 	notes: string | null;
+	usedReward: {
+		id: string;
+		ruleName: string;
+		rewardType: string;
+		rewardValue: number | null;
+		freeServiceId: string | null;
+		rewardSummary: string;
+		preview: string;
+	} | null;
 	items: {
 		id: string;
 		serviceId: string;

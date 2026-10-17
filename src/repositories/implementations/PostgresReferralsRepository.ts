@@ -136,12 +136,30 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 	async convertPendingByReferredId(
 		referredId: string,
 		convertedAt: Date,
-	): Promise<void> {
-		await this.connection("referrals")
+		trx?: Knex.Transaction,
+	): Promise<Referral[]> {
+		const executor = trx ?? this.connection;
+		const pendingRows = await executor("referrals")
+			.where({ referred_id: referredId, status: "PENDING" })
+			.select("*");
+
+		if (pendingRows.length === 0) {
+			return [];
+		}
+
+		await executor("referrals")
 			.where({ referred_id: referredId, status: "PENDING" })
 			.update({
 				status: "CONVERTED",
 				converted_at: convertedAt,
 			});
+
+		return pendingRows.map((row) =>
+			mapRowToReferral({
+				...row,
+				status: "CONVERTED",
+				converted_at: convertedAt,
+			}),
+		);
 	}
 }

@@ -6,4 +6,5 @@ export interface ICreateCustomerRequestDTO {
 	dateOfBirth?: string | null;
 	leadSource: LeadSource;
 	referrerId?: string;
+	isExistingCustomer?: boolean;
 }

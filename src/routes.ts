@@ -21,6 +21,9 @@ import { getLoyaltyRuleController } from "./useCases/GetLoyaltyRule";
 import { createLoyaltyRuleController } from "./useCases/CreateLoyaltyRule";
 import { updateLoyaltyRuleController } from "./useCases/UpdateLoyaltyRule";
 import { setLoyaltyRuleActiveController } from "./useCases/SetLoyaltyRuleActive";
+import { listCustomerRewardsController } from "./useCases/ListCustomerRewards";
+import { cancelCustomerRewardController } from "./useCases/CancelCustomerReward";
+import { grantManualCustomerRewardController } from "./useCases/GrantManualCustomerReward";
 
 const router = Router();
 
@@ -59,6 +62,21 @@ router.get("/customers", (request, response) => {
 router.post("/customers", (request, response) => {
 	createCustomerController.handle(request, response);
 });
+
+router.get("/customers/:customerId/rewards", (request, response) => {
+	listCustomerRewardsController.handle(request, response);
+});
+
+router.post("/customers/:customerId/rewards", (request, response) => {
+	grantManualCustomerRewardController.handle(request, response);
+});
+
+router.patch(
+	"/customers/:customerId/rewards/:rewardId/cancel",
+	(request, response) => {
+		cancelCustomerRewardController.handle(request, response);
+	},
+);
 
 router.patch("/customers/:id", (request, response) => {
 	updateCustomerController.handle(request, response);

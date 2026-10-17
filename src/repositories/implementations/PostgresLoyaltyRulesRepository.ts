@@ -1,5 +1,5 @@
 import type { Knex } from "knex";
-import { LoyaltyRule } from "@/entities/LoyaltyRule";
+import { LoyaltyRule, type LoyaltyTriggerType } from "@/entities/LoyaltyRule";
 import type {
 	ILoyaltyRulesRepository,
 	LoyaltyRuleRecord,
@@ -101,5 +101,16 @@ export class PostgresLoyaltyRulesRepository implements ILoyaltyRulesRepository {
 				active,
 				updated_at: this.connection.fn.now(),
 			});
+	}
+
+	async listActiveByTriggerType(
+		triggerType: LoyaltyTriggerType,
+	): Promise<LoyaltyRuleRecord[]> {
+		const rows = await baseQuery(this.connection)
+			.where("loyalty_rules.active", true)
+			.where("loyalty_rules.trigger_type", triggerType)
+			.orderBy("loyalty_rules.created_at", "asc");
+
+		return rows.map((row) => mapRowToRecord(row));
 	}
 }

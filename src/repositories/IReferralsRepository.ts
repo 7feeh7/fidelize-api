@@ -1,3 +1,4 @@
+import type { Knex } from "knex";
 import type { Referral, ReferralStatus } from "@/entities/Referral";
 
 export interface ReferralListItem {
@@ -33,5 +34,6 @@ export interface IReferralsRepository {
 	convertPendingByReferredId(
 		referredId: string,
 		convertedAt: Date,
-	): Promise<void>;
+		trx?: Knex.Transaction,
+	): Promise<Referral[]>;
 }

@@ -1,17 +1,23 @@
+import type { Knex } from "knex";
 import { Appointment } from "@/entities/Appointment";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
+import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
+import { CustomerRewardUsageService } from "@/services/CustomerRewardUsageService";
 import {
 	computeSubtotal,
 	computeTotal,
 } from "@/utils/appointmentCalculations";
 import {
-	normalizeDiscountAmount,
 	parseAppointmentDate,
 	prepareAppointmentItems,
 } from "@/utils/prepareAppointmentItems";
+import { resolveAppointmentCustomerReward } from "@/utils/resolveAppointmentCustomerReward";
+import { syncAppointmentCustomerReward } from "@/utils/syncAppointmentCustomerReward";
 import type { IUpdateAppointmentRequestDTO } from "./UpdateAppointmentDTO";
 
 export class UpdateAppointmentUseCase {
@@ -20,6 +26,9 @@ export class UpdateAppointmentUseCase {
 		private customersRepository: ICustomersRepository,
 		private servicesRepository: IServicesRepository,
 		private usersRepository: IUsersRepository,
+		private customerRewardsRepository: ICustomerRewardsRepository,
+		private connection: Knex,
+		private rewardUsageServiceForTests?: CustomerRewardUsageService,
 	) {}
 
 	async execute(data: IUpdateAppointmentRequestDTO): Promise<void> {
@@ -55,13 +64,33 @@ export class UpdateAppointmentUseCase {
 		}
 
 		const appointmentDate = parseAppointmentDate(data.appointmentDate);
-		const discountAmount = normalizeDiscountAmount(data.discountAmount);
 		const items = await prepareAppointmentItems(
 			this.servicesRepository,
 			appointmentDate,
 			data.items,
 		);
 		const subtotal = computeSubtotal(items);
+		const rewardUsageService =
+			this.rewardUsageServiceForTests ?? new CustomerRewardUsageService();
+		const previousReward =
+			await this.customerRewardsRepository.findUsedDetailByAppointmentId(
+				data.id,
+			);
+		const { rewardItem, discountAmount } =
+			await resolveAppointmentCustomerReward({
+				customerRewardId: data.customerRewardId,
+				customerId: data.customerId,
+				appointmentId: data.id,
+				subtotal,
+				items: items.map((item) => ({
+					serviceId: item.serviceId,
+					price: item.price,
+				})),
+				discountAmount: data.discountAmount,
+				notes: data.notes,
+				customerRewardsRepository: this.customerRewardsRepository,
+				rewardUsageService,
+			});
 
 		if (discountAmount > subtotal) {
 			throw new Error("O desconto não pode ser maior que o subtotal");
@@ -82,6 +111,22 @@ export class UpdateAppointmentUseCase {
 			data.id,
 		);
 
-		await this.appointmentsRepository.updateWithItems(appointment, items);
+		await this.connection.transaction(async (trx) => {
+			const appointmentsRepository = new PostgresAppointmentsRepository(trx);
+			const customerRewardsRepository = new PostgresCustomerRewardsRepository(
+				trx,
+			);
+
+			await appointmentsRepository.updateWithItems(appointment, items);
+
+			await syncAppointmentCustomerReward({
+				appointmentId: data.id,
+				previousReward,
+				nextReward: rewardItem,
+				customerRewardsRepository,
+				rewardUsageService,
+				now: appointmentDate,
+			});
+		});
 	}
 }

@@ -29,9 +29,10 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 	async saveWithItems(
 		appointment: Appointment,
 		items: AppointmentItem[],
+		trx?: Knex.Transaction,
 	): Promise<void> {
-		await this.connection.transaction(async (trx) => {
-			await trx("appointments").insert({
+		const persist = async (executor: Knex.Transaction) => {
+			await executor("appointments").insert({
 				id: appointment.id,
 				customer_id: appointment.customerId,
 				user_id: appointment.userId,
@@ -43,7 +44,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 			});
 
 			if (items.length > 0) {
-				await trx("appointment_items").insert(
+				await executor("appointment_items").insert(
 					items.map((item) => ({
 						id: item.id,
 						appointment_id: appointment.id,
@@ -53,7 +54,14 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 					})),
 				);
 			}
-		});
+		};
+
+		if (trx) {
+			await persist(trx);
+			return;
+		}
+
+		await this.connection.transaction(persist);
 	}
 
 	async updateWithItems(
@@ -215,8 +223,12 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 		};
 	}
 
-	async countByCustomerId(customerId: string): Promise<number> {
-		const row = await this.connection("appointments")
+	async countByCustomerId(
+		customerId: string,
+		trx?: Knex.Transaction,
+	): Promise<number> {
+		const executor = trx ?? this.connection;
+		const row = await executor("appointments")
 			.where({ customer_id: customerId })
 			.count<{ count: string }>("id as count")
 			.first();

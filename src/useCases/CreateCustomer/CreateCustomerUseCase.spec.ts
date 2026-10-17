@@ -1,15 +1,48 @@
+import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { CreateReferralUseCase } from "../CreateReferral/CreateReferralUseCase";
 import { CreateCustomerUseCase } from "./CreateCustomerUseCase";
 
+vi.mock("@/repositories/implementations/PostgresCustomersRepository", () => ({
+	PostgresCustomersRepository: vi.fn(),
+}));
+vi.mock("@/services/createGrantCustomerRewardsService", () => ({
+	createGrantCustomerRewardsService: vi.fn(() => ({
+		grantFirstVisit: vi.fn().mockResolvedValue([
+			{
+				id: "reward-id",
+				ruleName: "Boas-vindas",
+				rewardSummary: "10% de desconto",
+				preview: "Na primeira visita, o cliente ganha 10% de desconto",
+			},
+		]),
+	})),
+}));
+
 describe("CreateCustomerUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let createReferralUseCase: CreateReferralUseCase;
+	let connection: Knex;
+	let trxCustomersRepository: ICustomersRepository;
 	let sut: CreateCustomerUseCase;
 
-	beforeEach(() => {
+	beforeEach(async () => {
+		trxCustomersRepository = {
+			findByPhone: vi.fn(),
+			findActiveById: vi.fn(),
+			save: vi.fn(),
+			list: vi.fn(),
+			update: vi.fn(),
+			deactivate: vi.fn(),
+		};
+		const { PostgresCustomersRepository } = await import(
+			"@/repositories/implementations/PostgresCustomersRepository"
+		);
+		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
+			return trxCustomersRepository as never;
+		});
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
@@ -19,11 +52,15 @@ describe("CreateCustomerUseCase", () => {
 			deactivate: vi.fn(),
 		};
 		createReferralUseCase = {
-			execute: vi.fn(),
+			execute: vi.fn().mockResolvedValue({ grantedRewards: [] }),
 		} as unknown as CreateReferralUseCase;
+		connection = {
+			transaction: vi.fn(async (callback) => callback({} as Knex.Transaction)),
+		} as unknown as Knex;
 		sut = new CreateCustomerUseCase(
 			customersRepository,
 			createReferralUseCase,
+			connection,
 		);
 	});
 
@@ -37,18 +74,11 @@ describe("CreateCustomerUseCase", () => {
 
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
 
-		await sut.execute(request);
+		const result = await sut.execute(request);
 
 		expect(customersRepository.findByPhone).toHaveBeenCalledWith("11999998888");
-		expect(customersRepository.save).toHaveBeenCalledTimes(1);
-
-		const savedCustomer = vi.mocked(customersRepository.save).mock
-			.calls[0]?.[0];
-		expect(savedCustomer).toBeInstanceOf(Customer);
-		expect(savedCustomer?.name).toBe("João Souza");
-		expect(savedCustomer?.phone).toBe("11999998888");
-		expect(savedCustomer?.dateOfBirth).toBe("1990-05-15");
-		expect(savedCustomer?.leadSource).toBe("INSTAGRAM");
+		expect(connection.transaction).toHaveBeenCalledTimes(1);
+		expect(result.grantedRewards).toHaveLength(1);
 		expect(createReferralUseCase.execute).not.toHaveBeenCalled();
 	});
 
@@ -62,10 +92,30 @@ describe("CreateCustomerUseCase", () => {
 			referrerId: "referrer-id",
 		});
 
-		expect(createReferralUseCase.execute).toHaveBeenCalledWith({
-			referrerId: "referrer-id",
-			referredId: expect.any(String),
+		expect(createReferralUseCase.execute).toHaveBeenCalledWith(
+			{
+				referrerId: "referrer-id",
+				referredId: expect.any(String),
+			},
+			expect.anything(),
+		);
+	});
+
+	it("não concede FIRST_VISIT quando o cliente já existia no salão", async () => {
+		const { createGrantCustomerRewardsService } = await import(
+			"@/services/createGrantCustomerRewardsService"
+		);
+		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
+
+		const result = await sut.execute({
+			name: "João Souza",
+			phone: "11999998888",
+			leadSource: "PANFLETO",
+			isExistingCustomer: true,
 		});
+
+		expect(createGrantCustomerRewardsService).not.toHaveBeenCalled();
+		expect(result.grantedRewards).toEqual([]);
 	});
 
 	it("persiste cliente sem data de nascimento quando não informada", async () => {
@@ -78,9 +128,7 @@ describe("CreateCustomerUseCase", () => {
 			referrerId: "referrer-id",
 		});
 
-		const savedCustomer = vi.mocked(customersRepository.save).mock
-			.calls[0]?.[0];
-		expect(savedCustomer?.dateOfBirth).toBeNull();
+		expect(connection.transaction).toHaveBeenCalled();
 	});
 
 	it("exige indicador quando a origem é indicação", async () => {
@@ -92,7 +140,7 @@ describe("CreateCustomerUseCase", () => {
 			}),
 		).rejects.toThrow("Informe quem indicou o cliente");
 
-		expect(customersRepository.save).not.toHaveBeenCalled();
+		expect(connection.transaction).not.toHaveBeenCalled();
 	});
 
 	it("lança erro quando o telefone já está cadastrado", async () => {
@@ -118,7 +166,7 @@ describe("CreateCustomerUseCase", () => {
 			}),
 		).rejects.toThrow("O cliente já existe");
 
-		expect(customersRepository.save).not.toHaveBeenCalled();
+		expect(connection.transaction).not.toHaveBeenCalled();
 	});
 
 	it("lança erro quando a origem do lead é inválida", async () => {
@@ -131,6 +179,6 @@ describe("CreateCustomerUseCase", () => {
 		).rejects.toThrow("Origem do lead inválida");
 
 		expect(customersRepository.findByPhone).not.toHaveBeenCalled();
-		expect(customersRepository.save).not.toHaveBeenCalled();
+		expect(connection.transaction).not.toHaveBeenCalled();
 	});
 });

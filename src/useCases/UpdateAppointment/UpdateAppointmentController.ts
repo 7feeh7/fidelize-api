@@ -13,6 +13,7 @@ export class UpdateAppointmentController {
 				loggedUserId,
 				userId,
 				discountAmount,
+				customerRewardId,
 				notes,
 				items,
 			} = request.body;
@@ -24,6 +25,7 @@ export class UpdateAppointmentController {
 				loggedUserId,
 				userId,
 				discountAmount,
+				customerRewardId,
 				notes,
 				items,
 			});

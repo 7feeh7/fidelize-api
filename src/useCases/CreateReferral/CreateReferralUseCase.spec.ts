@@ -1,3 +1,4 @@
+import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
 import { Referral } from "@/entities/Referral";
@@ -5,9 +6,22 @@ import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import { CreateReferralUseCase } from "./CreateReferralUseCase";
 
+vi.mock("@/repositories/implementations/PostgresReferralsRepository", () => ({
+	PostgresReferralsRepository: vi.fn(),
+}));
+vi.mock("@/repositories/implementations/PostgresCustomersRepository", () => ({
+	PostgresCustomersRepository: vi.fn(),
+}));
+vi.mock("@/services/createGrantCustomerRewardsService", () => ({
+	createGrantCustomerRewardsService: vi.fn(() => ({
+		grantForNewReferral: vi.fn().mockResolvedValue([]),
+	})),
+}));
+
 describe("CreateReferralUseCase", () => {
 	let referralsRepository: IReferralsRepository;
 	let customersRepository: ICustomersRepository;
+	let connection: Knex;
 	let sut: CreateReferralUseCase;
 
 	const referrer = new Customer(
@@ -30,7 +44,7 @@ describe("CreateReferralUseCase", () => {
 		"referred-id",
 	);
 
-	beforeEach(() => {
+	beforeEach(async () => {
 		referralsRepository = {
 			save: vi.fn(),
 			findByReferredId: vi.fn(),
@@ -48,10 +62,22 @@ describe("CreateReferralUseCase", () => {
 			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
-		sut = new CreateReferralUseCase(
-			referralsRepository,
-			customersRepository,
+		const { PostgresReferralsRepository } = await import(
+			"@/repositories/implementations/PostgresReferralsRepository"
 		);
+		const { PostgresCustomersRepository } = await import(
+			"@/repositories/implementations/PostgresCustomersRepository"
+		);
+		vi.mocked(PostgresReferralsRepository).mockImplementation(function () {
+			return referralsRepository as never;
+		});
+		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
+			return customersRepository as never;
+		});
+		connection = {
+			transaction: vi.fn(async (callback) => callback({} as Knex.Transaction)),
+		} as unknown as Knex;
+		sut = new CreateReferralUseCase(connection);
 	});
 
 	it("registra indicação pendente quando dados são válidos", async () => {

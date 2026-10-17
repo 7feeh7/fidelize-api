@@ -1,19 +1,35 @@
+import type { Knex } from "knex";
 import { Appointment } from "@/entities/Appointment";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
+import { PostgresReferralsRepository } from "@/repositories/implementations/PostgresReferralsRepository";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
+import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
+import { createGrantCustomerRewardsService } from "@/services/createGrantCustomerRewardsService";
+import { CustomerRewardUsageService } from "@/services/CustomerRewardUsageService";
+import type {
+	GrantedRewardDTO,
+	GrantCustomerRewardsService,
+} from "@/services/GrantCustomerRewardsService";
 import {
 	computeSubtotal,
 	computeTotal,
 } from "@/utils/appointmentCalculations";
 import {
-	normalizeDiscountAmount,
 	parseAppointmentDate,
 	prepareAppointmentItems,
 } from "@/utils/prepareAppointmentItems";
+import { resolveAppointmentCustomerReward } from "@/utils/resolveAppointmentCustomerReward";
+import { syncAppointmentCustomerReward } from "@/utils/syncAppointmentCustomerReward";
 import type { ICreateAppointmentRequestDTO } from "./CreateAppointmentDTO";
+
+export interface ICreateAppointmentResponseDTO {
+	grantedRewards: GrantedRewardDTO[];
+}
 
 export class CreateAppointmentUseCase {
 	constructor(
@@ -22,9 +38,15 @@ export class CreateAppointmentUseCase {
 		private servicesRepository: IServicesRepository,
 		private usersRepository: IUsersRepository,
 		private referralsRepository: IReferralsRepository,
+		private customerRewardsRepository: ICustomerRewardsRepository,
+		private connection: Knex,
+		private grantCustomerRewardsServiceForTests?: GrantCustomerRewardsService,
+		private rewardUsageServiceForTests?: CustomerRewardUsageService,
 	) {}
 
-	async execute(data: ICreateAppointmentRequestDTO): Promise<void> {
+	async execute(
+		data: ICreateAppointmentRequestDTO,
+	): Promise<ICreateAppointmentResponseDTO> {
 		if (!data.customerId?.trim()) {
 			throw new Error("Informe o cliente");
 		}
@@ -49,13 +71,28 @@ export class CreateAppointmentUseCase {
 		}
 
 		const appointmentDate = parseAppointmentDate(data.appointmentDate);
-		const discountAmount = normalizeDiscountAmount(data.discountAmount);
 		const items = await prepareAppointmentItems(
 			this.servicesRepository,
 			appointmentDate,
 			data.items,
 		);
 		const subtotal = computeSubtotal(items);
+		const rewardUsageService =
+			this.rewardUsageServiceForTests ?? new CustomerRewardUsageService();
+		const { rewardItem, discountAmount } =
+			await resolveAppointmentCustomerReward({
+				customerRewardId: data.customerRewardId,
+				customerId: data.customerId,
+				subtotal,
+				items: items.map((item) => ({
+					serviceId: item.serviceId,
+					price: item.price,
+				})),
+				discountAmount: data.discountAmount,
+				notes: data.notes,
+				customerRewardsRepository: this.customerRewardsRepository,
+				rewardUsageService,
+			});
 
 		if (discountAmount > subtotal) {
 			throw new Error("O desconto não pode ser maior que o subtotal");
@@ -73,16 +110,57 @@ export class CreateAppointmentUseCase {
 			notes: data.notes?.trim() ? data.notes.trim() : null,
 		});
 
-		await this.appointmentsRepository.saveWithItems(appointment, items);
+		const grantedRewards: GrantedRewardDTO[] = [];
 
-		const appointmentCount =
-			await this.appointmentsRepository.countByCustomerId(data.customerId);
-
-		if (appointmentCount === 1) {
-			await this.referralsRepository.convertPendingByReferredId(
-				data.customerId,
-				appointmentDate,
+		await this.connection.transaction(async (trx) => {
+			const appointmentsRepository = new PostgresAppointmentsRepository(trx);
+			const referralsRepository = new PostgresReferralsRepository(trx);
+			const customerRewardsRepository = new PostgresCustomerRewardsRepository(
+				trx,
 			);
-		}
+			const grantService =
+				this.grantCustomerRewardsServiceForTests ??
+				createGrantCustomerRewardsService(trx);
+
+			await appointmentsRepository.saveWithItems(appointment, items, trx);
+
+			await syncAppointmentCustomerReward({
+				appointmentId: appointment.id as string,
+				previousReward: null,
+				nextReward: rewardItem,
+				customerRewardsRepository,
+				rewardUsageService,
+				now: appointmentDate,
+			});
+
+			const appointmentCount = await appointmentsRepository.countByCustomerId(
+				data.customerId,
+				trx,
+			);
+
+			grantedRewards.push(
+				...(await grantService.grantVisitCount(
+					data.customerId,
+					appointmentCount,
+				)),
+			);
+
+			if (appointmentCount === 1) {
+				const convertedReferrals =
+					await referralsRepository.convertPendingByReferredId(
+						data.customerId,
+						appointmentDate,
+						trx,
+					);
+
+				grantedRewards.push(
+					...(await grantService.grantForConvertedReferrals(
+						convertedReferrals,
+					)),
+				);
+			}
+		});
+
+		return { grantedRewards };
 	}
 }

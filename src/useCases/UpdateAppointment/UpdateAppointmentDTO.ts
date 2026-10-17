@@ -7,6 +7,7 @@ export interface IUpdateAppointmentRequestDTO {
 	loggedUserId: string;
 	userId?: string | null;
 	discountAmount?: number;
+	customerRewardId?: string | null;
 	notes?: string | null;
 	items: AppointmentItemInput[];
 }
