@@ -21,6 +21,7 @@ As migrations ficam em `src/database/migrations/`.
 | `loyalty_rules` | Regras de fidelidade (gatilho, recompensa, validade, status) |
 | `customer_rewards` | Benefícios concedidos aos clientes (status, validade, origem) |
 | `message_templates` | Modelos de mensagem com variáveis (`RETURN_REMINDER`, `BIRTHDAY`, etc.) |
+| `messages` | Fila de mensagens (`PENDING`, `SENT`, `CANCELED`) com texto final e agendamento |
 
 ## Variáveis de ambiente
 

@@ -30,6 +30,13 @@ import { createMessageTemplateController } from "./useCases/CreateMessageTemplat
 import { updateMessageTemplateController } from "./useCases/UpdateMessageTemplate";
 import { setMessageTemplateActiveController } from "./useCases/SetMessageTemplateActive";
 import { previewMessageTemplateController } from "./useCases/PreviewMessageTemplate";
+import { listMessagesController } from "./useCases/ListMessages";
+import { getMessagePendingCountController } from "./useCases/GetMessagePendingCount";
+import { createCustomerMessageController } from "./useCases/CreateCustomerMessage";
+import { updateMessageContentController } from "./useCases/UpdateMessageContent";
+import { markMessageSentController } from "./useCases/MarkMessageSent";
+import { cancelMessageController } from "./useCases/CancelMessage";
+import { getMessageWhatsAppLinkController } from "./useCases/GetMessageWhatsAppLink";
 
 const router = Router();
 
@@ -158,6 +165,34 @@ router.patch("/message-templates/:id/active", (request, response) => {
 
 router.post("/message-templates/preview", (request, response) => {
 	previewMessageTemplateController.handle(request, response);
+});
+
+router.get("/messages/pending-count", (request, response) => {
+	getMessagePendingCountController.handle(request, response);
+});
+
+router.get("/messages", (request, response) => {
+	listMessagesController.handle(request, response);
+});
+
+router.post("/customers/:customerId/messages", (request, response) => {
+	createCustomerMessageController.handle(request, response);
+});
+
+router.patch("/messages/:id", (request, response) => {
+	updateMessageContentController.handle(request, response);
+});
+
+router.patch("/messages/:id/sent", (request, response) => {
+	markMessageSentController.handle(request, response);
+});
+
+router.patch("/messages/:id/cancel", (request, response) => {
+	cancelMessageController.handle(request, response);
+});
+
+router.get("/messages/:id/whatsapp-link", (request, response) => {
+	getMessageWhatsAppLinkController.handle(request, response);
 });
 
 export { router };
