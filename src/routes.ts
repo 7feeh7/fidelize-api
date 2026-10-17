@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { createCustomerController } from "./useCases/CreateCustomer";
+import { listCustomersController } from "./useCases/ListCustomers";
 import { createServiceController } from "./useCases/CreateService";
 import { authenticateUserController } from "./useCases/AuthenticateUser";
 import { createUserController } from "./useCases/CreateUser";
@@ -12,6 +13,10 @@ router.post("/login", (request, response) => {
 
 router.post("/users", (request, response) => {
 	createUserController.handle(request, response);
+});
+
+router.get("/customers", (request, response) => {
+	listCustomersController.handle(request, response);
 });
 
 router.post("/customers", (request, response) => {

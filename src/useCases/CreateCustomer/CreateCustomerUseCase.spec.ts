@@ -11,6 +11,7 @@ describe("CreateCustomerUseCase", () => {
 		customersRepository = {
 			findByPhone: vi.fn(),
 			save: vi.fn(),
+			list: vi.fn(),
 		};
 		sut = new CreateCustomerUseCase(customersRepository);
 	});
