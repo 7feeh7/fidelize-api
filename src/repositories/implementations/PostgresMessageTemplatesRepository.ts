@@ -6,7 +6,9 @@ import {
 } from "@/entities/MessageTemplate";
 import type { IMessageTemplatesRepository } from "../IMessageTemplatesRepository";
 
-function mapRowToMessageTemplate(row: Record<string, unknown>): MessageTemplate {
+function mapRowToMessageTemplate(
+	row: Record<string, unknown>,
+): MessageTemplate {
 	return new MessageTemplate(
 		{
 			name: row.name as string,
@@ -79,12 +81,10 @@ export class PostgresMessageTemplatesRepository
 	}
 
 	async setActive(id: string, active: boolean): Promise<void> {
-		await this.connection("message_templates")
-			.where({ id })
-			.update({
-				active,
-				updated_at: this.connection.fn.now(),
-			});
+		await this.connection("message_templates").where({ id }).update({
+			active,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 
 	async deactivateActiveByAutomaticType(

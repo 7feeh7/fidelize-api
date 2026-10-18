@@ -3,15 +3,13 @@ import { PostgresMessageTemplatesRepository } from "@/repositories/implementatio
 import { SetMessageTemplateActiveController } from "./SetMessageTemplateActiveController";
 import { SetMessageTemplateActiveUseCase } from "./SetMessageTemplateActiveUseCase";
 
-const postgresMessageTemplatesRepository = new PostgresMessageTemplatesRepository(
-	connection,
-);
+const postgresMessageTemplatesRepository =
+	new PostgresMessageTemplatesRepository(connection);
 
 const setMessageTemplateActiveUseCase = new SetMessageTemplateActiveUseCase(
 	postgresMessageTemplatesRepository,
 );
-const setMessageTemplateActiveController = new SetMessageTemplateActiveController(
-	setMessageTemplateActiveUseCase,
-);
+const setMessageTemplateActiveController =
+	new SetMessageTemplateActiveController(setMessageTemplateActiveUseCase);
 
 export { setMessageTemplateActiveController };

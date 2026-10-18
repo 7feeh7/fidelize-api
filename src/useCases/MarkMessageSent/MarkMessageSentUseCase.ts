@@ -39,7 +39,9 @@ export class MarkMessageSentUseCase {
 		}
 
 		if (message.status !== "PENDING") {
-			throw new Error("Somente mensagens pendentes podem ser marcadas como enviadas");
+			throw new Error(
+				"Somente mensagens pendentes podem ser marcadas como enviadas",
+			);
 		}
 
 		const sentAt = new Date();

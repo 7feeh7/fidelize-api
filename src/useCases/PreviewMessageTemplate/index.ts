@@ -4,9 +4,8 @@ import { createFillMessageTemplateService } from "@/services/createFillMessageTe
 import { PreviewMessageTemplateController } from "./PreviewMessageTemplateController";
 import { PreviewMessageTemplateUseCase } from "./PreviewMessageTemplateUseCase";
 
-const postgresMessageTemplatesRepository = new PostgresMessageTemplatesRepository(
-	connection,
-);
+const postgresMessageTemplatesRepository =
+	new PostgresMessageTemplatesRepository(connection);
 
 const previewMessageTemplateUseCase = new PreviewMessageTemplateUseCase(
 	postgresMessageTemplatesRepository,

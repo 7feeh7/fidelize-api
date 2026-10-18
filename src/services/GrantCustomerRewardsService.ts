@@ -14,7 +14,10 @@ export interface GrantedRewardDTO {
 	preview: string;
 }
 
-function computeExpiresAt(grantedAt: Date, validDays: number | null): Date | null {
+function computeExpiresAt(
+	grantedAt: Date,
+	validDays: number | null,
+): Date | null {
 	if (validDays == null) {
 		return null;
 	}
@@ -51,9 +54,7 @@ export class GrantCustomerRewardsService {
 		private customerRewardsRepository: ICustomerRewardsRepository,
 	) {}
 
-	async grantFirstVisit(
-		customerId: string,
-	): Promise<GrantedRewardDTO[]> {
+	async grantFirstVisit(customerId: string): Promise<GrantedRewardDTO[]> {
 		const rules =
 			await this.loyaltyRulesRepository.listActiveByTriggerType("FIRST_VISIT");
 
@@ -77,7 +78,9 @@ export class GrantCustomerRewardsService {
 		referralId: string,
 	): Promise<GrantedRewardDTO[]> {
 		const rules =
-			await this.loyaltyRulesRepository.listActiveByTriggerType("REFERRAL_GIVEN");
+			await this.loyaltyRulesRepository.listActiveByTriggerType(
+				"REFERRAL_GIVEN",
+			);
 
 		return this.grantRulesForCustomer(referrerId, rules, referralId);
 	}
@@ -166,7 +169,10 @@ export class GrantCustomerRewardsService {
 	}
 
 	async grantForNewReferral(referral: Referral): Promise<GrantedRewardDTO[]> {
-		return this.grantReferralReceived(referral.referredId, referral.id as string);
+		return this.grantReferralReceived(
+			referral.referredId,
+			referral.id as string,
+		);
 	}
 
 	async grantForConvertedReferrals(

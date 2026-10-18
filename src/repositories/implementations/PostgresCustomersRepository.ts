@@ -79,11 +79,7 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 					["CANCELED"],
 				);
 			})
-			.leftJoin(
-				"customers as referrer",
-				"referrer.id",
-				"referrals.referrer_id",
-			)
+			.leftJoin("customers as referrer", "referrer.id", "referrals.referrer_id")
 			.orderBy("customers.name", "asc")
 			.limit(perPage)
 			.offset((page - 1) * perPage);
@@ -139,11 +135,7 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 					["CANCELED"],
 				);
 			})
-			.leftJoin(
-				"customers as referrer",
-				"referrer.id",
-				"referrals.referrer_id",
-			)
+			.leftJoin("customers as referrer", "referrer.id", "referrals.referrer_id")
 			.first();
 
 		if (!row) {
@@ -171,11 +163,9 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 	}
 
 	async deactivate(id: string): Promise<void> {
-		await this.connection("customers")
-			.where({ id, active: true })
-			.update({
-				active: false,
-				updated_at: this.connection.fn.now(),
-			});
+		await this.connection("customers").where({ id, active: true }).update({
+			active: false,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 }

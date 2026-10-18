@@ -3,9 +3,8 @@ import { PostgresMessageTemplatesRepository } from "@/repositories/implementatio
 import { CreateMessageTemplateController } from "./CreateMessageTemplateController";
 import { CreateMessageTemplateUseCase } from "./CreateMessageTemplateUseCase";
 
-const postgresMessageTemplatesRepository = new PostgresMessageTemplatesRepository(
-	connection,
-);
+const postgresMessageTemplatesRepository =
+	new PostgresMessageTemplatesRepository(connection);
 
 const createMessageTemplateUseCase = new CreateMessageTemplateUseCase(
 	postgresMessageTemplatesRepository,

@@ -13,11 +13,7 @@ export async function up(knex: Knex): Promise<void> {
 			.notNullable()
 			.references("id")
 			.inTable("loyalty_rules");
-		table
-			.uuid("referral_id")
-			.nullable()
-			.references("id")
-			.inTable("referrals");
+		table.uuid("referral_id").nullable().references("id").inTable("referrals");
 		table
 			.uuid("appointment_id")
 			.nullable()

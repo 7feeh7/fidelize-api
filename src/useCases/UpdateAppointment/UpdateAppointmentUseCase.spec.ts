@@ -12,9 +12,12 @@ import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
 import { UpdateAppointmentUseCase } from "./UpdateAppointmentUseCase";
 
-vi.mock("@/repositories/implementations/PostgresAppointmentsRepository", () => ({
-	PostgresAppointmentsRepository: vi.fn(),
-}));
+vi.mock(
+	"@/repositories/implementations/PostgresAppointmentsRepository",
+	() => ({
+		PostgresAppointmentsRepository: vi.fn(),
+	}),
+);
 vi.mock(
 	"@/repositories/implementations/PostgresCustomerRewardsRepository",
 	() => ({
@@ -66,13 +69,11 @@ describe("UpdateAppointmentUseCase", () => {
 		const { PostgresCustomerRewardsRepository } = await import(
 			"@/repositories/implementations/PostgresCustomerRewardsRepository"
 		);
-		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
-			return trxAppointmentsRepository as never;
-		});
+		vi.mocked(PostgresAppointmentsRepository).mockImplementation(
+			() => trxAppointmentsRepository as never,
+		);
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			function () {
-				return trxCustomerRewardsRepository as never;
-			},
+			() => trxCustomerRewardsRepository as never,
 		);
 
 		customersRepository = {
@@ -150,10 +151,7 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 		vi.mocked(usersRepository.findById).mockResolvedValue(
-			new User(
-				{ name: "Pro", email: "a@b.com", password: "hash" },
-				"user-id",
-			),
+			new User({ name: "Pro", email: "a@b.com", password: "hash" }, "user-id"),
 		);
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
 			new Service(
@@ -180,9 +178,8 @@ describe("UpdateAppointmentUseCase", () => {
 
 		expect(trxAppointmentsRepository.updateWithItems).toHaveBeenCalledTimes(1);
 
-		const [appointment, items] = vi.mocked(
-			trxAppointmentsRepository.updateWithItems,
-		).mock.calls[0] ?? [];
+		const [appointment, items] =
+			vi.mocked(trxAppointmentsRepository.updateWithItems).mock.calls[0] ?? [];
 
 		expect(appointment?.subtotal).toBe(75);
 		expect(appointment?.total).toBe(70);
@@ -243,10 +240,7 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 		vi.mocked(usersRepository.findById).mockResolvedValue(
-			new User(
-				{ name: "Pro", email: "a@b.com", password: "hash" },
-				"user-id",
-			),
+			new User({ name: "Pro", email: "a@b.com", password: "hash" }, "user-id"),
 		);
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
 			new Service(

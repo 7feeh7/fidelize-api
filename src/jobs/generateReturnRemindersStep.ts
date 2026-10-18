@@ -23,7 +23,9 @@ export async function generateReturnRemindersStep(
 	referenceDate = new Date(),
 ): Promise<GenerateReturnRemindersStepResult> {
 	const asOfDate = getTodayDateOnly(referenceDate);
-	const templatesRepository = new PostgresMessageTemplatesRepository(connection);
+	const templatesRepository = new PostgresMessageTemplatesRepository(
+		connection,
+	);
 	const activeTemplate =
 		await templatesRepository.findActiveAutomaticByType("RETURN_REMINDER");
 
@@ -43,11 +45,12 @@ export async function generateReturnRemindersStep(
 		connection,
 	);
 	const messagesRepository = new PostgresMessagesRepository(connection);
-	const buildVariableValuesService = new BuildMessageTemplateVariableValuesService(
-		new PostgresCustomersRepository(connection),
-		new PostgresAppointmentsRepository(connection),
-		new PostgresCustomerRewardsRepository(connection),
-	);
+	const buildVariableValuesService =
+		new BuildMessageTemplateVariableValuesService(
+			new PostgresCustomersRepository(connection),
+			new PostgresAppointmentsRepository(connection),
+			new PostgresCustomerRewardsRepository(connection),
+		);
 
 	const candidates = await returnRemindersRepository.listEligibleForReminders(
 		asOfDate,

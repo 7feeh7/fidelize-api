@@ -17,7 +17,10 @@ export function normalizeDateOnly(value: unknown): string | null {
 	return String(value).slice(0, 10);
 }
 
-export function subtractDaysFromDateOnly(dateOnly: string, days: number): string {
+export function subtractDaysFromDateOnly(
+	dateOnly: string,
+	days: number,
+): string {
 	const date = new Date(`${dateOnly}T12:00:00.000Z`);
 	date.setUTCDate(date.getUTCDate() - days);
 	return date.toISOString().slice(0, 10);

@@ -8,10 +8,7 @@ import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
 import { CustomerRewardUsageService } from "@/services/CustomerRewardUsageService";
-import {
-	computeSubtotal,
-	computeTotal,
-} from "@/utils/appointmentCalculations";
+import { computeSubtotal, computeTotal } from "@/utils/appointmentCalculations";
 import {
 	parseAppointmentDate,
 	prepareAppointmentItems,

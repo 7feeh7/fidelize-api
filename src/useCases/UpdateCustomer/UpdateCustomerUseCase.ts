@@ -23,9 +23,7 @@ export class UpdateCustomerUseCase {
 		}
 
 		if (data.phone !== customer.phone) {
-			const phoneInUse = await this.customersRepository.findByPhone(
-				data.phone,
-			);
+			const phoneInUse = await this.customersRepository.findByPhone(data.phone);
 			if (phoneInUse && phoneInUse.id !== customer.id) {
 				throw new Error("O cliente já existe");
 			}

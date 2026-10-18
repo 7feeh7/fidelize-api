@@ -57,9 +57,9 @@ describe("GrantCustomerRewardsService", () => {
 	});
 
 	it("concede FIRST_VISIT quando ainda não existe para o cliente", async () => {
-		vi.mocked(
-			loyaltyRulesRepository.listActiveByTriggerType,
-		).mockResolvedValue([firstVisitRule]);
+		vi.mocked(loyaltyRulesRepository.listActiveByTriggerType).mockResolvedValue(
+			[firstVisitRule],
+		);
 		vi.mocked(customerRewardsRepository.existsByGrantKey).mockResolvedValue(
 			false,
 		);
@@ -72,9 +72,9 @@ describe("GrantCustomerRewardsService", () => {
 	});
 
 	it("não duplica benefício para a mesma regra e cliente", async () => {
-		vi.mocked(
-			loyaltyRulesRepository.listActiveByTriggerType,
-		).mockResolvedValue([firstVisitRule]);
+		vi.mocked(loyaltyRulesRepository.listActiveByTriggerType).mockResolvedValue(
+			[firstVisitRule],
+		);
 		vi.mocked(customerRewardsRepository.existsByGrantKey).mockResolvedValue(
 			true,
 		);
@@ -104,9 +104,9 @@ describe("GrantCustomerRewardsService", () => {
 			freeServiceName: null,
 		};
 
-		vi.mocked(
-			loyaltyRulesRepository.listActiveByTriggerType,
-		).mockResolvedValue([visitRule]);
+		vi.mocked(loyaltyRulesRepository.listActiveByTriggerType).mockResolvedValue(
+			[visitRule],
+		);
 		vi.mocked(customerRewardsRepository.existsByGrantKey).mockResolvedValue(
 			false,
 		);
@@ -136,9 +136,9 @@ describe("GrantCustomerRewardsService", () => {
 			freeServiceName: null,
 		};
 
-		vi.mocked(
-			loyaltyRulesRepository.listActiveByTriggerType,
-		).mockResolvedValue([referralRule]);
+		vi.mocked(loyaltyRulesRepository.listActiveByTriggerType).mockResolvedValue(
+			[referralRule],
+		);
 		vi.mocked(customerRewardsRepository.existsByGrantKey).mockResolvedValue(
 			false,
 		);

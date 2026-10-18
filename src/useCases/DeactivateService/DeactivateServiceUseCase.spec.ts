@@ -35,7 +35,9 @@ describe("DeactivateServiceUseCase", () => {
 
 		await sut.execute({ id: "service-id" });
 
-		expect(servicesRepository.findActiveById).toHaveBeenCalledWith("service-id");
+		expect(servicesRepository.findActiveById).toHaveBeenCalledWith(
+			"service-id",
+		);
 		expect(servicesRepository.deactivate).toHaveBeenCalledWith("service-id");
 	});
 

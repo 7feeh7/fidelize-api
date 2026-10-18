@@ -31,7 +31,9 @@ export async function generateBirthdaysStep(
 	const asOfDate = getTodayDateOnly(referenceDate);
 	const calendarYear = getCalendarYearFromDateOnly(asOfDate);
 
-	const templatesRepository = new PostgresMessageTemplatesRepository(connection);
+	const templatesRepository = new PostgresMessageTemplatesRepository(
+		connection,
+	);
 	const loyaltyRulesRepository = new PostgresLoyaltyRulesRepository(connection);
 	const activeTemplate =
 		await templatesRepository.findActiveAutomaticByType("BIRTHDAY");
@@ -68,11 +70,12 @@ export async function generateBirthdaysStep(
 		connection,
 	);
 	const messagesRepository = new PostgresMessagesRepository(connection);
-	const buildVariableValuesService = new BuildMessageTemplateVariableValuesService(
-		new PostgresCustomersRepository(connection),
-		new PostgresAppointmentsRepository(connection),
-		customerRewardsRepository,
-	);
+	const buildVariableValuesService =
+		new BuildMessageTemplateVariableValuesService(
+			new PostgresCustomersRepository(connection),
+			new PostgresAppointmentsRepository(connection),
+			customerRewardsRepository,
+		);
 
 	const candidates = await birthdaysRepository.listCandidatesForDate(asOfDate);
 	const expiresAt = getEndOfMonthExpiresAt(asOfDate);
@@ -120,10 +123,11 @@ export async function generateBirthdaysStep(
 			continue;
 		}
 
-		const alreadyMessaged = await messagesRepository.existsBirthdayMessageForYear(
-			candidate.customerId,
-			calendarYear,
-		);
+		const alreadyMessaged =
+			await messagesRepository.existsBirthdayMessageForYear(
+				candidate.customerId,
+				calendarYear,
+			);
 
 		if (alreadyMessaged) {
 			continue;

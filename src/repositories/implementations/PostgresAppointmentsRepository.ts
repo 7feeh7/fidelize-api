@@ -1,6 +1,6 @@
 import type { Knex } from "knex";
 import { Appointment } from "@/entities/Appointment";
-import { AppointmentItem } from "@/entities/AppointmentItem";
+import type { AppointmentItem } from "@/entities/AppointmentItem";
 import type {
 	AppointmentDetail,
 	IAppointmentsRepository,
@@ -69,18 +69,16 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 		items: AppointmentItem[],
 	): Promise<void> {
 		await this.connection.transaction(async (trx) => {
-			await trx("appointments")
-				.where({ id: appointment.id })
-				.update({
-					customer_id: appointment.customerId,
-					user_id: appointment.userId,
-					appointment_date: appointment.appointmentDate,
-					subtotal: appointment.subtotal,
-					discount_amount: appointment.discountAmount,
-					total: appointment.total,
-					notes: appointment.notes,
-					updated_at: trx.fn.now(),
-				});
+			await trx("appointments").where({ id: appointment.id }).update({
+				customer_id: appointment.customerId,
+				user_id: appointment.userId,
+				appointment_date: appointment.appointmentDate,
+				subtotal: appointment.subtotal,
+				discount_amount: appointment.discountAmount,
+				total: appointment.total,
+				notes: appointment.notes,
+				updated_at: trx.fn.now(),
+			});
 
 			await trx("appointment_items")
 				.where({ appointment_id: appointment.id })
@@ -115,11 +113,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 			.leftJoin("customers as c", "c.id", "a.customer_id")
 			.leftJoin("users as u", "u.id", "a.user_id")
 			.where("a.id", id)
-			.select(
-				"a.*",
-				"c.name as customer_name",
-				"u.name as user_name",
-			)
+			.select("a.*", "c.name as customer_name", "u.name as user_name")
 			.first();
 
 		if (!row) {
@@ -242,9 +236,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 			.select(
 				this.connection.raw("count(*)::int as total_visits"),
 				this.connection.raw("coalesce(sum(total), 0) as total_spent"),
-				this.connection.raw(
-					"max(appointment_date::date) as last_visit_date",
-				),
+				this.connection.raw("max(appointment_date::date) as last_visit_date"),
 			)
 			.first();
 

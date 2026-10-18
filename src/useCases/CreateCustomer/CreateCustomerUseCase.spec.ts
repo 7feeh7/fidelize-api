@@ -40,9 +40,9 @@ describe("CreateCustomerUseCase", () => {
 		const { PostgresCustomersRepository } = await import(
 			"@/repositories/implementations/PostgresCustomersRepository"
 		);
-		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
-			return trxCustomersRepository as never;
-		});
+		vi.mocked(PostgresCustomersRepository).mockImplementation(
+			() => trxCustomersRepository as never,
+		);
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),

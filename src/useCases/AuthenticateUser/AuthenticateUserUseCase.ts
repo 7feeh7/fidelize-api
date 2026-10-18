@@ -39,10 +39,8 @@ export class AuthenticateUserUseCase {
 			email: user.email,
 		};
 
-		const access_token =
-			this.tokenProvider.generateAccessToken(tokenPayload);
-		const refresh_token =
-			this.tokenProvider.generateRefreshToken(tokenPayload);
+		const access_token = this.tokenProvider.generateAccessToken(tokenPayload);
+		const refresh_token = this.tokenProvider.generateRefreshToken(tokenPayload);
 
 		const decoded = jwt.decode(access_token) as jwt.JwtPayload;
 		const expires_in = decoded.exp! - decoded.iat!;

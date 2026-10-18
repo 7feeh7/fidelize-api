@@ -6,11 +6,12 @@ import { BuildMessageTemplateVariableValuesService } from "./BuildMessageTemplat
 import { FillMessageTemplateService } from "./FillMessageTemplateService";
 
 export function createFillMessageTemplateService(): FillMessageTemplateService {
-	const buildVariableValuesService = new BuildMessageTemplateVariableValuesService(
-		new PostgresCustomersRepository(connection),
-		new PostgresAppointmentsRepository(connection),
-		new PostgresCustomerRewardsRepository(connection),
-	);
+	const buildVariableValuesService =
+		new BuildMessageTemplateVariableValuesService(
+			new PostgresCustomersRepository(connection),
+			new PostgresAppointmentsRepository(connection),
+			new PostgresCustomerRewardsRepository(connection),
+		);
 
 	return new FillMessageTemplateService(buildVariableValuesService);
 }

@@ -6,8 +6,7 @@ export class CreateCustomerController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { name, phone, dateOfBirth, leadSource, referrerId } =
-				request.body;
+			const { name, phone, dateOfBirth, leadSource, referrerId } = request.body;
 
 			const { grantedRewards } = await this.createCustomerUseCase.execute({
 				name,

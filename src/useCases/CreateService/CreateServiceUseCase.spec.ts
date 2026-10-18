@@ -32,7 +32,9 @@ describe("CreateServiceUseCase", () => {
 
 		await sut.execute(request);
 
-		expect(servicesRepository.findByName).toHaveBeenCalledWith("Corte masculino");
+		expect(servicesRepository.findByName).toHaveBeenCalledWith(
+			"Corte masculino",
+		);
 		expect(servicesRepository.save).toHaveBeenCalledTimes(1);
 
 		const savedService = vi.mocked(servicesRepository.save).mock.calls[0]?.[0];

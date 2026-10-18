@@ -1,8 +1,4 @@
-export const REFERRAL_STATUSES = [
-	"PENDING",
-	"CONVERTED",
-	"CANCELED",
-] as const;
+export const REFERRAL_STATUSES = ["PENDING", "CONVERTED", "CANCELED"] as const;
 
 export type ReferralStatus = (typeof REFERRAL_STATUSES)[number];
 

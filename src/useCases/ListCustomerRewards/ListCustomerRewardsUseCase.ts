@@ -16,10 +16,7 @@ export class ListCustomerRewardsUseCase {
 	async execute(
 		data: IListCustomerRewardsRequestDTO,
 	): Promise<IListCustomerRewardsResponseDTO> {
-		if (
-			data.status &&
-			!CUSTOMER_REWARD_STATUSES.includes(data.status)
-		) {
+		if (data.status && !CUSTOMER_REWARD_STATUSES.includes(data.status)) {
 			throw new Error("Status de benefício inválido");
 		}
 
@@ -49,8 +46,7 @@ export class ListCustomerRewardsUseCase {
 
 		const resolvedPage = page ?? 1;
 		const resolvedPerPage = perPage ?? Math.max(total, 1);
-		const totalPages =
-			total === 0 ? 0 : Math.ceil(total / resolvedPerPage);
+		const totalPages = total === 0 ? 0 : Math.ceil(total / resolvedPerPage);
 
 		return {
 			data: items.map(mapCustomerRewardToDTO),

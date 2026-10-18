@@ -18,7 +18,9 @@ function mapRowToRecord(row: Record<string, unknown>): BirthdayCustomerRecord {
 export class PostgresBirthdaysRepository implements IBirthdaysRepository {
 	constructor(private connection: Knex) {}
 
-	async listCandidatesForDate(asOfDate: string): Promise<BirthdayCustomerRecord[]> {
+	async listCandidatesForDate(
+		asOfDate: string,
+	): Promise<BirthdayCustomerRecord[]> {
 		const month = Number(asOfDate.slice(5, 7));
 		const day = Number(asOfDate.slice(8, 10));
 

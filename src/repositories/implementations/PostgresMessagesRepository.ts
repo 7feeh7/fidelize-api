@@ -83,16 +83,16 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 
 	private baseListQuery() {
 		return this.listJoinQuery().select(
-				"m.*",
-				"c.name as customer_name",
-				"c.phone as customer_phone",
-				this.connection.raw("c.date_of_birth::date as customer_date_of_birth"),
-				"u.name as sent_by_name",
-				"s.name as return_reminder_service_name",
-				this.connection.raw(
-					"a.appointment_date::date as return_reminder_appointment_date",
-				),
-			);
+			"m.*",
+			"c.name as customer_name",
+			"c.phone as customer_phone",
+			this.connection.raw("c.date_of_birth::date as customer_date_of_birth"),
+			"u.name as sent_by_name",
+			"s.name as return_reminder_service_name",
+			this.connection.raw(
+				"a.appointment_date::date as return_reminder_appointment_date",
+			),
+		);
 	}
 
 	async save(message: Message): Promise<void> {

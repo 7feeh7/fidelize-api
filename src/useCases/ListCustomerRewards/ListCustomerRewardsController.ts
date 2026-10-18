@@ -12,9 +12,7 @@ function parsePositiveInt(value: unknown, fallback: number): number {
 }
 
 export class ListCustomerRewardsController {
-	constructor(
-		private listCustomerRewardsUseCase: ListCustomerRewardsUseCase,
-	) {}
+	constructor(private listCustomerRewardsUseCase: ListCustomerRewardsUseCase) {}
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {

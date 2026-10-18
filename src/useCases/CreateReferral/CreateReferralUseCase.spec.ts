@@ -68,12 +68,12 @@ describe("CreateReferralUseCase", () => {
 		const { PostgresCustomersRepository } = await import(
 			"@/repositories/implementations/PostgresCustomersRepository"
 		);
-		vi.mocked(PostgresReferralsRepository).mockImplementation(function () {
-			return referralsRepository as never;
-		});
-		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
-			return customersRepository as never;
-		});
+		vi.mocked(PostgresReferralsRepository).mockImplementation(
+			() => referralsRepository as never,
+		);
+		vi.mocked(PostgresCustomersRepository).mockImplementation(
+			() => customersRepository as never,
+		);
 		connection = {
 			transaction: vi.fn(async (callback) => callback({} as Knex.Transaction)),
 		} as unknown as Knex;

@@ -57,12 +57,10 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 	}
 
 	async update(referral: Referral): Promise<void> {
-		await this.connection("referrals")
-			.where({ id: referral.id })
-			.update({
-				status: referral.status,
-				converted_at: referral.convertedAt,
-			});
+		await this.connection("referrals").where({ id: referral.id }).update({
+			status: referral.status,
+			converted_at: referral.convertedAt,
+		});
 	}
 
 	async list({

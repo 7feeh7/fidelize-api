@@ -47,8 +47,7 @@ export class ListMessagesUseCase {
 		const pendingCount = await this.messagesRepository.countPendingUntil(today);
 		const resolvedPage = page ?? 1;
 		const resolvedPerPage = perPage ?? Math.max(total, 1);
-		const totalPages =
-			total === 0 ? 0 : Math.ceil(total / resolvedPerPage);
+		const totalPages = total === 0 ? 0 : Math.ceil(total / resolvedPerPage);
 
 		return {
 			data: items.map(mapMessageToDTO),

@@ -62,11 +62,9 @@ export class PostgresServicesRepository implements IServicesRepository {
 	}
 
 	async deactivate(id: string): Promise<void> {
-		await this.connection("services")
-			.where({ id, active: true })
-			.update({
-				active: false,
-				updated_at: this.connection.fn.now(),
-			});
+		await this.connection("services").where({ id, active: true }).update({
+			active: false,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 }

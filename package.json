@@ -12,7 +12,9 @@
 		"migrate:latest": "yarn knex migrate:latest",
 		"migrate:rollback": "yarn knex migrate:rollback",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"lint": "biome check src",
+		"typecheck": "tsc --noEmit"
 	},
 	"dependencies": {
 		"bcrypt": "6.0.0",

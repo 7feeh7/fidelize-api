@@ -44,8 +44,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 		expect(servicesRepository.findActiveById).not.toHaveBeenCalled();
 		expect(loyaltyRulesRepository.save).toHaveBeenCalledTimes(1);
 
-		const savedRule = vi.mocked(loyaltyRulesRepository.save).mock
-			.calls[0]?.[0];
+		const savedRule = vi.mocked(loyaltyRulesRepository.save).mock.calls[0]?.[0];
 		expect(savedRule).toBeInstanceOf(LoyaltyRule);
 		expect(savedRule?.name).toBe("Aniversário");
 		expect(savedRule?.triggerType).toBe("BIRTHDAY");

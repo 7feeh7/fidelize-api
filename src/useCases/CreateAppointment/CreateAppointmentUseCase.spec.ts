@@ -13,9 +13,12 @@ import type { IUsersRepository } from "@/repositories/IUsersRepository";
 import type { GrantCustomerRewardsService } from "@/services/GrantCustomerRewardsService";
 import { CreateAppointmentUseCase } from "./CreateAppointmentUseCase";
 
-vi.mock("@/repositories/implementations/PostgresAppointmentsRepository", () => ({
-	PostgresAppointmentsRepository: vi.fn(),
-}));
+vi.mock(
+	"@/repositories/implementations/PostgresAppointmentsRepository",
+	() => ({
+		PostgresAppointmentsRepository: vi.fn(),
+	}),
+);
 vi.mock("@/repositories/implementations/PostgresReferralsRepository", () => ({
 	PostgresReferralsRepository: vi.fn(),
 }));
@@ -107,12 +110,12 @@ describe("CreateAppointmentUseCase", () => {
 		const { PostgresCustomerRewardsRepository } = await import(
 			"@/repositories/implementations/PostgresCustomerRewardsRepository"
 		);
-		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
-			return trxAppointmentsRepository as never;
-		});
-		vi.mocked(PostgresReferralsRepository).mockImplementation(function () {
-			return trxReferralsRepository as never;
-		});
+		vi.mocked(PostgresAppointmentsRepository).mockImplementation(
+			() => trxAppointmentsRepository as never,
+		);
+		vi.mocked(PostgresReferralsRepository).mockImplementation(
+			() => trxReferralsRepository as never,
+		);
 		trxCustomerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
@@ -124,9 +127,7 @@ describe("CreateAppointmentUseCase", () => {
 			update: vi.fn(),
 		};
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			function () {
-				return trxCustomerRewardsRepository as never;
-			},
+			() => trxCustomerRewardsRepository as never,
 		);
 
 		customersRepository = {
@@ -207,9 +208,8 @@ describe("CreateAppointmentUseCase", () => {
 
 		expect(trxAppointmentsRepository.saveWithItems).toHaveBeenCalledTimes(1);
 
-		const [appointment, items] = vi.mocked(
-			trxAppointmentsRepository.saveWithItems,
-		).mock.calls[0] ?? [];
+		const [appointment, items] =
+			vi.mocked(trxAppointmentsRepository.saveWithItems).mock.calls[0] ?? [];
 
 		expect(appointment?.subtotal).toBe(90);
 		expect(appointment?.discountAmount).toBe(10);
@@ -263,8 +263,8 @@ describe("CreateAppointmentUseCase", () => {
 			items: [{ serviceId: "service-id", price: 80 }],
 		});
 
-		const [appointment] = vi.mocked(trxAppointmentsRepository.saveWithItems)
-			.mock.calls[0] ?? [];
+		const [appointment] =
+			vi.mocked(trxAppointmentsRepository.saveWithItems).mock.calls[0] ?? [];
 		expect(appointment?.userId).toBe("user-id");
 	});
 
@@ -347,8 +347,8 @@ describe("CreateAppointmentUseCase", () => {
 			items: [{ serviceId: "service-id", price: 90 }],
 		});
 
-		const [appointment] = vi.mocked(trxAppointmentsRepository.saveWithItems)
-			.mock.calls[0] ?? [];
+		const [appointment] =
+			vi.mocked(trxAppointmentsRepository.saveWithItems).mock.calls[0] ?? [];
 		expect(appointment?.discountAmount).toBe(9);
 		expect(trxCustomerRewardsRepository.update).toHaveBeenCalledTimes(1);
 	});

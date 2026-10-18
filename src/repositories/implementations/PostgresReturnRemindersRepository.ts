@@ -5,7 +5,9 @@ import type {
 	ReturnReminderCandidate,
 } from "../IReturnRemindersRepository";
 
-function mapRowToCandidate(row: Record<string, unknown>): ReturnReminderCandidate {
+function mapRowToCandidate(
+	row: Record<string, unknown>,
+): ReturnReminderCandidate {
 	return {
 		appointmentItemId: row.appointment_item_id as string,
 		customerId: row.customer_id as string,
@@ -16,7 +18,9 @@ function mapRowToCandidate(row: Record<string, unknown>): ReturnReminderCandidat
 	};
 }
 
-export class PostgresReturnRemindersRepository implements IReturnRemindersRepository {
+export class PostgresReturnRemindersRepository
+	implements IReturnRemindersRepository
+{
 	constructor(private connection: Knex) {}
 
 	private openReturnObligationsQuery() {

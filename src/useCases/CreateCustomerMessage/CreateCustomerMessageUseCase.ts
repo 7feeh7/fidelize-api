@@ -38,7 +38,8 @@ export class CreateCustomerMessageUseCase {
 		let resolvedTemplateId: string | null = null;
 
 		if (templateId) {
-			const template = await this.messageTemplatesRepository.findById(templateId);
+			const template =
+				await this.messageTemplatesRepository.findById(templateId);
 
 			if (!template) {
 				throw new Error("Modelo de mensagem não encontrado");

@@ -2,9 +2,7 @@ import type { Request, Response } from "express";
 import type { GetCustomerSummaryUseCase } from "./GetCustomerSummaryUseCase";
 
 export class GetCustomerSummaryController {
-	constructor(
-		private getCustomerSummaryUseCase: GetCustomerSummaryUseCase,
-	) {}
+	constructor(private getCustomerSummaryUseCase: GetCustomerSummaryUseCase) {}
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {

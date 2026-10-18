@@ -1,4 +1,7 @@
-import type { CustomerReward, CustomerRewardStatus } from "@/entities/CustomerReward";
+import type {
+	CustomerReward,
+	CustomerRewardStatus,
+} from "@/entities/CustomerReward";
 
 export interface CustomerRewardListItem {
 	reward: CustomerReward;

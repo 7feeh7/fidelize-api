@@ -37,9 +37,7 @@ export class GetCustomerSummaryUseCase {
 		const today = getTodayDateOnly();
 		const [stats, nextSuggestedReturnDate, expiringSoonRewards] =
 			await Promise.all([
-				this.appointmentsRepository.getStatsByCustomerId(
-					normalizedCustomerId,
-				),
+				this.appointmentsRepository.getStatsByCustomerId(normalizedCustomerId),
 				this.returnRemindersRepository.findNextSuggestedReturnDueDate(
 					normalizedCustomerId,
 					today,

@@ -10,15 +10,16 @@ import type {
 
 const NULL_REFERRAL_SENTINEL = "00000000-0000-0000-0000-000000000000";
 
-function mapRowToListItem(row: Record<string, unknown>): CustomerRewardListItem {
+function mapRowToListItem(
+	row: Record<string, unknown>,
+): CustomerRewardListItem {
 	return {
 		reward: mapRowToCustomerReward(row),
 		ruleName: row.rule_name as string,
 		triggerType: row.trigger_type as string,
 		visitCount: (row.visit_count as number | null) ?? null,
 		rewardType: row.reward_type as string,
-		rewardValue:
-			row.reward_value == null ? null : Number(row.reward_value),
+		rewardValue: row.reward_value == null ? null : Number(row.reward_value),
 		freeServiceId: (row.free_service_id as string | null) ?? null,
 		freeServiceName: (row.free_service_name as string | null) ?? null,
 		validDays: (row.valid_days as number | null) ?? null,
@@ -35,9 +36,7 @@ function mapRowToCustomerReward(row: Record<string, unknown>): CustomerReward {
 			grantYear: (row.grant_year as number | null) ?? null,
 			status: row.status as CustomerRewardStatus,
 			grantedAt: new Date(row.granted_at as string),
-			expiresAt: row.expires_at
-				? new Date(row.expires_at as string)
-				: null,
+			expiresAt: row.expires_at ? new Date(row.expires_at as string) : null,
 			usedAt: row.used_at ? new Date(row.used_at as string) : null,
 		},
 		row.id as string,
@@ -74,10 +73,11 @@ export class PostgresCustomerRewardsRepository
 				customer_id: customerId,
 				loyalty_rule_id: loyaltyRuleId,
 			})
-			.whereRaw(
-				"COALESCE(referral_id, ?::uuid) = COALESCE(?, ?::uuid)",
-				[NULL_REFERRAL_SENTINEL, referralId, NULL_REFERRAL_SENTINEL],
-			)
+			.whereRaw("COALESCE(referral_id, ?::uuid) = COALESCE(?, ?::uuid)", [
+				NULL_REFERRAL_SENTINEL,
+				referralId,
+				NULL_REFERRAL_SENTINEL,
+			])
 			.first();
 
 		return Boolean(row);
@@ -117,16 +117,16 @@ export class PostgresCustomerRewardsRepository
 
 	private buildDetailQuery() {
 		return this.buildDetailFromQuery().select(
-				"cr.*",
-				"lr.name as rule_name",
-				"lr.trigger_type",
-				"lr.visit_count",
-				"lr.reward_type",
-				"lr.reward_value",
-				"lr.valid_days",
-				"lr.free_service_id",
-				this.connection.raw("services.name as free_service_name"),
-			);
+			"cr.*",
+			"lr.name as rule_name",
+			"lr.trigger_type",
+			"lr.visit_count",
+			"lr.reward_type",
+			"lr.reward_value",
+			"lr.valid_days",
+			"lr.free_service_id",
+			this.connection.raw("services.name as free_service_name"),
+		);
 	}
 
 	async findDetailById(id: string): Promise<CustomerRewardListItem | null> {
@@ -214,9 +214,7 @@ export class PostgresCustomerRewardsRepository
 		);
 
 		if (page != null && perPage != null) {
-			rowsQuery = rowsQuery
-				.limit(perPage)
-				.offset((page - 1) * perPage);
+			rowsQuery = rowsQuery.limit(perPage).offset((page - 1) * perPage);
 		}
 
 		const rows = await rowsQuery;
@@ -247,14 +245,12 @@ export class PostgresCustomerRewardsRepository
 	}
 
 	async update(reward: CustomerReward): Promise<void> {
-		await this.connection("customer_rewards")
-			.where({ id: reward.id })
-			.update({
-				status: reward.status,
-				appointment_id: reward.appointmentId,
-				used_at: reward.usedAt,
-				expires_at: reward.expiresAt,
-				updated_at: this.connection.fn.now(),
-			});
+		await this.connection("customer_rewards").where({ id: reward.id }).update({
+			status: reward.status,
+			appointment_id: reward.appointmentId,
+			used_at: reward.usedAt,
+			expires_at: reward.expiresAt,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 }

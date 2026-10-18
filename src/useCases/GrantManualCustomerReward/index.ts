@@ -9,7 +9,8 @@ const postgresCustomerRewardsRepository = new PostgresCustomerRewardsRepository(
 	connection,
 );
 const postgresCustomersRepository = new PostgresCustomersRepository(connection);
-const grantCustomerRewardsService = createGrantCustomerRewardsService(connection);
+const grantCustomerRewardsService =
+	createGrantCustomerRewardsService(connection);
 
 const grantManualCustomerRewardUseCase = new GrantManualCustomerRewardUseCase(
 	postgresCustomersRepository,

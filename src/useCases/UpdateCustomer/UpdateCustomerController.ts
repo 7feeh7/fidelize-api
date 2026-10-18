@@ -7,8 +7,7 @@ export class UpdateCustomerController {
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
 			const { id } = request.params;
-			const { name, phone, dateOfBirth, leadSource, referrerId } =
-				request.body;
+			const { name, phone, dateOfBirth, leadSource, referrerId } = request.body;
 
 			if (typeof id !== "string" || !id.trim()) {
 				throw new Error("Cliente inválido");

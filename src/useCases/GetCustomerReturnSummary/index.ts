@@ -13,8 +13,7 @@ const getCustomerReturnSummaryUseCase = new GetCustomerReturnSummaryUseCase(
 	postgresCustomersRepository,
 	postgresReturnRemindersRepository,
 );
-const getCustomerReturnSummaryController = new GetCustomerReturnSummaryController(
-	getCustomerReturnSummaryUseCase,
-);
+const getCustomerReturnSummaryController =
+	new GetCustomerReturnSummaryController(getCustomerReturnSummaryUseCase);
 
 export { getCustomerReturnSummaryController };

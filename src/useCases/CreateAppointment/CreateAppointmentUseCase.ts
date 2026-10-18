@@ -15,10 +15,7 @@ import type {
 	GrantedRewardDTO,
 	GrantCustomerRewardsService,
 } from "@/services/GrantCustomerRewardsService";
-import {
-	computeSubtotal,
-	computeTotal,
-} from "@/utils/appointmentCalculations";
+import { computeSubtotal, computeTotal } from "@/utils/appointmentCalculations";
 import {
 	parseAppointmentDate,
 	prepareAppointmentItems,

@@ -13,8 +13,7 @@ function mapRowToLoyaltyRule(row: Record<string, unknown>): LoyaltyRule {
 			triggerType: row.trigger_type as LoyaltyRule["triggerType"],
 			visitCount: (row.visit_count as number | null) ?? null,
 			rewardType: row.reward_type as LoyaltyRule["rewardType"],
-			rewardValue:
-				row.reward_value == null ? null : Number(row.reward_value),
+			rewardValue: row.reward_value == null ? null : Number(row.reward_value),
 			freeServiceId: (row.free_service_id as string | null) ?? null,
 			validDays: (row.valid_days as number | null) ?? null,
 			active: row.active as boolean,
@@ -79,28 +78,24 @@ export class PostgresLoyaltyRulesRepository implements ILoyaltyRulesRepository {
 	}
 
 	async update(rule: LoyaltyRule): Promise<void> {
-		await this.connection("loyalty_rules")
-			.where({ id: rule.id })
-			.update({
-				name: rule.name,
-				description: rule.description,
-				trigger_type: rule.triggerType,
-				visit_count: rule.visitCount,
-				reward_type: rule.rewardType,
-				reward_value: rule.rewardValue,
-				free_service_id: rule.freeServiceId,
-				valid_days: rule.validDays,
-				updated_at: this.connection.fn.now(),
-			});
+		await this.connection("loyalty_rules").where({ id: rule.id }).update({
+			name: rule.name,
+			description: rule.description,
+			trigger_type: rule.triggerType,
+			visit_count: rule.visitCount,
+			reward_type: rule.rewardType,
+			reward_value: rule.rewardValue,
+			free_service_id: rule.freeServiceId,
+			valid_days: rule.validDays,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 
 	async setActive(id: string, active: boolean): Promise<void> {
-		await this.connection("loyalty_rules")
-			.where({ id })
-			.update({
-				active,
-				updated_at: this.connection.fn.now(),
-			});
+		await this.connection("loyalty_rules").where({ id }).update({
+			active,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 
 	async listActiveByTriggerType(

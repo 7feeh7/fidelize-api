@@ -1,9 +1,6 @@
 import { AppointmentItem } from "@/entities/AppointmentItem";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
-import {
-	computeReturnDueDate,
-	roundMoney,
-} from "./appointmentCalculations";
+import { computeReturnDueDate, roundMoney } from "./appointmentCalculations";
 
 export interface AppointmentItemInput {
 	serviceId: string;

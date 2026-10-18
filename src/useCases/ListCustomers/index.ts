@@ -5,7 +5,11 @@ import { ListCustomersUseCase } from "./ListCustomersUseCase";
 
 const postgresCustomersRepository = new PostgresCustomersRepository(connection);
 
-const listCustomersUseCase = new ListCustomersUseCase(postgresCustomersRepository);
-const listCustomersController = new ListCustomersController(listCustomersUseCase);
+const listCustomersUseCase = new ListCustomersUseCase(
+	postgresCustomersRepository,
+);
+const listCustomersController = new ListCustomersController(
+	listCustomersUseCase,
+);
 
 export { listCustomersController, listCustomersUseCase };

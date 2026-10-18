@@ -18,11 +18,10 @@ describe("expireCustomerRewardsStep", () => {
 			"@/repositories/implementations/PostgresCustomerRewardsRepository"
 		);
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			function () {
-				return {
+			() =>
+				({
 					expireAvailablePastDue: vi.fn().mockResolvedValue(4),
-				} as never;
-			},
+				}) as never,
 		);
 	});
 

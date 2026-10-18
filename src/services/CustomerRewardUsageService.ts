@@ -69,19 +69,18 @@ export class CustomerRewardUsageService {
 
 		const expectedDiscount = roundMoney(params.rewardDiscount);
 
-		if (
-			requestedDiscount !== expectedDiscount &&
-			!params.notes?.trim()
-		) {
-			throw new Error(
-				"Informe observações ao alterar o desconto do benefício",
-			);
+		if (requestedDiscount !== expectedDiscount && !params.notes?.trim()) {
+			throw new Error("Informe observações ao alterar o desconto do benefício");
 		}
 
 		return requestedDiscount;
 	}
 
-	markAsUsed(reward: CustomerReward, appointmentId: string, usedAt: Date): void {
+	markAsUsed(
+		reward: CustomerReward,
+		appointmentId: string,
+		usedAt: Date,
+	): void {
 		reward.status = "USED";
 		reward.appointmentId = appointmentId;
 		reward.usedAt = usedAt;

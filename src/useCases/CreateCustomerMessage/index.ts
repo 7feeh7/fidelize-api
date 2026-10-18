@@ -7,9 +7,8 @@ import { CreateCustomerMessageController } from "./CreateCustomerMessageControll
 import { CreateCustomerMessageUseCase } from "./CreateCustomerMessageUseCase";
 
 const postgresCustomersRepository = new PostgresCustomersRepository(connection);
-const postgresMessageTemplatesRepository = new PostgresMessageTemplatesRepository(
-	connection,
-);
+const postgresMessageTemplatesRepository =
+	new PostgresMessageTemplatesRepository(connection);
 const postgresMessagesRepository = new PostgresMessagesRepository(connection);
 
 const createCustomerMessageUseCase = new CreateCustomerMessageUseCase(

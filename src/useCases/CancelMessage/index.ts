@@ -5,7 +5,11 @@ import { CancelMessageUseCase } from "./CancelMessageUseCase";
 
 const postgresMessagesRepository = new PostgresMessagesRepository(connection);
 
-const cancelMessageUseCase = new CancelMessageUseCase(postgresMessagesRepository);
-const cancelMessageController = new CancelMessageController(cancelMessageUseCase);
+const cancelMessageUseCase = new CancelMessageUseCase(
+	postgresMessagesRepository,
+);
+const cancelMessageController = new CancelMessageController(
+	cancelMessageUseCase,
+);
 
 export { cancelMessageController };

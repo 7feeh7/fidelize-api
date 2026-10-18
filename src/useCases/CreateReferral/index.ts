@@ -7,7 +7,4 @@ const createReferralController = new CreateReferralController(
 	createReferralUseCase,
 );
 
-export {
-	createReferralController,
-	createReferralUseCase,
-};
+export { createReferralController, createReferralUseCase };
