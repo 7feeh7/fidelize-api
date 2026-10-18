@@ -35,13 +35,27 @@ export class ListCustomerRewardsUseCase {
 			throw new Error("Cliente não encontrado");
 		}
 
-		const items = await this.customerRewardsRepository.listByCustomerId(
-			customerId,
-			data.status,
-		);
+		const page = data.page != null && data.page > 0 ? data.page : undefined;
+		const perPage =
+			data.perPage != null && data.perPage > 0 ? data.perPage : undefined;
+
+		const { items, total } =
+			await this.customerRewardsRepository.listByCustomerId({
+				customerId,
+				status: data.status,
+				page,
+				perPage,
+			});
+
+		const resolvedPage = page ?? 1;
+		const resolvedPerPage = perPage ?? Math.max(total, 1);
+		const totalPages =
+			total === 0 ? 0 : Math.ceil(total / resolvedPerPage);
 
 		return {
 			data: items.map(mapCustomerRewardToDTO),
+			page: resolvedPage,
+			totalPages,
 		};
 	}
 }

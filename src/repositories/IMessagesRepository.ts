@@ -1,12 +1,22 @@
 import type { Message, MessageStatus } from "@/entities/Message";
 import type { MessageTemplateType } from "@/entities/MessageTemplate";
 
+export type MessageListSort = "scheduled_asc" | "recent_desc";
+
 export interface MessageListFilters {
 	status?: MessageStatus;
 	type?: MessageTemplateType;
 	customerId?: string;
 	scheduledUntil?: string;
 	scheduledFrom?: string;
+	page?: number;
+	perPage?: number;
+	sort?: MessageListSort;
+}
+
+export interface MessageListResult {
+	items: MessageListItem[];
+	total: number;
 }
 
 export interface MessageListItem {
@@ -23,7 +33,7 @@ export interface IMessagesRepository {
 	save(message: Message): Promise<void>;
 	findById(id: string): Promise<Message | null>;
 	findListItemById(id: string): Promise<MessageListItem | null>;
-	list(filters: MessageListFilters): Promise<MessageListItem[]>;
+	list(filters: MessageListFilters): Promise<MessageListResult>;
 	countPendingUntil(scheduledUntil: string): Promise<number>;
 	updateContent(id: string, content: string): Promise<void>;
 	markSent(id: string, sentBy: string, sentAt: Date): Promise<void>;

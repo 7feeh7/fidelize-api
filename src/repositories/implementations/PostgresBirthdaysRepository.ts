@@ -1,5 +1,6 @@
 import type { Knex } from "knex";
 import { isBirthdayOnDate } from "@/utils/birthday";
+import { normalizeDateOnly } from "@/utils/dateOnly";
 import type {
 	BirthdayCustomerRecord,
 	IBirthdaysRepository,
@@ -10,7 +11,7 @@ function mapRowToRecord(row: Record<string, unknown>): BirthdayCustomerRecord {
 		customerId: row.id as string,
 		customerName: row.name as string,
 		customerPhone: row.phone as string,
-		dateOfBirth: (row.date_of_birth as string).slice(0, 10),
+		dateOfBirth: normalizeDateOnly(row.date_of_birth) as string,
 	};
 }
 

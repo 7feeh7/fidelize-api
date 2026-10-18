@@ -12,6 +12,18 @@ export interface CustomerRewardListItem {
 	validDays: number | null;
 }
 
+export interface ListCustomerRewardsParams {
+	customerId: string;
+	status?: CustomerRewardStatus;
+	page?: number;
+	perPage?: number;
+}
+
+export interface ListCustomerRewardsResult {
+	items: CustomerRewardListItem[];
+	total: number;
+}
+
 export interface ICustomerRewardsRepository {
 	save(reward: CustomerReward): Promise<void>;
 	existsByGrantKey(
@@ -31,8 +43,12 @@ export interface ICustomerRewardsRepository {
 	): Promise<CustomerRewardListItem | null>;
 	expireAvailablePastDue(referenceDate: Date): Promise<number>;
 	listByCustomerId(
+		params: ListCustomerRewardsParams,
+	): Promise<ListCustomerRewardsResult>;
+	listAvailableExpiringWithinDays(
 		customerId: string,
-		status?: CustomerRewardStatus,
+		referenceDate: Date,
+		withinDays: number,
 	): Promise<CustomerRewardListItem[]>;
 	findSoonestExpiringAvailable(
 		customerId: string,

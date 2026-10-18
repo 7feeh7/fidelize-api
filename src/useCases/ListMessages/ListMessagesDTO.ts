@@ -8,9 +8,13 @@ export interface IListMessagesRequestDTO {
 	customerId?: string;
 	scheduledUntil?: string;
 	scheduledFrom?: string;
+	page?: number;
+	perPage?: number;
 }
 
 export interface IListMessagesResponseDTO {
 	data: MessageDTO[];
 	pendingCount: number;
+	page: number;
+	totalPages: number;
 }

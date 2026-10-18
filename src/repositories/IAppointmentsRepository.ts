@@ -49,6 +49,12 @@ export interface ListAppointmentsResult {
 	total: number;
 }
 
+export interface CustomerAppointmentStats {
+	totalVisits: number;
+	totalSpent: number;
+	lastVisitDate: string | null;
+}
+
 export interface IAppointmentsRepository {
 	saveWithItems(
 		appointment: Appointment,
@@ -66,4 +72,5 @@ export interface IAppointmentsRepository {
 		customerId: string,
 		trx?: Knex.Transaction,
 	): Promise<number>;
+	getStatsByCustomerId(customerId: string): Promise<CustomerAppointmentStats>;
 }

@@ -3,13 +3,29 @@ import type { MessageTemplateType } from "@/entities/MessageTemplate";
 import type { Request, Response } from "express";
 import type { ListMessagesUseCase } from "./ListMessagesUseCase";
 
+function parsePositiveInt(value: unknown, fallback: number): number {
+	const parsed = Number(value);
+	if (!Number.isFinite(parsed) || parsed < 1) {
+		return fallback;
+	}
+
+	return Math.floor(parsed);
+}
+
 export class ListMessagesController {
 	constructor(private listMessagesUseCase: ListMessagesUseCase) {}
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { status, type, customerId, scheduledUntil, scheduledFrom } =
-				request.query;
+			const {
+				status,
+				type,
+				customerId,
+				scheduledUntil,
+				scheduledFrom,
+				page,
+				perPage,
+			} = request.query;
 
 			const result = await this.listMessagesUseCase.execute({
 				status:
@@ -25,6 +41,12 @@ export class ListMessagesController {
 					typeof scheduledUntil === "string" ? scheduledUntil : undefined,
 				scheduledFrom:
 					typeof scheduledFrom === "string" ? scheduledFrom : undefined,
+				page:
+					typeof page === "string" ? parsePositiveInt(page, 1) : undefined,
+				perPage:
+					typeof perPage === "string"
+						? parsePositiveInt(perPage, 10)
+						: undefined,
 			});
 
 			return response.status(200).json(result);

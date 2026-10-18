@@ -235,4 +235,27 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 
 		return Number(row?.count ?? 0);
 	}
+
+	async getStatsByCustomerId(customerId: string) {
+		const row = await this.connection("appointments")
+			.where({ customer_id: customerId })
+			.select(
+				this.connection.raw("count(*)::int as total_visits"),
+				this.connection.raw("coalesce(sum(total), 0) as total_spent"),
+				this.connection.raw(
+					"max(appointment_date::date) as last_visit_date",
+				),
+			)
+			.first();
+
+		const lastVisitRaw = row?.last_visit_date as string | Date | null;
+
+		return {
+			totalVisits: Number(row?.total_visits ?? 0),
+			totalSpent: Number(row?.total_spent ?? 0),
+			lastVisitDate: lastVisitRaw
+				? new Date(lastVisitRaw).toISOString().slice(0, 10)
+				: null,
+		};
+	}
 }

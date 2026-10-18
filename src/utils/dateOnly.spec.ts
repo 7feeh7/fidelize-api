@@ -1,12 +1,19 @@
 import { describe, expect, it } from "vitest";
-import { daysBetweenDateOnly, subtractDaysFromDateOnly } from "./dateOnly";
+import { normalizeDateOnly } from "./dateOnly";
 
-describe("dateOnly utils", () => {
-	it("subtrai dias em datas somente-data", () => {
-		expect(subtractDaysFromDateOnly("2026-10-17", 30)).toBe("2026-09-17");
+describe("normalizeDateOnly", () => {
+	it("returns null for nullish values", () => {
+		expect(normalizeDateOnly(null)).toBeNull();
+		expect(normalizeDateOnly(undefined)).toBeNull();
 	});
 
-	it("calcula dias entre duas datas somente-data", () => {
-		expect(daysBetweenDateOnly("2026-09-17", "2026-10-17")).toBe(30);
+	it("normalizes ISO strings", () => {
+		expect(normalizeDateOnly("1990-05-15T00:00:00.000Z")).toBe("1990-05-15");
+	});
+
+	it("normalizes Date values from pg", () => {
+		expect(normalizeDateOnly(new Date("1990-05-15T00:00:00.000Z"))).toBe(
+			"1990-05-15",
+		);
 	});
 });

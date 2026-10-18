@@ -1,5 +1,6 @@
 import type { Knex } from "knex";
 import { Message, type MessageStatus } from "@/entities/Message";
+import { normalizeDateOnly } from "@/utils/dateOnly";
 import type { MessageTemplateType } from "@/entities/MessageTemplate";
 import type {
 	IMessagesRepository,
@@ -31,14 +32,13 @@ function mapRowToListItem(row: Record<string, unknown>): MessageListItem {
 		message: mapRowToMessage(row),
 		customerName: row.customer_name as string,
 		customerPhone: row.customer_phone as string,
-		customerDateOfBirth: row.customer_date_of_birth
-			? (row.customer_date_of_birth as string).slice(0, 10)
-			: null,
+		customerDateOfBirth: normalizeDateOnly(row.customer_date_of_birth),
 		sentByName: (row.sent_by_name as string | null) ?? null,
 		returnReminderServiceName:
 			(row.return_reminder_service_name as string | null) ?? null,
-		returnReminderAppointmentDate:
-			(row.return_reminder_appointment_date as string | null) ?? null,
+		returnReminderAppointmentDate: normalizeDateOnly(
+			row.return_reminder_appointment_date,
+		),
 	};
 }
 
@@ -72,14 +72,17 @@ function applyListFilters(
 export class PostgresMessagesRepository implements IMessagesRepository {
 	constructor(private connection: Knex) {}
 
-	private baseListQuery() {
+	private listJoinQuery() {
 		return this.connection("messages as m")
 			.join("customers as c", "m.customer_id", "c.id")
 			.leftJoin("users as u", "m.sent_by", "u.id")
 			.leftJoin("appointment_items as ai", "ai.id", "m.appointment_item_id")
 			.leftJoin("appointments as a", "a.id", "ai.appointment_id")
-			.leftJoin("services as s", "s.id", "ai.service_id")
-			.select(
+			.leftJoin("services as s", "s.id", "ai.service_id");
+	}
+
+	private baseListQuery() {
+		return this.listJoinQuery().select(
 				"m.*",
 				"c.name as customer_name",
 				"c.phone as customer_phone",
@@ -129,16 +132,39 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		return mapRowToListItem(row);
 	}
 
-	async list(filters: MessageListFilters): Promise<MessageListItem[]> {
-		let query = this.baseListQuery()
-			.orderBy("m.scheduled_for", "asc")
-			.orderBy("m.created_at", "asc");
+	async list(filters: MessageListFilters) {
+		const buildFilterQuery = () =>
+			applyListFilters(this.listJoinQuery(), filters);
 
-		query = applyListFilters(query, filters);
+		const countRow = await buildFilterQuery()
+			.count<{ count: string }>("m.id as count")
+			.first();
+		const total = Number(countRow?.count ?? 0);
+
+		let query = applyListFilters(this.baseListQuery(), filters);
+
+		if (filters.sort === "recent_desc") {
+			query = query
+				.orderBy("m.created_at", "desc")
+				.orderBy("m.scheduled_for", "desc");
+		} else {
+			query = query
+				.orderBy("m.scheduled_for", "asc")
+				.orderBy("m.created_at", "asc");
+		}
+
+		if (filters.page != null && filters.perPage != null) {
+			query = query
+				.limit(filters.perPage)
+				.offset((filters.page - 1) * filters.perPage);
+		}
 
 		const rows = await query;
 
-		return rows.map((row) => mapRowToListItem(row));
+		return {
+			total,
+			items: rows.map((row) => mapRowToListItem(row)),
+		};
 	}
 
 	async countPendingUntil(scheduledUntil: string): Promise<number> {

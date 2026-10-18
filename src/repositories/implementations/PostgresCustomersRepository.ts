@@ -1,6 +1,8 @@
 import type { Knex } from "knex";
 import { Customer, type LeadSource } from "@/entities/Customer";
+import { normalizeDateOnly } from "@/utils/dateOnly";
 import type {
+	CustomerProfileRecord,
 	ICustomersRepository,
 	ListCustomersParams,
 	ListCustomersResult,
@@ -11,7 +13,7 @@ function mapRowToCustomer(row: Record<string, unknown>): Customer {
 		{
 			name: row.name as string,
 			phone: row.phone as string,
-			dateOfBirth: (row.date_of_birth as string | null) ?? null,
+			dateOfBirth: normalizeDateOnly(row.date_of_birth),
 			leadSource: row.lead_source as LeadSource,
 			active: row.active as boolean,
 		},
@@ -116,6 +118,44 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 		}
 
 		return mapRowToCustomer(row);
+	}
+
+	async findActiveProfileById(
+		id: string,
+	): Promise<CustomerProfileRecord | null> {
+		const row = await this.connection("customers")
+			.where({ "customers.id": id, "customers.active": true })
+			.select(
+				"customers.*",
+				"referrals.referrer_id",
+				"referrer.name as referrer_name",
+				this.connection.raw(
+					`(select count(*)::int from referrals r where r.referrer_id = customers.id and r.status != 'CANCELED') as referrals_made_count`,
+				),
+			)
+			.leftJoin("referrals", function joinReferrals() {
+				this.on("referrals.referred_id", "=", "customers.id").andOnNotIn(
+					"referrals.status",
+					["CANCELED"],
+				);
+			})
+			.leftJoin(
+				"customers as referrer",
+				"referrer.id",
+				"referrals.referrer_id",
+			)
+			.first();
+
+		if (!row) {
+			return null;
+		}
+
+		return {
+			customer: mapRowToCustomer(row),
+			referrerId: (row.referrer_id as string | null) ?? null,
+			referrerName: (row.referrer_name as string | null) ?? null,
+			referralsMadeCount: Number(row.referrals_made_count ?? 0),
+		};
 	}
 
 	async update(customer: Customer): Promise<void> {

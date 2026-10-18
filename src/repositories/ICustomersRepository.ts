@@ -13,6 +13,8 @@ export interface CustomerListRecord {
 	referralsMadeCount: number;
 }
 
+export type CustomerProfileRecord = CustomerListRecord;
+
 export interface ListCustomersResult {
 	items: CustomerListRecord[];
 	total: number;
@@ -22,6 +24,7 @@ export interface ICustomersRepository {
 	save(customer: Customer): Promise<void>;
 	findByPhone(phone: string): Promise<Customer | null>;
 	findActiveById(id: string): Promise<Customer | null>;
+	findActiveProfileById(id: string): Promise<CustomerProfileRecord | null>;
 	list(params: ListCustomersParams): Promise<ListCustomersResult>;
 	update(customer: Customer): Promise<void>;
 	deactivate(id: string): Promise<void>;

@@ -39,6 +39,7 @@ import { cancelMessageController } from "./useCases/CancelMessage";
 import { getMessageWhatsAppLinkController } from "./useCases/GetMessageWhatsAppLink";
 import { runDailyRoutineController } from "./useCases/RunDailyRoutine";
 import { getCustomerReturnSummaryController } from "./useCases/GetCustomerReturnSummary";
+import { getCustomerSummaryController } from "./useCases/GetCustomerSummary";
 import { listMonthlyBirthdaysController } from "./useCases/ListMonthlyBirthdays";
 
 const router = Router();
@@ -81,6 +82,10 @@ router.get("/customers/birthdays", (request, response) => {
 
 router.post("/customers", (request, response) => {
 	createCustomerController.handle(request, response);
+});
+
+router.get("/customers/:customerId/summary", (request, response) => {
+	getCustomerSummaryController.handle(request, response);
 });
 
 router.get("/customers/:customerId/rewards", (request, response) => {

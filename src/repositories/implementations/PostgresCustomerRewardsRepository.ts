@@ -109,11 +109,14 @@ export class PostgresCustomerRewardsRepository
 		return mapRowToCustomerReward(row);
 	}
 
-	private buildDetailQuery() {
+	private buildDetailFromQuery() {
 		return this.connection("customer_rewards as cr")
 			.join("loyalty_rules as lr", "lr.id", "cr.loyalty_rule_id")
-			.leftJoin("services", "services.id", "lr.free_service_id")
-			.select(
+			.leftJoin("services", "services.id", "lr.free_service_id");
+	}
+
+	private buildDetailQuery() {
+		return this.buildDetailFromQuery().select(
 				"cr.*",
 				"lr.name as rule_name",
 				"lr.trigger_type",
@@ -179,19 +182,66 @@ export class PostgresCustomerRewardsRepository
 		return mapRowToListItem(row);
 	}
 
-	async listByCustomerId(
-		customerId: string,
-		status?: CustomerRewardStatus,
-	): Promise<CustomerRewardListItem[]> {
-		const query = this.buildDetailQuery()
-			.where("cr.customer_id", customerId)
-			.orderBy("cr.granted_at", "desc");
+	async listByCustomerId({
+		customerId,
+		status,
+		page,
+		perPage,
+	}: {
+		customerId: string;
+		status?: CustomerRewardStatus;
+		page?: number;
+		perPage?: number;
+	}) {
+		const applyCustomerFilters = (query: Knex.QueryBuilder) => {
+			query.where("cr.customer_id", customerId);
 
-		if (status) {
-			query.where("cr.status", status);
+			if (status) {
+				query.where("cr.status", status);
+			}
+
+			return query;
+		};
+
+		const countRow = await applyCustomerFilters(this.buildDetailFromQuery())
+			.count<{ count: string }>("cr.id as count")
+			.first();
+		const total = Number(countRow?.count ?? 0);
+
+		let rowsQuery = applyCustomerFilters(this.buildDetailQuery()).orderBy(
+			"cr.granted_at",
+			"desc",
+		);
+
+		if (page != null && perPage != null) {
+			rowsQuery = rowsQuery
+				.limit(perPage)
+				.offset((page - 1) * perPage);
 		}
 
-		const rows = await query;
+		const rows = await rowsQuery;
+
+		return {
+			total,
+			items: rows.map((row) => mapRowToListItem(row)),
+		};
+	}
+
+	async listAvailableExpiringWithinDays(
+		customerId: string,
+		referenceDate: Date,
+		withinDays: number,
+	): Promise<CustomerRewardListItem[]> {
+		const expiresUntil = new Date(referenceDate);
+		expiresUntil.setUTCDate(expiresUntil.getUTCDate() + withinDays);
+
+		const rows = await this.buildDetailQuery()
+			.where("cr.customer_id", customerId)
+			.where("cr.status", "AVAILABLE")
+			.whereNotNull("cr.expires_at")
+			.where("cr.expires_at", ">=", referenceDate)
+			.where("cr.expires_at", "<=", expiresUntil)
+			.orderBy("cr.expires_at", "asc");
 
 		return rows.map((row) => mapRowToListItem(row));
 	}

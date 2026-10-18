@@ -39,9 +39,9 @@ export class GrantManualCustomerRewardUseCase {
 			loyaltyRuleId,
 		);
 
-		const items = await this.customerRewardsRepository.listByCustomerId(
+		const { items } = await this.customerRewardsRepository.listByCustomerId({
 			customerId,
-		);
+		});
 		const rewardItem = items.find((item) => item.reward.id === granted.id);
 
 		if (!rewardItem) {
