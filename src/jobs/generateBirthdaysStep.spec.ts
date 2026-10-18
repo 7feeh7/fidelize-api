@@ -1,6 +1,14 @@
 // biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Knex } from "knex";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresBirthdaysRepository } from "@/repositories/implementations/PostgresBirthdaysRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
+import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
+import { PostgresLoyaltyRulesRepository } from "@/repositories/implementations/PostgresLoyaltyRulesRepository";
+import { PostgresMessagesRepository } from "@/repositories/implementations/PostgresMessagesRepository";
+import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { generateBirthdaysStep } from "./generateBirthdaysStep";
 
 vi.mock(
@@ -48,32 +56,10 @@ describe("generateBirthdaysStep", () => {
 	const saveMessage = vi.fn();
 	const saveReward = vi.fn();
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		connection = {} as Knex;
 		saveMessage.mockReset();
 		saveReward.mockReset();
-
-		const { PostgresMessageTemplatesRepository } = await import(
-			"@/repositories/implementations/PostgresMessageTemplatesRepository"
-		);
-		const { PostgresLoyaltyRulesRepository } = await import(
-			"@/repositories/implementations/PostgresLoyaltyRulesRepository"
-		);
-		const { PostgresBirthdaysRepository } = await import(
-			"@/repositories/implementations/PostgresBirthdaysRepository"
-		);
-		const { PostgresMessagesRepository } = await import(
-			"@/repositories/implementations/PostgresMessagesRepository"
-		);
-		const { PostgresCustomerRewardsRepository } = await import(
-			"@/repositories/implementations/PostgresCustomerRewardsRepository"
-		);
-		const { PostgresCustomersRepository } = await import(
-			"@/repositories/implementations/PostgresCustomersRepository"
-		);
-		const { PostgresAppointmentsRepository } = await import(
-			"@/repositories/implementations/PostgresAppointmentsRepository"
-		);
 
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
 			function () {

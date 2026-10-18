@@ -1,6 +1,6 @@
+import type { Request, Response } from "express";
 import type { MessageStatus } from "@/entities/Message";
 import type { MessageTemplateType } from "@/entities/MessageTemplate";
-import type { Request, Response } from "express";
 import type { ListMessagesUseCase } from "./ListMessagesUseCase";
 
 function parsePositiveInt(value: unknown, fallback: number): number {

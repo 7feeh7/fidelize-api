@@ -1,7 +1,7 @@
 import type { Knex } from "knex";
 import { Message, type MessageStatus } from "@/entities/Message";
-import { normalizeDateOnly } from "@/utils/dateOnly";
 import type { MessageTemplateType } from "@/entities/MessageTemplate";
+import { normalizeDateOnly } from "@/utils/dateOnly";
 import type {
 	IMessagesRepository,
 	MessageListFilters,
@@ -163,7 +163,7 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 
 		return {
 			total,
-			items: rows.map((row) => mapRowToListItem(row)),
+			items: rows.map((row: Record<string, unknown>) => mapRowToListItem(row)),
 		};
 	}
 

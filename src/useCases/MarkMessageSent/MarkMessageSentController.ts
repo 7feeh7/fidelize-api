@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { MarkMessageSentUseCase } from "./MarkMessageSentUseCase";
 
 export class MarkMessageSentController {
@@ -6,11 +7,10 @@ export class MarkMessageSentController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { id } = request.params;
 			const { loggedUserId } = request.body;
 
 			const result = await this.markMessageSentUseCase.execute({
-				id,
+				id: readRouteParam(request.params.id, "id"),
 				loggedUserId,
 			});
 

@@ -1,11 +1,11 @@
-import jwt from "jsonwebtoken";
+import jwt, { type SignOptions } from "jsonwebtoken";
 import type { ITokenPayload, ITokenProvider } from "../ITokenProvider";
 
 export class JwtTokenProvider implements ITokenProvider {
 	constructor(
 		private secret: string,
-		private accessExpiresIn: string,
-		private refreshExpiresIn: string,
+		private accessExpiresIn: SignOptions["expiresIn"],
+		private refreshExpiresIn: SignOptions["expiresIn"],
 	) {
 		if (!secret) {
 			throw new Error("JWT_SECRET não configurado");

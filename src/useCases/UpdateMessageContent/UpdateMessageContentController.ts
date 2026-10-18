@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { UpdateMessageContentUseCase } from "./UpdateMessageContentUseCase";
 
 export class UpdateMessageContentController {
@@ -8,11 +9,10 @@ export class UpdateMessageContentController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { id } = request.params;
 			const { content } = request.body;
 
 			const result = await this.updateMessageContentUseCase.execute({
-				id,
+				id: readRouteParam(request.params.id, "id"),
 				content,
 			});
 

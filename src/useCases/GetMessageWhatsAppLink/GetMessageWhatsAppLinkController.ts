@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { GetMessageWhatsAppLinkUseCase } from "./GetMessageWhatsAppLinkUseCase";
 
 export class GetMessageWhatsAppLinkController {
@@ -8,9 +9,9 @@ export class GetMessageWhatsAppLinkController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { id } = request.params;
-
-			const result = await this.getMessageWhatsAppLinkUseCase.execute(id);
+			const result = await this.getMessageWhatsAppLinkUseCase.execute(
+				readRouteParam(request.params.id, "id"),
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

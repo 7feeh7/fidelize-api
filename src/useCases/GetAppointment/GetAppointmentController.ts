@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { GetAppointmentUseCase } from "./GetAppointmentUseCase";
 
 export class GetAppointmentController {
@@ -6,9 +7,9 @@ export class GetAppointmentController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { id } = request.params;
-
-			const result = await this.getAppointmentUseCase.execute({ id });
+			const result = await this.getAppointmentUseCase.execute({
+				id: readRouteParam(request.params.id, "id"),
+			});
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

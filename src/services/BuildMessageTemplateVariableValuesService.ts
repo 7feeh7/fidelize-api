@@ -1,14 +1,14 @@
 import { getBusinessName } from "@/config/businessName";
+import type { LoyaltyRewardType } from "@/entities/LoyaltyRule";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
 import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
-import { formatLoyaltyRuleRewardSummary } from "@/utils/loyaltyRulePresentation";
 import { daysBetweenDateOnly } from "@/utils/dateOnly";
 import {
 	extractFirstName,
 	type MessageTemplateVariableValues,
 } from "@/utils/fillMessageTemplateVariables";
-import type { LoyaltyRewardType } from "@/entities/LoyaltyRule";
+import { formatLoyaltyRuleRewardSummary } from "@/utils/loyaltyRulePresentation";
 
 export const SAMPLE_MESSAGE_TEMPLATE_VARIABLES: MessageTemplateVariableValues =
 	{

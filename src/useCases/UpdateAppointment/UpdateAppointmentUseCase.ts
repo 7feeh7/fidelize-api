@@ -1,12 +1,12 @@
 import type { Knex } from "knex";
 import { Appointment } from "@/entities/Appointment";
-import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
-import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
 import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { CustomerRewardUsageService } from "@/services/CustomerRewardUsageService";
 import { computeSubtotal, computeTotal } from "@/utils/appointmentCalculations";
 import {

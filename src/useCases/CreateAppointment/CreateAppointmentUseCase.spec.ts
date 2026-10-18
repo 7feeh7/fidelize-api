@@ -2,15 +2,18 @@
 import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
+import { CustomerReward } from "@/entities/CustomerReward";
 import { Service } from "@/entities/Service";
 import { User } from "@/entities/User";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
-import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
+import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
-import { CustomerReward } from "@/entities/CustomerReward";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
+import { PostgresReferralsRepository } from "@/repositories/implementations/PostgresReferralsRepository";
 import type { GrantCustomerRewardsService } from "@/services/GrantCustomerRewardsService";
 import { CreateAppointmentUseCase } from "./CreateAppointmentUseCase";
 
@@ -76,7 +79,7 @@ describe("CreateAppointmentUseCase", () => {
 		"user-id",
 	);
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		appointmentsRepository = {
 			saveWithItems: vi.fn(),
 			updateWithItems: vi.fn(),
@@ -84,6 +87,7 @@ describe("CreateAppointmentUseCase", () => {
 			findDetailById: vi.fn(),
 			list: vi.fn(),
 			countByCustomerId: vi.fn(),
+			getStatsByCustomerId: vi.fn(),
 		};
 		trxAppointmentsRepository = {
 			saveWithItems: vi.fn(),
@@ -92,6 +96,7 @@ describe("CreateAppointmentUseCase", () => {
 			findDetailById: vi.fn(),
 			list: vi.fn(),
 			countByCustomerId: vi.fn().mockResolvedValue(1),
+			getStatsByCustomerId: vi.fn(),
 		};
 		trxReferralsRepository = {
 			save: vi.fn(),
@@ -102,15 +107,6 @@ describe("CreateAppointmentUseCase", () => {
 			countByReferrerId: vi.fn(),
 			convertPendingByReferredId: vi.fn().mockResolvedValue([]),
 		};
-		const { PostgresAppointmentsRepository } = await import(
-			"@/repositories/implementations/PostgresAppointmentsRepository"
-		);
-		const { PostgresReferralsRepository } = await import(
-			"@/repositories/implementations/PostgresReferralsRepository"
-		);
-		const { PostgresCustomerRewardsRepository } = await import(
-			"@/repositories/implementations/PostgresCustomerRewardsRepository"
-		);
 		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
 			return trxAppointmentsRepository as never;
 		});
@@ -120,6 +116,9 @@ describe("CreateAppointmentUseCase", () => {
 		trxCustomerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
+			existsBirthdayGrantForYear: vi.fn(),
+			listAvailableExpiringWithinDays: vi.fn(),
+			findSoonestExpiringAvailable: vi.fn(),
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			findUsedDetailByAppointmentId: vi.fn(),
@@ -136,6 +135,7 @@ describe("CreateAppointmentUseCase", () => {
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
+			findActiveProfileById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
 			update: vi.fn(),
@@ -166,6 +166,9 @@ describe("CreateAppointmentUseCase", () => {
 		customerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
+			existsBirthdayGrantForYear: vi.fn(),
+			listAvailableExpiringWithinDays: vi.fn(),
+			findSoonestExpiringAvailable: vi.fn(),
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			findUsedDetailByAppointmentId: vi.fn(),
@@ -324,6 +327,7 @@ describe("CreateAppointmentUseCase", () => {
 					loyaltyRuleId: "rule-id",
 					referralId: null,
 					appointmentId: null,
+					grantYear: null,
 					status: "AVAILABLE",
 					grantedAt: new Date("2026-10-01T12:00:00.000Z"),
 					expiresAt: new Date("2026-12-01T12:00:00.000Z"),

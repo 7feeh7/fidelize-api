@@ -15,7 +15,10 @@ export class Customer {
 	public leadSource!: LeadSource;
 	public active!: boolean;
 
-	constructor(props: Omit<Customer, "id">, id?: string) {
+	constructor(
+		props: Omit<Customer, "id" | "active"> & { active?: boolean },
+		id?: string,
+	) {
 		Object.assign(this, props);
 		this.id = id ?? crypto.randomUUID();
 		if (this.active === undefined) {

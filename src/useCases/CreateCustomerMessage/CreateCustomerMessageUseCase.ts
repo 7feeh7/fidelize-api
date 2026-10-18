@@ -1,7 +1,7 @@
 import { Message } from "@/entities/Message";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
-import type { IMessageTemplatesRepository } from "@/repositories/IMessageTemplatesRepository";
 import type { IMessagesRepository } from "@/repositories/IMessagesRepository";
+import type { IMessageTemplatesRepository } from "@/repositories/IMessageTemplatesRepository";
 import type { FillMessageTemplateService } from "@/services/FillMessageTemplateService";
 import { getTodayDateOnly } from "@/utils/getTodayDateOnly";
 import { mapMessageToDTO } from "@/utils/mapMessageToDTO";

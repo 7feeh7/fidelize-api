@@ -11,6 +11,7 @@ describe("ListCustomersUseCase", () => {
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
+			findActiveProfileById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
 			update: vi.fn(),

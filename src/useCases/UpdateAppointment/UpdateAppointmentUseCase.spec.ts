@@ -11,6 +11,8 @@ import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewards
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { UpdateAppointmentUseCase } from "./UpdateAppointmentUseCase";
 
 vi.mock(
@@ -37,7 +39,7 @@ describe("UpdateAppointmentUseCase", () => {
 	let connection: Knex;
 	let sut: UpdateAppointmentUseCase;
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		appointmentsRepository = {
 			saveWithItems: vi.fn(),
 			updateWithItems: vi.fn(),
@@ -45,6 +47,7 @@ describe("UpdateAppointmentUseCase", () => {
 			findDetailById: vi.fn(),
 			list: vi.fn(),
 			countByCustomerId: vi.fn(),
+			getStatsByCustomerId: vi.fn(),
 		};
 		trxAppointmentsRepository = {
 			saveWithItems: vi.fn(),
@@ -53,10 +56,14 @@ describe("UpdateAppointmentUseCase", () => {
 			findDetailById: vi.fn(),
 			list: vi.fn(),
 			countByCustomerId: vi.fn(),
+			getStatsByCustomerId: vi.fn(),
 		};
 		trxCustomerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
+			existsBirthdayGrantForYear: vi.fn(),
+			listAvailableExpiringWithinDays: vi.fn(),
+			findSoonestExpiringAvailable: vi.fn(),
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			findUsedDetailByAppointmentId: vi.fn(),
@@ -64,12 +71,6 @@ describe("UpdateAppointmentUseCase", () => {
 			listByCustomerId: vi.fn(),
 			update: vi.fn(),
 		};
-		const { PostgresAppointmentsRepository } = await import(
-			"@/repositories/implementations/PostgresAppointmentsRepository"
-		);
-		const { PostgresCustomerRewardsRepository } = await import(
-			"@/repositories/implementations/PostgresCustomerRewardsRepository"
-		);
 		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
 			return trxAppointmentsRepository as never;
 		});
@@ -82,6 +83,7 @@ describe("UpdateAppointmentUseCase", () => {
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
+			findActiveProfileById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
 			update: vi.fn(),
@@ -103,6 +105,9 @@ describe("UpdateAppointmentUseCase", () => {
 		customerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
+			existsBirthdayGrantForYear: vi.fn(),
+			listAvailableExpiringWithinDays: vi.fn(),
+			findSoonestExpiringAvailable: vi.fn(),
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			findUsedDetailByAppointmentId: vi.fn(),
@@ -208,6 +213,7 @@ describe("UpdateAppointmentUseCase", () => {
 				loyaltyRuleId: "rule-id",
 				referralId: null,
 				appointmentId: "appointment-id",
+				grantYear: null,
 				status: "USED",
 				grantedAt: new Date("2026-10-01T12:00:00.000Z"),
 				expiresAt: new Date("2026-12-01T12:00:00.000Z"),

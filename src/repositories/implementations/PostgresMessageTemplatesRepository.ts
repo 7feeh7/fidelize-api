@@ -1,7 +1,7 @@
 import type { Knex } from "knex";
 import {
-	MessageTemplate,
 	type AutomaticMessageTemplateType,
+	MessageTemplate,
 	type MessageTemplateType,
 } from "@/entities/MessageTemplate";
 import type { IMessageTemplatesRepository } from "../IMessageTemplatesRepository";

@@ -1,11 +1,11 @@
 import type { Knex } from "knex";
 import { Message } from "@/entities/Message";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
-import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { PostgresMessagesRepository } from "@/repositories/implementations/PostgresMessagesRepository";
+import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { PostgresReturnRemindersRepository } from "@/repositories/implementations/PostgresReturnRemindersRepository";
-import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { BuildMessageTemplateVariableValuesService } from "@/services/BuildMessageTemplateVariableValuesService";
 import { fillMessageTemplateVariables } from "@/utils/fillMessageTemplateVariables";
 import { getTodayDateOnly } from "@/utils/getTodayDateOnly";

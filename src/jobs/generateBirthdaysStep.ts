@@ -1,13 +1,13 @@
 import type { Knex } from "knex";
 import { CustomerReward } from "@/entities/CustomerReward";
 import { Message } from "@/entities/Message";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresBirthdaysRepository } from "@/repositories/implementations/PostgresBirthdaysRepository";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
 import { PostgresLoyaltyRulesRepository } from "@/repositories/implementations/PostgresLoyaltyRulesRepository";
-import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { PostgresMessagesRepository } from "@/repositories/implementations/PostgresMessagesRepository";
-import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { BuildMessageTemplateVariableValuesService } from "@/services/BuildMessageTemplateVariableValuesService";
 import {
 	getCalendarYearFromDateOnly,

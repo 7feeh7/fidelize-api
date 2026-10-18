@@ -3,6 +3,8 @@ import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
+import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
+import { createGrantCustomerRewardsService } from "@/services/createGrantCustomerRewardsService";
 import type { CreateReferralUseCase } from "../CreateReferral/CreateReferralUseCase";
 import { CreateCustomerUseCase } from "./CreateCustomerUseCase";
 
@@ -29,24 +31,23 @@ describe("CreateCustomerUseCase", () => {
 	let trxCustomersRepository: ICustomersRepository;
 	let sut: CreateCustomerUseCase;
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		trxCustomersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
+			findActiveProfileById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
 			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
-		const { PostgresCustomersRepository } = await import(
-			"@/repositories/implementations/PostgresCustomersRepository"
-		);
 		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
 			return trxCustomersRepository as never;
 		});
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
+			findActiveProfileById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
 			update: vi.fn(),
@@ -111,9 +112,6 @@ describe("CreateCustomerUseCase", () => {
 	});
 
 	it("não concede FIRST_VISIT quando o cliente já existia no salão", async () => {
-		const { createGrantCustomerRewardsService } = await import(
-			"@/services/createGrantCustomerRewardsService"
-		);
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
 
 		const result = await sut.execute({

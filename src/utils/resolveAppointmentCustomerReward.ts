@@ -1,5 +1,7 @@
-import type { CustomerRewardListItem } from "@/repositories/ICustomerRewardsRepository";
-import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
+import type {
+	CustomerRewardListItem,
+	ICustomerRewardsRepository,
+} from "@/repositories/ICustomerRewardsRepository";
 import type {
 	AppointmentRewardItem,
 	CustomerRewardUsageService,

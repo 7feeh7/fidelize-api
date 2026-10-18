@@ -46,7 +46,7 @@ export class PostgresBirthdaysRepository implements IBirthdaysRepository {
 	}
 
 	async listInMonth(
-		year: number,
+		_year: number,
 		month: number,
 	): Promise<BirthdayCustomerRecord[]> {
 		const rows = await this.connection("customers")

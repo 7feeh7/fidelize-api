@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { UpdateAppointmentUseCase } from "./UpdateAppointmentUseCase";
 
 export class UpdateAppointmentController {
@@ -6,7 +7,6 @@ export class UpdateAppointmentController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { id } = request.params;
 			const {
 				customerId,
 				appointmentDate,
@@ -19,7 +19,7 @@ export class UpdateAppointmentController {
 			} = request.body;
 
 			await this.updateAppointmentUseCase.execute({
-				id,
+				id: readRouteParam(request.params.id, "id"),
 				customerId,
 				appointmentDate,
 				loggedUserId,

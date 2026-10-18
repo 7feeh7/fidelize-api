@@ -43,6 +43,9 @@ describe("GrantCustomerRewardsService", () => {
 		customerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
+			existsBirthdayGrantForYear: vi.fn(),
+			listAvailableExpiringWithinDays: vi.fn(),
+			findSoonestExpiringAvailable: vi.fn(),
 			findById: vi.fn(),
 			findDetailById: vi.fn(),
 			findUsedDetailByAppointmentId: vi.fn(),

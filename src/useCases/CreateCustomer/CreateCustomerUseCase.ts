@@ -1,7 +1,7 @@
 import type { Knex } from "knex";
 import { Customer, LEAD_SOURCES } from "@/entities/Customer";
-import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
+import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
 import { createGrantCustomerRewardsService } from "@/services/createGrantCustomerRewardsService";
 import type { GrantedRewardDTO } from "@/services/GrantCustomerRewardsService";
 import type { CreateReferralUseCase } from "../CreateReferral/CreateReferralUseCase";

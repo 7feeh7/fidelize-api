@@ -1,5 +1,5 @@
-import type { NormalizedLoyaltyRuleInput } from "./loyaltyRuleValidation";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
+import type { NormalizedLoyaltyRuleInput } from "./loyaltyRuleValidation";
 
 export async function ensureFreeServiceForLoyaltyRule(
 	data: NormalizedLoyaltyRuleInput,

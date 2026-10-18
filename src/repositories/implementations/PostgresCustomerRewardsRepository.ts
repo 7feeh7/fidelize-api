@@ -221,7 +221,7 @@ export class PostgresCustomerRewardsRepository
 
 		return {
 			total,
-			items: rows.map((row) => mapRowToListItem(row)),
+			items: rows.map((row: Record<string, unknown>) => mapRowToListItem(row)),
 		};
 	}
 

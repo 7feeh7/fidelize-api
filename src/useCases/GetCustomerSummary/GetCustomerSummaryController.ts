@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { GetCustomerSummaryUseCase } from "./GetCustomerSummaryUseCase";
 
 export class GetCustomerSummaryController {
@@ -7,7 +8,7 @@ export class GetCustomerSummaryController {
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
 			const result = await this.getCustomerSummaryUseCase.execute(
-				request.params.customerId,
+				readRouteParam(request.params.customerId, "customerId"),
 			);
 			return response.status(200).json(result);
 		} catch (err: unknown) {

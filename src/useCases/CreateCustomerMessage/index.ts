@@ -1,7 +1,7 @@
 import { connection } from "@/database/connection";
 import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
-import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { PostgresMessagesRepository } from "@/repositories/implementations/PostgresMessagesRepository";
+import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
 import { createFillMessageTemplateService } from "@/services/createFillMessageTemplateService";
 import { CreateCustomerMessageController } from "./CreateCustomerMessageController";
 import { CreateCustomerMessageUseCase } from "./CreateCustomerMessageUseCase";

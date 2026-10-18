@@ -15,6 +15,7 @@ describe("CreateMessageTemplateUseCase", () => {
 			update: vi.fn(),
 			setActive: vi.fn(),
 			deactivateActiveByAutomaticType: vi.fn(),
+			findActiveAutomaticByType: vi.fn(),
 		};
 		sut = new CreateMessageTemplateUseCase(messageTemplatesRepository);
 	});

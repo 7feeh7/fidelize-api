@@ -1,6 +1,8 @@
 // biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Knex } from "knex";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { expireCustomerRewardsStep } from "./expireCustomerRewardsStep";
 
 vi.mock(
@@ -13,11 +15,8 @@ vi.mock(
 describe("expireCustomerRewardsStep", () => {
 	let connection: Knex;
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		connection = {} as Knex;
-		const { PostgresCustomerRewardsRepository } = await import(
-			"@/repositories/implementations/PostgresCustomerRewardsRepository"
-		);
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
 			function () {
 				return {

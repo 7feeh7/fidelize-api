@@ -5,6 +5,8 @@ import { Customer } from "@/entities/Customer";
 import { Referral } from "@/entities/Referral";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
+import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
+import { PostgresReferralsRepository } from "@/repositories/implementations/PostgresReferralsRepository";
 import { CreateReferralUseCase } from "./CreateReferralUseCase";
 
 vi.mock("@/repositories/implementations/PostgresReferralsRepository", () => ({
@@ -45,7 +47,7 @@ describe("CreateReferralUseCase", () => {
 		"referred-id",
 	);
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		referralsRepository = {
 			save: vi.fn(),
 			findByReferredId: vi.fn(),
@@ -58,17 +60,12 @@ describe("CreateReferralUseCase", () => {
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
+			findActiveProfileById: vi.fn(),
 			save: vi.fn(),
 			list: vi.fn(),
 			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
-		const { PostgresReferralsRepository } = await import(
-			"@/repositories/implementations/PostgresReferralsRepository"
-		);
-		const { PostgresCustomersRepository } = await import(
-			"@/repositories/implementations/PostgresCustomersRepository"
-		);
 		vi.mocked(PostgresReferralsRepository).mockImplementation(function () {
 			return referralsRepository as never;
 		});

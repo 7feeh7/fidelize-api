@@ -1,19 +1,19 @@
 import type { Knex } from "knex";
 import { Appointment } from "@/entities/Appointment";
-import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
-import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
-import { PostgresReferralsRepository } from "@/repositories/implementations/PostgresReferralsRepository";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
 import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
-import { createGrantCustomerRewardsService } from "@/services/createGrantCustomerRewardsService";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
+import { PostgresReferralsRepository } from "@/repositories/implementations/PostgresReferralsRepository";
 import { CustomerRewardUsageService } from "@/services/CustomerRewardUsageService";
+import { createGrantCustomerRewardsService } from "@/services/createGrantCustomerRewardsService";
 import type {
-	GrantedRewardDTO,
 	GrantCustomerRewardsService,
+	GrantedRewardDTO,
 } from "@/services/GrantCustomerRewardsService";
 import { computeSubtotal, computeTotal } from "@/utils/appointmentCalculations";
 import {
@@ -30,11 +30,11 @@ export interface ICreateAppointmentResponseDTO {
 
 export class CreateAppointmentUseCase {
 	constructor(
-		private appointmentsRepository: IAppointmentsRepository,
+		_appointmentsRepository: IAppointmentsRepository,
 		private customersRepository: ICustomersRepository,
 		private servicesRepository: IServicesRepository,
 		private usersRepository: IUsersRepository,
-		private referralsRepository: IReferralsRepository,
+		_referralsRepository: IReferralsRepository,
 		private customerRewardsRepository: ICustomerRewardsRepository,
 		private connection: Knex,
 		private grantCustomerRewardsServiceForTests?: GrantCustomerRewardsService,

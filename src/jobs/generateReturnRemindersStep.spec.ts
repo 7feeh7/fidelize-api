@@ -1,6 +1,13 @@
 // biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
-import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Knex } from "knex";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
+import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
+import { PostgresMessagesRepository } from "@/repositories/implementations/PostgresMessagesRepository";
+import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
+import { PostgresReturnRemindersRepository } from "@/repositories/implementations/PostgresReturnRemindersRepository";
 import {
 	generateReturnRemindersStep,
 	RETURN_REMINDER_MAX_OVERDUE_DAYS,
@@ -46,28 +53,9 @@ describe("generateReturnRemindersStep", () => {
 	let connection: Knex;
 	const save = vi.fn();
 
-	beforeEach(async () => {
+	beforeEach(() => {
 		connection = {} as Knex;
 		save.mockReset();
-
-		const { PostgresMessageTemplatesRepository } = await import(
-			"@/repositories/implementations/PostgresMessageTemplatesRepository"
-		);
-		const { PostgresReturnRemindersRepository } = await import(
-			"@/repositories/implementations/PostgresReturnRemindersRepository"
-		);
-		const { PostgresMessagesRepository } = await import(
-			"@/repositories/implementations/PostgresMessagesRepository"
-		);
-		const { PostgresCustomersRepository } = await import(
-			"@/repositories/implementations/PostgresCustomersRepository"
-		);
-		const { PostgresAppointmentsRepository } = await import(
-			"@/repositories/implementations/PostgresAppointmentsRepository"
-		);
-		const { PostgresCustomerRewardsRepository } = await import(
-			"@/repositories/implementations/PostgresCustomerRewardsRepository"
-		);
 
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
 			function () {
@@ -115,13 +103,6 @@ describe("generateReturnRemindersStep", () => {
 
 	it("usa o limite de 30 dias de atraso na seleção", async () => {
 		const referenceDate = new Date("2026-10-17T03:00:00.000Z");
-		const { PostgresMessageTemplatesRepository } = await import(
-			"@/repositories/implementations/PostgresMessageTemplatesRepository"
-		);
-		const { PostgresReturnRemindersRepository } = await import(
-			"@/repositories/implementations/PostgresReturnRemindersRepository"
-		);
-
 		const listEligibleForReminders = vi.fn().mockResolvedValue([]);
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
 			function () {

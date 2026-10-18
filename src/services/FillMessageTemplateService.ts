@@ -1,5 +1,5 @@
-import type { BuildMessageTemplateVariableValuesService } from "./BuildMessageTemplateVariableValuesService";
 import { fillMessageTemplateVariables } from "@/utils/fillMessageTemplateVariables";
+import type { BuildMessageTemplateVariableValuesService } from "./BuildMessageTemplateVariableValuesService";
 
 export class FillMessageTemplateService {
 	constructor(

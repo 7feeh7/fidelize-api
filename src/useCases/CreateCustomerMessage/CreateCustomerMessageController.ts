@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { CreateCustomerMessageUseCase } from "./CreateCustomerMessageUseCase";
 
 export class CreateCustomerMessageController {
@@ -8,11 +9,10 @@ export class CreateCustomerMessageController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { customerId } = request.params;
 			const { templateId, content, scheduledFor } = request.body;
 
 			const result = await this.createCustomerMessageUseCase.execute({
-				customerId,
+				customerId: readRouteParam(request.params.customerId, "customerId"),
 				templateId,
 				content,
 				scheduledFor,

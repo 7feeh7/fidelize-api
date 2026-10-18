@@ -34,16 +34,28 @@ export class AuthenticateUserUseCase {
 			throw new Error(INVALID_CREDENTIALS_MESSAGE);
 		}
 
+		if (!user.id) {
+			throw new Error(INVALID_CREDENTIALS_MESSAGE);
+		}
+
 		const tokenPayload = {
-			sub: user.id!,
+			sub: user.id,
 			email: user.email,
 		};
 
 		const access_token = this.tokenProvider.generateAccessToken(tokenPayload);
 		const refresh_token = this.tokenProvider.generateRefreshToken(tokenPayload);
 
-		const decoded = jwt.decode(access_token) as jwt.JwtPayload;
-		const expires_in = decoded.exp! - decoded.iat!;
+		const decoded = jwt.decode(access_token) as jwt.JwtPayload | null;
+		if (
+			decoded?.exp == null ||
+			decoded.iat == null ||
+			typeof decoded.exp !== "number" ||
+			typeof decoded.iat !== "number"
+		) {
+			throw new Error("Token inválido");
+		}
+		const expires_in = decoded.exp - decoded.iat;
 
 		return {
 			access_token,

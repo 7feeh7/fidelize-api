@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { GrantManualCustomerRewardUseCase } from "./GrantManualCustomerRewardUseCase";
 
 export class GrantManualCustomerRewardController {
@@ -8,11 +9,10 @@ export class GrantManualCustomerRewardController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { customerId } = request.params;
 			const { loyaltyRuleId } = request.body;
 
 			const result = await this.grantManualCustomerRewardUseCase.execute({
-				customerId,
+				customerId: readRouteParam(request.params.customerId, "customerId"),
 				loyaltyRuleId,
 			});
 

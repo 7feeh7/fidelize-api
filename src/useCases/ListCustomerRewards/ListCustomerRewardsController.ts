@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import type { CustomerRewardStatus } from "@/entities/CustomerReward";
+import { readRouteParam } from "@/utils/readRouteParam";
 import type { ListCustomerRewardsUseCase } from "./ListCustomerRewardsUseCase";
 
 function parsePositiveInt(value: unknown, fallback: number): number {
@@ -16,11 +17,10 @@ export class ListCustomerRewardsController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { customerId } = request.params;
 			const status = request.query.status as CustomerRewardStatus | undefined;
 
 			const result = await this.listCustomerRewardsUseCase.execute({
-				customerId,
+				customerId: readRouteParam(request.params.customerId, "customerId"),
 				status,
 				page:
 					typeof request.query.page === "string"

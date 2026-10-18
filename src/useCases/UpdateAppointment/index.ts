@@ -1,8 +1,8 @@
 import { connection } from "@/database/connection";
 import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
+import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
 import { PostgresServicesRepository } from "@/repositories/implementations/PostgresServicesRepository";
-import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { PostgresUsersRepository } from "@/repositories/implementations/PostgresUsersRepository";
 import { UpdateAppointmentController } from "./UpdateAppointmentController";
 import { UpdateAppointmentUseCase } from "./UpdateAppointmentUseCase";
