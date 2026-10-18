@@ -1,3 +1,4 @@
+// biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
 import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
@@ -110,12 +111,12 @@ describe("CreateAppointmentUseCase", () => {
 		const { PostgresCustomerRewardsRepository } = await import(
 			"@/repositories/implementations/PostgresCustomerRewardsRepository"
 		);
-		vi.mocked(PostgresAppointmentsRepository).mockImplementation(
-			() => trxAppointmentsRepository as never,
-		);
-		vi.mocked(PostgresReferralsRepository).mockImplementation(
-			() => trxReferralsRepository as never,
-		);
+		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
+			return trxAppointmentsRepository as never;
+		});
+		vi.mocked(PostgresReferralsRepository).mockImplementation(function () {
+			return trxReferralsRepository as never;
+		});
 		trxCustomerRewardsRepository = {
 			save: vi.fn(),
 			existsByGrantKey: vi.fn(),
@@ -127,7 +128,9 @@ describe("CreateAppointmentUseCase", () => {
 			update: vi.fn(),
 		};
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			() => trxCustomerRewardsRepository as never,
+			function () {
+				return trxCustomerRewardsRepository as never;
+			},
 		);
 
 		customersRepository = {

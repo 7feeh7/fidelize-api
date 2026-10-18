@@ -1,3 +1,4 @@
+// biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Knex } from "knex";
 import { generateBirthdaysStep } from "./generateBirthdaysStep";
@@ -75,50 +76,49 @@ describe("generateBirthdaysStep", () => {
 		);
 
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					findActiveAutomaticByType: vi.fn().mockResolvedValue(null),
-				}) as never,
+				} as never;
+			},
 		);
 
-		vi.mocked(PostgresLoyaltyRulesRepository).mockImplementation(
-			() =>
-				({
-					listActiveByTriggerType: vi.fn().mockResolvedValue([]),
-				}) as never,
-		);
+		vi.mocked(PostgresLoyaltyRulesRepository).mockImplementation(function () {
+			return {
+				listActiveByTriggerType: vi.fn().mockResolvedValue([]),
+			} as never;
+		});
 
-		vi.mocked(PostgresBirthdaysRepository).mockImplementation(
-			() =>
-				({
-					listCandidatesForDate: vi.fn().mockResolvedValue([]),
-				}) as never,
-		);
+		vi.mocked(PostgresBirthdaysRepository).mockImplementation(function () {
+			return {
+				listCandidatesForDate: vi.fn().mockResolvedValue([]),
+			} as never;
+		});
 
-		vi.mocked(PostgresMessagesRepository).mockImplementation(
-			() =>
-				({
-					save: saveMessage,
-					existsBirthdayMessageForYear: vi.fn().mockResolvedValue(false),
-				}) as never,
-		);
+		vi.mocked(PostgresMessagesRepository).mockImplementation(function () {
+			return {
+				save: saveMessage,
+				existsBirthdayMessageForYear: vi.fn().mockResolvedValue(false),
+			} as never;
+		});
 
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					save: saveReward,
 					existsBirthdayGrantForYear: vi.fn().mockResolvedValue(false),
 					findDetailById: vi.fn().mockResolvedValue(null),
 					findSoonestExpiringAvailable: vi.fn().mockResolvedValue(null),
-				}) as never,
+				} as never;
+			},
 		);
 
-		vi.mocked(PostgresCustomersRepository).mockImplementation(
-			() => ({}) as never,
-		);
-		vi.mocked(PostgresAppointmentsRepository).mockImplementation(
-			() => ({}) as never,
-		);
+		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
+			return {} as never;
+		});
+		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
+			return {} as never;
+		});
 	});
 
 	it("não processa aniversários quando não há modelo nem regra ativos", async () => {

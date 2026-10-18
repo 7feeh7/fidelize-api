@@ -1,3 +1,4 @@
+// biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Knex } from "knex";
 import { expireCustomerRewardsStep } from "./expireCustomerRewardsStep";
@@ -18,10 +19,11 @@ describe("expireCustomerRewardsStep", () => {
 			"@/repositories/implementations/PostgresCustomerRewardsRepository"
 		);
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					expireAvailablePastDue: vi.fn().mockResolvedValue(4),
-				}) as never,
+				} as never;
+			},
 		);
 	});
 

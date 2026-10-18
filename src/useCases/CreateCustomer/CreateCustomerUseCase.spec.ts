@@ -1,3 +1,4 @@
+// biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
 import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Customer } from "@/entities/Customer";
@@ -40,9 +41,9 @@ describe("CreateCustomerUseCase", () => {
 		const { PostgresCustomersRepository } = await import(
 			"@/repositories/implementations/PostgresCustomersRepository"
 		);
-		vi.mocked(PostgresCustomersRepository).mockImplementation(
-			() => trxCustomersRepository as never,
-		);
+		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
+			return trxCustomersRepository as never;
+		});
 		customersRepository = {
 			findByPhone: vi.fn(),
 			findActiveById: vi.fn(),
@@ -78,6 +79,14 @@ describe("CreateCustomerUseCase", () => {
 
 		expect(customersRepository.findByPhone).toHaveBeenCalledWith("11999998888");
 		expect(connection.transaction).toHaveBeenCalledTimes(1);
+		expect(trxCustomersRepository.save).toHaveBeenCalledTimes(1);
+		const savedCustomer = vi.mocked(trxCustomersRepository.save).mock
+			.calls[0]?.[0];
+		expect(savedCustomer).toBeInstanceOf(Customer);
+		expect(savedCustomer?.name).toBe("João Souza");
+		expect(savedCustomer?.phone).toBe("11999998888");
+		expect(savedCustomer?.dateOfBirth).toBe("1990-05-15");
+		expect(savedCustomer?.leadSource).toBe("INSTAGRAM");
 		expect(result.grantedRewards).toHaveLength(1);
 		expect(createReferralUseCase.execute).not.toHaveBeenCalled();
 	});
@@ -128,7 +137,11 @@ describe("CreateCustomerUseCase", () => {
 			referrerId: "referrer-id",
 		});
 
-		expect(connection.transaction).toHaveBeenCalled();
+		expect(trxCustomersRepository.save).toHaveBeenCalledTimes(1);
+		const savedCustomer = vi.mocked(trxCustomersRepository.save).mock
+			.calls[0]?.[0];
+		expect(savedCustomer).toBeInstanceOf(Customer);
+		expect(savedCustomer?.dateOfBirth).toBeNull();
 	});
 
 	it("exige indicador quando a origem é indicação", async () => {

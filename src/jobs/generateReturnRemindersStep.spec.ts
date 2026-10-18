@@ -1,3 +1,4 @@
+// biome-ignore-all lint/complexity/useArrowFunction: o Vitest 5 instancia o mock com new
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { Knex } from "knex";
 import {
@@ -69,34 +70,37 @@ describe("generateReturnRemindersStep", () => {
 		);
 
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					findActiveAutomaticByType: vi.fn().mockResolvedValue(null),
-				}) as never,
+				} as never;
+			},
 		);
 
 		vi.mocked(PostgresReturnRemindersRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					listEligibleForReminders: vi.fn(),
-				}) as never,
+				} as never;
+			},
 		);
 
-		vi.mocked(PostgresMessagesRepository).mockImplementation(
-			() => ({ save }) as never,
-		);
+		vi.mocked(PostgresMessagesRepository).mockImplementation(function () {
+			return { save } as never;
+		});
 
-		vi.mocked(PostgresCustomersRepository).mockImplementation(
-			() => ({}) as never,
-		);
-		vi.mocked(PostgresAppointmentsRepository).mockImplementation(
-			() => ({}) as never,
-		);
+		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
+			return {} as never;
+		});
+		vi.mocked(PostgresAppointmentsRepository).mockImplementation(function () {
+			return {} as never;
+		});
 		vi.mocked(PostgresCustomerRewardsRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					findSoonestExpiringAvailable: vi.fn().mockResolvedValue(null),
-				}) as never,
+				} as never;
+			},
 		);
 	});
 
@@ -120,16 +124,19 @@ describe("generateReturnRemindersStep", () => {
 
 		const listEligibleForReminders = vi.fn().mockResolvedValue([]);
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
-			() =>
-				({
+			function () {
+				return {
 					findActiveAutomaticByType: vi.fn().mockResolvedValue({
 						id: "template-1",
 						content: "Oi {nome}!",
 					}),
-				}) as never,
+				} as never;
+			},
 		);
 		vi.mocked(PostgresReturnRemindersRepository).mockImplementation(
-			() => ({ listEligibleForReminders }) as never,
+			function () {
+				return { listEligibleForReminders } as never;
+			},
 		);
 
 		await generateReturnRemindersStep(connection, referenceDate);
