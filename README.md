@@ -63,13 +63,9 @@ docker compose down
 
 O servidor agora deve estar em execução em http://localhost:3000 (porta definida em `PORT` no `.env`, padrão `3333` no código).
 
----
-
 ## Pipeline CI/CD
 
 ![Diagrama da pipeline](assets/deploy.png)
-
----
 
 ## Documentação
 
