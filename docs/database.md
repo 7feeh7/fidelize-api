@@ -32,3 +32,4 @@ As migrations ficam em `src/database/migrations/`.
 | `DB_USER`     | Usuário             |
 | `DB_PASSWORD` | Senha               |
 | `DB_NAME`     | Nome do banco       |
+| `DB_SSL`      | `true`/`1` para SSL (Postgres gerenciado); omita ou `false` em local |

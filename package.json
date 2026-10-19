@@ -7,14 +7,15 @@
 		"start": "node dist/server.js",
 		"start:dev": "tsx watch --env-file=.env src/server.ts",
 		"format": "biome format --write",
-		"knex": "node --env-file=.env --import tsx ./node_modules/knex/bin/cli.js --knexfile src/database/knexfile.ts",
+		"knex": "node --env-file-if-exists=.env --import tsx ./node_modules/knex/bin/cli.js --knexfile src/database/knexfile.ts",
 		"migrate:make": "yarn knex migrate:make",
 		"migrate:latest": "yarn knex migrate:latest",
 		"migrate:rollback": "yarn knex migrate:rollback",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"lint": "biome check src",
-		"typecheck": "tsc --noEmit"
+		"typecheck": "tsc --noEmit",
+		"build:lambda": "node scripts/build-lambda.mjs"
 	},
 	"dependencies": {
 		"bcrypt": "6.0.0",
@@ -23,14 +24,17 @@
 		"jsonwebtoken": "9.0.2",
 		"knex": "3.3.0",
 		"pg": "8.23.1",
+		"serverless-http": "^4.0.0",
 		"typescript": "7.0.2"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.15",
+		"@types/aws-lambda": "^8.10.164",
 		"@types/bcrypt": "6.0.0",
 		"@types/cors": "2.8.17",
 		"@types/express": "5.0.6",
 		"@types/jsonwebtoken": "9.0.9",
+		"esbuild": "^0.28.2",
 		"tsx": "4.23.15",
 		"vite": "^8.3.4",
 		"vitest": "^5.0.5"

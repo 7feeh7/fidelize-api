@@ -1,0 +1,20 @@
+# Copie para terraform.tfvars e preencha. O terraform.tfvars não vai pro git (tem senhas).
+# Estes valores viram as variáveis de ambiente da Lambda.
+
+# Supabase: Connect > Transaction pooler
+db_host     = "aws-0-sa-east-1.pooler.supabase.com"
+db_port     = "6543"
+db_user     = "postgres.seu-project-ref"
+db_password = "troque-me"
+db_name     = "postgres"
+
+jwt_secret  = "troque-me"
+cors_origin = "https://seu-frontend.com"
+
+# Opcionais (padrão em variables.tf):
+# db_ssl                 = "true"
+# jwt_expires_in         = "1d"
+# jwt_refresh_expires_in = "7d"
+# business_name          = "Fidelizei"
+# daily_routine_hour     = "3"
+# daily_routine_minute   = "0"

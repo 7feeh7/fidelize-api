@@ -63,13 +63,16 @@ Para parar os containers preservando os dados:
 docker compose down
 ```
 
-O servidor agora deve estar em execução em http://localhost:3000.
+O servidor agora deve estar em execução em http://localhost:3000 (porta definida em `PORT` no `.env`, padrão `3333` no código).
 
 ---
 
 ## Documentação
 
-A documentação da API esta indisponível no momento.
+- [Banco de dados](docs/database.md)
+- [Deploy na AWS (Lambda + Terraform)](docs/deploy.md)
+
+A documentação da API (endpoints) ainda está indisponível no momento.
 
 ## Contribuindo
 
