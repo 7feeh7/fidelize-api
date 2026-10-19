@@ -16,12 +16,56 @@ const packageJson = JSON.parse(
 const pgVersion = packageJson.dependencies.pg;
 const bcryptVersion = packageJson.dependencies.bcrypt;
 
+const knexOptionalDrivers = [
+	"better-sqlite3",
+	"mysql",
+	"mysql2",
+	"mariadb",
+	"mariadb/callback",
+	"tedious",
+	"oracledb",
+	"pg-native",
+	"sqlite3",
+];
+
+function resolveAliasImport(relativePath) {
+	const basePath = path.join(root, "src", relativePath);
+	const candidates = [
+		basePath,
+		`${basePath}.ts`,
+		`${basePath}.tsx`,
+		`${basePath}.js`,
+		`${basePath}.mjs`,
+		path.join(basePath, "index.ts"),
+	];
+
+	for (const candidate of candidates) {
+		if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) {
+			return candidate;
+		}
+	}
+
+	return null;
+}
+
 const aliasPlugin = {
 	name: "path-alias",
 	setup(build) {
-		build.onResolve({ filter: /^@\// }, (args) => ({
-			path: path.join(root, "src", args.path.slice(2)),
-		}));
+		build.onResolve({ filter: /^@\// }, (args) => {
+			const resolved = resolveAliasImport(args.path.slice(2));
+
+			if (!resolved) {
+				return {
+					errors: [
+						{
+							text: `Não foi possível resolver o alias ${args.path}`,
+						},
+					],
+				};
+			}
+
+			return { path: resolved };
+		});
 	},
 };
 
@@ -56,7 +100,7 @@ await esbuild.build({
 	target: "node24",
 	format: "cjs",
 	outfile: path.join(outDir, "index.js"),
-	external: ["pg", "bcrypt"],
+	external: ["pg", "bcrypt", ...knexOptionalDrivers],
 	plugins: [aliasPlugin],
 });
 
