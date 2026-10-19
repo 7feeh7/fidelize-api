@@ -1,4 +1,5 @@
 import type { Request, Response } from "express";
+import { readBearerToken } from "@/utils/readBearerToken";
 import type { GetMeUseCase } from "./GetMeUseCase";
 import {
 	TOKEN_NOT_PROVIDED_MESSAGE,
@@ -6,19 +7,6 @@ import {
 } from "./GetMeUseCase";
 
 const INVALID_TOKEN_MESSAGE = "Token inválido";
-
-function readBearerToken(authorizationHeader: string | undefined): string {
-	if (!authorizationHeader?.startsWith("Bearer ")) {
-		throw new Error(TOKEN_NOT_PROVIDED_MESSAGE);
-	}
-
-	const accessToken = authorizationHeader.slice("Bearer ".length).trim();
-	if (!accessToken) {
-		throw new Error(TOKEN_NOT_PROVIDED_MESSAGE);
-	}
-
-	return accessToken;
-}
 
 export class GetMeController {
 	constructor(private getMeUseCase: GetMeUseCase) {}

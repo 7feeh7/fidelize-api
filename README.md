@@ -69,6 +69,7 @@ O servidor agora deve estar em execução em http://localhost:3000 (porta defini
 
 ## Documentação
 
+- [API HTTP e autenticação](docs/api.md)
 - [Banco de dados](docs/database.md)
 - [Deploy na AWS (Lambda + Terraform)](docs/deploy.md)
 

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { ensureAuthenticated } from "./middlewares";
 import { authenticateUserController } from "./useCases/AuthenticateUser";
 import { cancelCustomerRewardController } from "./useCases/CancelCustomerReward";
 import { cancelMessageController } from "./useCases/CancelMessage";
@@ -48,6 +49,12 @@ const router = Router();
 router.post("/login", (request, response) => {
 	authenticateUserController.handle(request, response);
 });
+
+router.post("/daily-routine/run", (request, response) => {
+	runDailyRoutineController.handle(request, response);
+});
+
+router.use(ensureAuthenticated);
 
 router.get("/me", (request, response) => {
 	getMeController.handle(request, response);
@@ -214,10 +221,6 @@ router.patch("/messages/:id/cancel", (request, response) => {
 
 router.get("/messages/:id/whatsapp-link", (request, response) => {
 	getMessageWhatsAppLinkController.handle(request, response);
-});
-
-router.post("/daily-routine/run", (request, response) => {
-	runDailyRoutineController.handle(request, response);
 });
 
 export { router };
