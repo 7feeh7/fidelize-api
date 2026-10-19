@@ -108,7 +108,7 @@ const mountPath =
 	process.platform === "win32" ? outDir.replace(/\\/g, "/") : outDir;
 
 run(
-	`docker run --rm -v "${mountPath}:/var/task" -w /var/task public.ecr.aws/lambda/nodejs:24 npm install pg@${pgVersion} bcrypt@${bcryptVersion} --omit=dev`,
+	`docker run --rm --entrypoint npm -v "${mountPath}:/var/task" -w /var/task public.ecr.aws/lambda/nodejs:24 install pg@${pgVersion} bcrypt@${bcryptVersion} --omit=dev`,
 );
 
 createZip(outDir, zipPath);
