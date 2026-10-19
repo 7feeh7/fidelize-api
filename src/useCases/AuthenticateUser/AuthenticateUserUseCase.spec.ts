@@ -26,6 +26,7 @@ describe("AuthenticateUserUseCase", () => {
 		tokenProvider = {
 			generateAccessToken: vi.fn(),
 			generateRefreshToken: vi.fn(),
+			verifyAccessToken: vi.fn(),
 		};
 		sut = new AuthenticateUserUseCase(
 			userRepository,

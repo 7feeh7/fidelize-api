@@ -6,4 +6,5 @@ export interface ITokenPayload {
 export interface ITokenProvider {
 	generateAccessToken(payload: ITokenPayload): string;
 	generateRefreshToken(payload: ITokenPayload): string;
+	verifyAccessToken(token: string): ITokenPayload;
 }

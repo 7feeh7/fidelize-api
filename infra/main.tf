@@ -9,6 +9,9 @@ locals {
 
   # Repositório do GitHub que pode publicar o código na Lambda.
   github_repo = "7feeh7/fidelize-api"
+
+  github_owner_id = "20801260"
+  github_repo_id  = "1421405279"
 }
 
 # ------------------------------------------------------------
@@ -214,22 +217,32 @@ resource "aws_iam_openid_connect_provider" "github" {
 resource "aws_iam_role" "github_deploy" {
   name = "${local.name}-github-deploy"
 
-  # Só a branch main do repositório pode usar esta role.
+  # Só a branch main deste repositório pode usar esta role.
+  # O GitHub desta conta manda o subject com IDs (repo:owner@id/repo@id:ref:...).
+  # O formato owner/repo fica como alternativa, se essa opção for desligada.
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Effect    = "Allow"
-      Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
-      Action = "sts:AssumeRoleWithWebIdentity"
-      Condition = {
-        StringEquals = {
-          "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
+        Action    = "sts:AssumeRoleWithWebIdentity"
+        Condition = {
+          StringEquals = {
+            "token.actions.githubusercontent.com:aud" = "sts.amazonaws.com"
+            "token.actions.githubusercontent.com:sub" = [
+              "repo:${local.github_repo}:ref:refs/heads/main",
+              "repo:7feeh7@${local.github_owner_id}/fidelize-api@${local.github_repo_id}:ref:refs/heads/main",
+            ]
+          }
         }
-        StringLike = {
-          "token.actions.githubusercontent.com:sub" = "repo:${local.github_repo}:*"
-        }
-      }
-    }]
+      },
+      {
+        Effect    = "Allow"
+        Principal = { Federated = aws_iam_openid_connect_provider.github.arn }
+        Action    = "sts:TagSession"
+      },
+    ]
   })
 }
 

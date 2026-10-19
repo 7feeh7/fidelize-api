@@ -17,6 +17,7 @@ import { getAppointmentController } from "./useCases/GetAppointment";
 import { getCustomerReturnSummaryController } from "./useCases/GetCustomerReturnSummary";
 import { getCustomerSummaryController } from "./useCases/GetCustomerSummary";
 import { getLoyaltyRuleController } from "./useCases/GetLoyaltyRule";
+import { getMeController } from "./useCases/GetMe";
 import { getMessagePendingCountController } from "./useCases/GetMessagePendingCount";
 import { getMessageTemplateController } from "./useCases/GetMessageTemplate";
 import { getMessageWhatsAppLinkController } from "./useCases/GetMessageWhatsAppLink";
@@ -46,6 +47,10 @@ const router = Router();
 
 router.post("/login", (request, response) => {
 	authenticateUserController.handle(request, response);
+});
+
+router.get("/me", (request, response) => {
+	getMeController.handle(request, response);
 });
 
 router.post("/users", (request, response) => {

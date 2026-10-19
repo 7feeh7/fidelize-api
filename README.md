@@ -72,8 +72,6 @@ O servidor agora deve estar em execução em http://localhost:3000 (porta defini
 - [Banco de dados](docs/database.md)
 - [Deploy na AWS (Lambda + Terraform)](docs/deploy.md)
 
-A documentação da API (endpoints) ainda está indisponível no momento.
-
 ## Contribuindo
 
 Contribuições para o projeto são bem vindas! Pra contribuir com o projeto, siga estas etapas:

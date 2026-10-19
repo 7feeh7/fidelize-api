@@ -23,4 +23,26 @@ export class JwtTokenProvider implements ITokenProvider {
 			expiresIn: this.refreshExpiresIn,
 		});
 	}
+
+	verifyAccessToken(token: string): ITokenPayload {
+		try {
+			const decoded = jwt.verify(token, this.secret) as jwt.JwtPayload;
+
+			if (
+				typeof decoded.sub !== "string" ||
+				typeof decoded.email !== "string" ||
+				!decoded.sub.trim() ||
+				!decoded.email.trim()
+			) {
+				throw new Error("Token inválido");
+			}
+
+			return {
+				sub: decoded.sub,
+				email: decoded.email,
+			};
+		} catch {
+			throw new Error("Token inválido");
+		}
+	}
 }
