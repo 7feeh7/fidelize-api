@@ -64,6 +64,7 @@ export interface IAppointmentsRepository {
 	updateWithItems(
 		appointment: Appointment,
 		items: AppointmentItem[],
+		trx?: Knex.Transaction,
 	): Promise<void>;
 	findById(id: string): Promise<Appointment | null>;
 	findDetailById(id: string): Promise<AppointmentDetail | null>;

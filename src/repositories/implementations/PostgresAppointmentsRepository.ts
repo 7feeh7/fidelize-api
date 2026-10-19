@@ -67,9 +67,10 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 	async updateWithItems(
 		appointment: Appointment,
 		items: AppointmentItem[],
+		trx?: Knex.Transaction,
 	): Promise<void> {
-		await this.connection.transaction(async (trx) => {
-			await trx("appointments").where({ id: appointment.id }).update({
+		const persist = async (executor: Knex.Transaction) => {
+			await executor("appointments").where({ id: appointment.id }).update({
 				customer_id: appointment.customerId,
 				user_id: appointment.userId,
 				appointment_date: appointment.appointmentDate,
@@ -77,25 +78,58 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 				discount_amount: appointment.discountAmount,
 				total: appointment.total,
 				notes: appointment.notes,
-				updated_at: trx.fn.now(),
+				updated_at: executor.fn.now(),
 			});
 
-			await trx("appointment_items")
+			const existingRows = await executor("appointment_items")
 				.where({ appointment_id: appointment.id })
-				.delete();
+				.select("id", "service_id");
+			const existingIdByServiceId = new Map(
+				existingRows.map((row) => [
+					row.service_id as string,
+					row.id as string,
+				]),
+			);
+			const keptIds: string[] = [];
 
-			if (items.length > 0) {
-				await trx("appointment_items").insert(
-					items.map((item) => ({
-						id: item.id,
-						appointment_id: appointment.id,
-						service_id: item.serviceId,
+			for (const item of items) {
+				const existingId = existingIdByServiceId.get(item.serviceId);
+
+				if (existingId) {
+					keptIds.push(existingId);
+					await executor("appointment_items").where({ id: existingId }).update({
 						price: item.price,
 						return_due_date: item.returnDueDate,
-					})),
-				);
+					});
+					continue;
+				}
+
+				await executor("appointment_items").insert({
+					id: item.id,
+					appointment_id: appointment.id,
+					service_id: item.serviceId,
+					price: item.price,
+					return_due_date: item.returnDueDate,
+				});
 			}
-		});
+
+			const deleteQuery = executor("appointment_items").where({
+				appointment_id: appointment.id,
+			});
+
+			if (keptIds.length > 0) {
+				deleteQuery.whereNotIn("id", keptIds);
+			}
+
+			await deleteQuery.delete();
+		};
+
+		if (trx) {
+			await persist(trx);
+			return;
+		}
+
+		await this.connection.transaction(persist);
 	}
 
 	async findById(id: string): Promise<Appointment | null> {

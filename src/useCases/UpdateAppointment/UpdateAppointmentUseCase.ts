@@ -114,7 +114,7 @@ export class UpdateAppointmentUseCase {
 				trx,
 			);
 
-			await appointmentsRepository.updateWithItems(appointment, items);
+			await appointmentsRepository.updateWithItems(appointment, items, trx);
 
 			await syncAppointmentCustomerReward({
 				appointmentId: data.id,
