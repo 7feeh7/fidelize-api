@@ -2,19 +2,23 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-Fidelize é um projeto Node.js que permite aos usuários gerenciar seu salão de beleza.
+Fidelize é um projeto Node.js que permite aos usuários gerenciar clientes, atendimento, serviços e programas de fidelidade.
 
 ## Tecnologias
 
-- [Node.js](https://nodejs.org/en/)
+- [Node](https://nodejs.org/en/)
 - [Express](https://expressjs.com/pt-br/)
+- [Knex](https://knexjs.org/)
 - [PostgreSQL](https://www.postgresql.org/)
+- [Vitest](https://vitest.dev/)
+- [Biome](https://biomejs.dev/pt-br/)
+- [Terraform](https://developer.hashicorp.com/terraform)
 
-## Features
+## Arquitetura
 
-- [] Cadastro e autenticação do usuário
-- [] Gerenciamento de clientes
-- [] Gerenciamento de serviços
+Abaixo, um diagrama simplificado:
+
+![Diagrama de arquitetura](assets/arquitetura.png)
 
 ## Instalação
 
@@ -37,13 +41,7 @@ Fidelize é um projeto Node.js que permite aos usuários gerenciar seu salão de
 - Crie um banco de dados PostgreSQL para aplicação
 - Renomeie o arquivo .env.example para .env e atualize os detalhes da conexão do banco de dados
 
-4. Construir o projeto:
-
-   ```bash
-   yarn run prestart
-   ```
-
-5. Inicie o servidor:
+4. Inicie o servidor:
 
    ```bash
    yarn run start:dev
@@ -64,6 +62,12 @@ docker compose down
 ```
 
 O servidor agora deve estar em execução em http://localhost:3000 (porta definida em `PORT` no `.env`, padrão `3333` no código).
+
+---
+
+## Pipeline CI/CD
+
+![Diagrama da pipeline](assets/deploy.png)
 
 ---
 

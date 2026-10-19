@@ -1,17 +1,17 @@
 # Deploy na AWS (Lambda)
 
-Produção usa **AWS Lambda** (`nodejs24.x`) exposta por um **API Gateway HTTP API** (HTTPS público) e **EventBridge Scheduler** para a rotina diária. O banco é o **Supabase** (fora da AWS).
+Produção usa **AWS Lambda** (`nodejs24.x`) exposta por um **API Gateway HTTP API** (HTTPS público) e **EventBridge Scheduler** para a rotina diária.
 
-Passo a passo completo do primeiro deploy: [passo-a-passo-aws.md](passo-a-passo-aws.md).
+![Diagrama da pipeline](../assets/deploy.png)
 
 ## Quem faz o quê
 
-| | Terraform (manual, na sua máquina) | GitHub Actions (automático, push na `main`) |
-| - | - | - |
-| Quando roda | Ao criar a infra e quando ela mudar | A cada push na `main` |
-| O que faz | Cria/altera Lambda, API Gateway, EventBridge, IAM, logs | Lint, typecheck, testes, build, migrations, publica o zip na Lambda |
-| Variáveis de ambiente da Lambda | **Sim** (vêm do `infra/terraform.tfvars`) | Não |
-| Código da Lambda | Só um código provisório na criação | **Sim** (`aws lambda update-function-code`) |
+|                                 | Terraform                                               | GitHub Actions                                                      |
+| ------------------------------- | ------------------------------------------------------- | ------------------------------------------------------------------- |
+| Quando roda                     | Ao criar a infra e quando ela mudar                     | A cada push na `main`                                               |
+| O que faz                       | Cria/altera Lambda, API Gateway, EventBridge, IAM, logs | Lint, typecheck, testes, build, migrations, publica o zip na Lambda |
+| Variáveis de ambiente da Lambda | **Sim** (vêm do `infra/terraform.tfvars`)               | Não                                                                 |
+| Código da Lambda                | Só um código provisório na criação                      | **Sim** (`aws lambda update-function-code`)                         |
 
 O Terraform ignora mudanças no código da Lambda (`lifecycle.ignore_changes` em [`infra/main.tf`](../infra/main.tf)). Rodar `terraform apply` de novo **não** desfaz o código publicado pelo GitHub.
 
@@ -44,14 +44,14 @@ A role do GitHub só tem permissão para atualizar o código da Lambda `fidelize
 
 **Settings → Secrets and variables → Actions**:
 
-| Tipo | Nome | Valor |
-| ---- | ---- | ----- |
-| Secret | `AWS_ROLE_ARN` | output `github_deploy_role_arn` do Terraform |
-| Secret | `DB_PASSWORD` | senha do Supabase |
-| Variable | `DB_HOST` | host do pooler do Supabase |
-| Variable | `DB_PORT` | `6543` |
-| Variable | `DB_USER` | `postgres.<project-ref>` |
-| Variable | `DB_NAME` | `postgres` |
+| Tipo     | Nome           | Valor                                        |
+| -------- | -------------- | -------------------------------------------- |
+| Secret   | `AWS_ROLE_ARN` | output `github_deploy_role_arn` do Terraform |
+| Secret   | `DB_PASSWORD`  | senha                                        |
+| Variable | `DB_HOST`      | host                                         |
+| Variable | `DB_PORT`      | `6543`                                       |
+| Variable | `DB_USER`      | `postgres.<project-ref>`                     |
+| Variable | `DB_NAME`      | `postgres`                                   |
 
 Os dados do banco no GitHub servem **só para as migrations**. A Lambda usa os valores do `terraform.tfvars`.
 
