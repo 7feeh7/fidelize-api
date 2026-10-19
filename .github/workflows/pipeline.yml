@@ -62,6 +62,24 @@ jobs:
       - name: Build Lambda package
         run: yarn build:lambda
 
+      - name: Validar secret AWS_ROLE_ARN
+        env:
+          AWS_ROLE_ARN: ${{ secrets.AWS_ROLE_ARN }}
+        run: |
+          set -euo pipefail
+          if [ -z "$AWS_ROLE_ARN" ]; then
+            echo "::error::Defina o secret AWS_ROLE_ARN em Settings → Secrets and variables → Actions."
+            exit 1
+          fi
+          if ! [[ "$AWS_ROLE_ARN" =~ ^arn:aws:iam::[0-9]{12}:role/[A-Za-z0-9+=,.@_-]+$ ]]; then
+            echo "::error::AWS_ROLE_ARN não é um ARN de role IAM válido."
+            exit 1
+          fi
+          if [[ "$AWS_ROLE_ARN" != *":role/${LAMBDA_FUNCTION_NAME}-github-deploy" ]]; then
+            echo "::error::AWS_ROLE_ARN deve apontar para a role ${LAMBDA_FUNCTION_NAME}-github-deploy (output github_deploy_role_arn do Terraform)."
+            exit 1
+          fi
+
       - name: Run database migrations
         run: yarn migrate:latest
         env:
@@ -77,6 +95,8 @@ jobs:
         with:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ env.AWS_REGION }}
+          audience: sts.amazonaws.com
+          role-skip-session-tagging: true
 
       - name: Deploy code to Lambda
         run: |
