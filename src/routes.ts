@@ -17,6 +17,7 @@ import { deactivateServiceController } from "./useCases/DeactivateService";
 import { getAppointmentController } from "./useCases/GetAppointment";
 import { getCustomerReturnSummaryController } from "./useCases/GetCustomerReturnSummary";
 import { getCustomerSummaryController } from "./useCases/GetCustomerSummary";
+import { getIndicatorsController } from "./useCases/GetIndicators";
 import { getLoyaltyRuleController } from "./useCases/GetLoyaltyRule";
 import { getMeController } from "./useCases/GetMe";
 import { getMessagePendingCountController } from "./useCases/GetMessagePendingCount";
@@ -53,6 +54,10 @@ router.use(ensureAuthenticated);
 
 router.get("/me", (request, response) => {
 	getMeController.handle(request, response);
+});
+
+router.get("/indicators", (request, response) => {
+	getIndicatorsController.handle(request, response);
 });
 
 router.post("/users", (request, response) => {
