@@ -80,7 +80,7 @@ Nada muda:
 2. Arquivo `.env` a partir de `.env.example` (`DB_SSL` vazio ou `false` para localhost).
 3. `yarn migrate:latest` e `yarn start:dev`.
 
-A rotina diária local roda pelo [`src/server.ts`](../src/server.ts). Em produção quem dispara é o EventBridge Scheduler (evento `{ "action": "daily-routine" }`).
+A rotina diária só roda em produção via EventBridge Scheduler, que invoca a Lambda com `{ "action": "daily-routine" }` (handler em [`src/lambda.ts`](../src/lambda.ts), fora do Express). Em desenvolvimento local, dispare manualmente invocando a Lambda empacotada ou executando `runDailyRoutine` em script/teste apontando ao banco local.
 
 ## Build do pacote Lambda
 

@@ -95,8 +95,8 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		);
 	}
 
-	async save(message: Message): Promise<void> {
-		await this.connection("messages").insert({
+	private messageInsertRow(message: Message) {
+		return {
 			id: message.id,
 			customer_id: message.customerId,
 			template_id: message.templateId,
@@ -109,7 +109,28 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 			sent_at: message.sentAt,
 			sent_by: message.sentBy,
 			created_at: message.createdAt,
-		});
+		};
+	}
+
+	async save(message: Message): Promise<void> {
+		await this.connection("messages").insert(this.messageInsertRow(message));
+	}
+
+	async saveIgnoringAppointmentItemConflict(
+		message: Message,
+	): Promise<boolean> {
+		if (!message.appointmentItemId) {
+			await this.save(message);
+			return true;
+		}
+
+		const rows = await this.connection("messages")
+			.insert(this.messageInsertRow(message))
+			.onConflict("appointment_item_id")
+			.ignore()
+			.returning("id");
+
+		return rows.length > 0;
 	}
 
 	async findById(id: string): Promise<Message | null> {

@@ -35,7 +35,6 @@ import { listServicesController } from "./useCases/ListServices";
 import { listUsersController } from "./useCases/ListUsers";
 import { markMessageSentController } from "./useCases/MarkMessageSent";
 import { previewMessageTemplateController } from "./useCases/PreviewMessageTemplate";
-import { runDailyRoutineController } from "./useCases/RunDailyRoutine";
 import { setLoyaltyRuleActiveController } from "./useCases/SetLoyaltyRuleActive";
 import { setMessageTemplateActiveController } from "./useCases/SetMessageTemplateActive";
 import { updateAppointmentController } from "./useCases/UpdateAppointment";
@@ -48,10 +47,6 @@ const router = Router();
 
 router.post("/login", (request, response) => {
 	authenticateUserController.handle(request, response);
-});
-
-router.post("/daily-routine/run", (request, response) => {
-	runDailyRoutineController.handle(request, response);
 });
 
 router.use(ensureAuthenticated);

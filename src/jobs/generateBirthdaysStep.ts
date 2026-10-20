@@ -15,6 +15,7 @@ import {
 } from "@/utils/birthday";
 import { fillMessageTemplateVariables } from "@/utils/fillMessageTemplateVariables";
 import { getTodayDateOnly } from "@/utils/getTodayDateOnly";
+import { isPostgresUniqueViolation } from "@/utils/isPostgresUniqueViolation";
 
 export interface GenerateBirthdaysStepResult {
 	generatedCount: number;
@@ -113,9 +114,15 @@ export async function generateBirthdaysStep(
 					usedAt: null,
 				});
 
-				await customerRewardsRepository.save(reward);
-				linkedRewardId = reward.id as string;
-				grantedCount += 1;
+				try {
+					await customerRewardsRepository.save(reward);
+					linkedRewardId = reward.id as string;
+					grantedCount += 1;
+				} catch (error) {
+					if (!isPostgresUniqueViolation(error)) {
+						throw error;
+					}
+				}
 			}
 		}
 

@@ -88,8 +88,12 @@ export async function generateReturnRemindersStep(
 			createdAt: new Date(),
 		});
 
-		await messagesRepository.save(message);
-		generatedCount += 1;
+		const inserted =
+			await messagesRepository.saveIgnoringAppointmentItemConflict(message);
+
+		if (inserted) {
+			generatedCount += 1;
+		}
 	}
 
 	return {

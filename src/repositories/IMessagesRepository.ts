@@ -31,6 +31,7 @@ export interface MessageListItem {
 
 export interface IMessagesRepository {
 	save(message: Message): Promise<void>;
+	saveIgnoringAppointmentItemConflict(message: Message): Promise<boolean>;
 	findById(id: string): Promise<Message | null>;
 	findListItemById(id: string): Promise<MessageListItem | null>;
 	list(filters: MessageListFilters): Promise<MessageListResult>;

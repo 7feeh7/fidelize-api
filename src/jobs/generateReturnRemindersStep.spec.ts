@@ -51,11 +51,12 @@ vi.mock(
 
 describe("generateReturnRemindersStep", () => {
 	let connection: Knex;
-	const save = vi.fn();
+	const saveIgnoringAppointmentItemConflict = vi.fn();
 
 	beforeEach(() => {
 		connection = {} as Knex;
-		save.mockReset();
+		saveIgnoringAppointmentItemConflict.mockReset();
+		saveIgnoringAppointmentItemConflict.mockResolvedValue(true);
 
 		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
 			function () {
@@ -74,7 +75,7 @@ describe("generateReturnRemindersStep", () => {
 		);
 
 		vi.mocked(PostgresMessagesRepository).mockImplementation(function () {
-			return { save } as never;
+			return { saveIgnoringAppointmentItemConflict } as never;
 		});
 
 		vi.mocked(PostgresCustomersRepository).mockImplementation(function () {
@@ -98,7 +99,7 @@ describe("generateReturnRemindersStep", () => {
 
 		expect(result.generatedCount).toBe(0);
 		expect(result.skippedNoActiveTemplate).toBe(true);
-		expect(save).not.toHaveBeenCalled();
+		expect(saveIgnoringAppointmentItemConflict).not.toHaveBeenCalled();
 	});
 
 	it("usa o limite de 30 dias de atraso na seleção", async () => {
