@@ -85,10 +85,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 				.where({ appointment_id: appointment.id })
 				.select("id", "service_id");
 			const existingIdByServiceId = new Map(
-				existingRows.map((row) => [
-					row.service_id as string,
-					row.id as string,
-				]),
+				existingRows.map((row) => [row.service_id as string, row.id as string]),
 			);
 			const keptIds: string[] = [];
 

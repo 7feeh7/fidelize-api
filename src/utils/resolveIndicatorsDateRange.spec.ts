@@ -7,9 +7,7 @@ import {
 
 describe("resolveIndicatorsDateRange", () => {
 	it("defaults to the current month until today", () => {
-		expect(
-			resolveIndicatorsDateRange({}, "2026-10-15"),
-		).toEqual({
+		expect(resolveIndicatorsDateRange({}, "2026-10-15")).toEqual({
 			startDate: "2026-10-01",
 			endDate: "2026-10-15",
 		});
