@@ -16,6 +16,7 @@ describe("AuthenticateUserUseCase", () => {
 		userRepository = {
 			findByEmail: vi.fn(),
 			save: vi.fn(),
+			update: vi.fn(),
 			findById: vi.fn(),
 			listAll: vi.fn(),
 		};

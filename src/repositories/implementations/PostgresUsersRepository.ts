@@ -14,6 +14,14 @@ export class PostgresUsersRepository implements IUsersRepository {
 		});
 	}
 
+	async update(user: User): Promise<void> {
+		await this.connection("users").where({ id: user.id }).update({
+			name: user.name,
+			email: user.email,
+			password: user.password,
+		});
+	}
+
 	async findByEmail(email: string): Promise<User | null> {
 		const row = await this.connection("users").where({ email }).first();
 

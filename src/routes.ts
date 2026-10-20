@@ -43,6 +43,7 @@ import { updateCustomerController } from "./useCases/UpdateCustomer";
 import { updateLoyaltyRuleController } from "./useCases/UpdateLoyaltyRule";
 import { updateMessageContentController } from "./useCases/UpdateMessageContent";
 import { updateMessageTemplateController } from "./useCases/UpdateMessageTemplate";
+import { updateUserController } from "./useCases/UpdateUser";
 
 const router = Router();
 
@@ -66,6 +67,10 @@ router.post("/users", (request, response) => {
 
 router.get("/users", (request, response) => {
 	listUsersController.handle(request, response);
+});
+
+router.patch("/users/:id", (request, response) => {
+	updateUserController.handle(request, response);
 });
 
 router.get("/appointments", (request, response) => {

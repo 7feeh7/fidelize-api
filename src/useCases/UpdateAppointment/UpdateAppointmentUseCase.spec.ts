@@ -98,6 +98,7 @@ describe("UpdateAppointmentUseCase", () => {
 		};
 		usersRepository = {
 			save: vi.fn(),
+			update: vi.fn(),
 			findByEmail: vi.fn(),
 			findById: vi.fn(),
 			listAll: vi.fn(),

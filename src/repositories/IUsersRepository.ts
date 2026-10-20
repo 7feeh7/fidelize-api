@@ -7,6 +7,7 @@ export interface UserListItem {
 
 export interface IUsersRepository {
 	save(user: User): Promise<void>;
+	update(user: User): Promise<void>;
 	findByEmail(email: string): Promise<User | null>;
 	findById(id: string): Promise<User | null>;
 	listAll(): Promise<UserListItem[]>;
