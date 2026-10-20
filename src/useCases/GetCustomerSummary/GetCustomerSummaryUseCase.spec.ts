@@ -57,7 +57,7 @@ describe("GetCustomerSummaryUseCase", () => {
 		);
 	});
 
-	it("returns customer profile with visit indicators", async () => {
+	it("retorna perfil do cliente com indicadores de visita", async () => {
 		vi.mocked(customersRepository.findActiveProfileById).mockResolvedValue({
 			customer: new Customer(
 				{
@@ -96,7 +96,7 @@ describe("GetCustomerSummaryUseCase", () => {
 		expect(result.nextSuggestedReturnDate).toBe("2026-11-01");
 	});
 
-	it("throws when customer is not found", async () => {
+	it("lança erro quando o cliente não é encontrado", async () => {
 		vi.mocked(customersRepository.findActiveProfileById).mockResolvedValue(
 			null,
 		);

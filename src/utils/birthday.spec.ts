@@ -5,7 +5,7 @@ import {
 	isBirthdayOnDate,
 } from "./birthday";
 
-describe("birthday utils", () => {
+describe("utilitários de aniversário", () => {
 	it("identifica aniversário no dia e mês", () => {
 		expect(isBirthdayOnDate("1990-05-15", "2026-05-15")).toBe(true);
 		expect(isBirthdayOnDate("1990-05-15", "2026-05-16")).toBe(false);

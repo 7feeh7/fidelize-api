@@ -14,7 +14,7 @@ describe("GetIndicatorsUseCase", () => {
 		sut = new GetIndicatorsUseCase(indicatorsRepository);
 	});
 
-	it("returns indicators for the requested date range", async () => {
+	it("retorna indicadores para o intervalo de datas informado", async () => {
 		vi.mocked(indicatorsRepository.getTotals).mockResolvedValue({
 			appointmentsCount: 181,
 			billedAmount: 15566,
@@ -44,7 +44,7 @@ describe("GetIndicatorsUseCase", () => {
 		});
 	});
 
-	it("rejects invalid ranges", async () => {
+	it("rejeita intervalos inválidos", async () => {
 		await expect(
 			sut.execute({
 				startDate: "2026-10-31",
