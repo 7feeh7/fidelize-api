@@ -8,6 +8,10 @@ export class UpdateServiceUseCase {
 	async execute(data: IUpdateServiceRequestDTO): Promise<void> {
 		validateServiceInput(data);
 
+		if (typeof data.active !== "boolean") {
+			throw new Error("Status do serviço inválido");
+		}
+
 		const existing = await this.servicesRepository.findById(data.id);
 
 		if (!existing) {
@@ -27,6 +31,7 @@ export class UpdateServiceUseCase {
 		existing.price = data.price;
 		existing.durationMinutes = data.durationMinutes ?? null;
 		existing.suggestedReturnDays = data.suggestedReturnDays ?? null;
+		existing.active = data.active;
 
 		await this.servicesRepository.update(existing);
 	}

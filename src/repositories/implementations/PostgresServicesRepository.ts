@@ -78,6 +78,7 @@ export class PostgresServicesRepository implements IServicesRepository {
 			price: service.price,
 			duration_minutes: service.durationMinutes,
 			suggested_return_days: service.suggestedReturnDays,
+			active: service.active,
 			updated_at: this.connection.fn.now(),
 		});
 	}
