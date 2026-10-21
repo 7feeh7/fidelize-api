@@ -7,13 +7,8 @@ export class UpdateServiceController {
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
 			const { id } = request.params;
-			const {
-				name,
-				description,
-				price,
-				durationMinutes,
-				suggestedReturnDays,
-			} = request.body;
+			const { name, description, price, durationMinutes, suggestedReturnDays } =
+				request.body;
 
 			if (typeof id !== "string" || !id.trim()) {
 				throw new Error("Serviço inválido");

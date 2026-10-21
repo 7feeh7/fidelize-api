@@ -9,9 +9,7 @@ import type {
 export const LIST_OVERDUE_RETURNS_MAX_PER_PAGE = 5;
 
 export class ListOverdueReturnsUseCase {
-	constructor(
-		private returnRemindersRepository: IReturnRemindersRepository,
-	) {}
+	constructor(private returnRemindersRepository: IReturnRemindersRepository) {}
 
 	async execute(
 		data: IListOverdueReturnsRequestDTO = {},
@@ -19,7 +17,9 @@ export class ListOverdueReturnsUseCase {
 	): Promise<IListOverdueReturnsResponseDTO> {
 		const page = !data.page || data.page < 1 ? 1 : data.page;
 		const requestedPerPage =
-			!data.perPage || data.perPage < 1 ? LIST_OVERDUE_RETURNS_MAX_PER_PAGE : data.perPage;
+			!data.perPage || data.perPage < 1
+				? LIST_OVERDUE_RETURNS_MAX_PER_PAGE
+				: data.perPage;
 		const perPage = Math.min(
 			requestedPerPage,
 			LIST_OVERDUE_RETURNS_MAX_PER_PAGE,

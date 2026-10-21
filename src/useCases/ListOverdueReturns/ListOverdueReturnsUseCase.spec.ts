@@ -67,7 +67,10 @@ describe("ListOverdueReturnsUseCase", () => {
 			returnRemindersRepository.listOverdueWithoutContactAfterAppointment,
 		).mockResolvedValue({ total: 0, items: [] });
 
-		await sut.execute({ page: 1, perPage: 20 }, new Date("2026-10-16T12:00:00.000Z"));
+		await sut.execute(
+			{ page: 1, perPage: 20 },
+			new Date("2026-10-16T12:00:00.000Z"),
+		);
 
 		expect(
 			returnRemindersRepository.listOverdueWithoutContactAfterAppointment,
