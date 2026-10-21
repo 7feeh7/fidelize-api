@@ -29,6 +29,7 @@ import { listCustomerRewardsController } from "./useCases/ListCustomerRewards";
 import { listCustomersController } from "./useCases/ListCustomers";
 import { listLoyaltyRulesController } from "./useCases/ListLoyaltyRules";
 import { listMessagesController } from "./useCases/ListMessages";
+import { listOverdueReturnsController } from "./useCases/ListOverdueReturns";
 import { listMessageTemplatesController } from "./useCases/ListMessageTemplates";
 import { listMonthlyBirthdaysController } from "./useCases/ListMonthlyBirthdays";
 import { listReferralsController } from "./useCases/ListReferrals";
@@ -59,6 +60,10 @@ router.get("/me", (request, response) => {
 
 router.get("/indicators", (request, response) => {
 	getIndicatorsController.handle(request, response);
+});
+
+router.get("/overdue-returns", (request, response) => {
+	listOverdueReturnsController.handle(request, response);
 });
 
 router.post("/users", (request, response) => {

@@ -35,6 +35,7 @@ describe("GetCustomerSummaryUseCase", () => {
 		returnRemindersRepository = {
 			findNextSuggestedReturnDueDate: vi.fn(),
 			listEligibleForReminders: vi.fn(),
+			listOverdueWithoutContactAfterAppointment: vi.fn(),
 		};
 		customerRewardsRepository = {
 			save: vi.fn(),
