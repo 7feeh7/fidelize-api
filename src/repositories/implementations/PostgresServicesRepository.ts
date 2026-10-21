@@ -41,6 +41,16 @@ export class PostgresServicesRepository implements IServicesRepository {
 		return mapRowToService(row);
 	}
 
+	async findById(id: string): Promise<Service | null> {
+		const row = await this.connection("services").where({ id }).first();
+
+		if (!row) {
+			return null;
+		}
+
+		return mapRowToService(row);
+	}
+
 	async findActiveById(id: string): Promise<Service | null> {
 		const row = await this.connection("services")
 			.where({ id, active: true })
@@ -59,6 +69,17 @@ export class PostgresServicesRepository implements IServicesRepository {
 			.orderBy("created_at", "desc");
 
 		return rows.map((row) => mapRowToService(row));
+	}
+
+	async update(service: Service): Promise<void> {
+		await this.connection("services").where({ id: service.id }).update({
+			name: service.name,
+			description: service.description,
+			price: service.price,
+			duration_minutes: service.durationMinutes,
+			suggested_return_days: service.suggestedReturnDays,
+			updated_at: this.connection.fn.now(),
+		});
 	}
 
 	async deactivate(id: string): Promise<void> {

@@ -14,6 +14,7 @@ import { createServiceController } from "./useCases/CreateService";
 import { createUserController } from "./useCases/CreateUser";
 import { deactivateCustomerController } from "./useCases/DeactivateCustomer";
 import { deactivateServiceController } from "./useCases/DeactivateService";
+import { updateServiceController } from "./useCases/UpdateService";
 import { getAppointmentController } from "./useCases/GetAppointment";
 import { getCustomerReturnSummaryController } from "./useCases/GetCustomerReturnSummary";
 import { getCustomerSummaryController } from "./useCases/GetCustomerSummary";
@@ -143,6 +144,10 @@ router.get("/services", (request, response) => {
 
 router.post("/services", (request, response) => {
 	createServiceController.handle(request, response);
+});
+
+router.patch("/services/:id", (request, response) => {
+	updateServiceController.handle(request, response);
 });
 
 router.delete("/services/:id", (request, response) => {

@@ -10,9 +10,11 @@ describe("ListServicesUseCase", () => {
 	beforeEach(() => {
 		servicesRepository = {
 			findByName: vi.fn(),
+			findById: vi.fn(),
 			findActiveById: vi.fn(),
 			save: vi.fn(),
 			listAll: vi.fn(),
+			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
 		sut = new ListServicesUseCase(servicesRepository);
@@ -55,14 +57,18 @@ describe("ListServicesUseCase", () => {
 				{
 					id: "service-active",
 					name: "Corte masculino",
+					description: null,
 					price: 45.9,
+					durationMinutes: 30,
 					suggestedReturnDays: 21,
 					active: true,
 				},
 				{
 					id: "service-inactive",
 					name: "Barba",
+					description: null,
 					price: 25,
+					durationMinutes: null,
 					suggestedReturnDays: null,
 					active: false,
 				},

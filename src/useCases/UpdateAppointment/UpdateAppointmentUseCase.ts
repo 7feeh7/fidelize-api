@@ -45,6 +45,10 @@ export class UpdateAppointmentUseCase {
 			throw new Error("Atendimento não encontrado");
 		}
 
+		const existingDetail = await this.appointmentsRepository.findDetailById(
+			data.id,
+		);
+
 		const customer = await this.customersRepository.findActiveById(
 			data.customerId,
 		);
@@ -65,6 +69,10 @@ export class UpdateAppointmentUseCase {
 			this.servicesRepository,
 			appointmentDate,
 			data.items,
+			{
+				previousAppointmentDate: existingAppointment.appointmentDate,
+				previousItems: existingDetail?.items ?? [],
+			},
 		);
 		const subtotal = computeSubtotal(items);
 		const rewardUsageService =

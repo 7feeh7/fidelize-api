@@ -1,29 +1,13 @@
 import { Service } from "@/entities/Service";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
+import { validateServiceInput } from "@/utils/serviceValidation";
 import type { ICreateServiceRequestDTO } from "./CreateServiceDTO";
 
 export class CreateServiceUseCase {
 	constructor(private servicesRepository: IServicesRepository) {}
 
 	async execute(data: ICreateServiceRequestDTO) {
-		if (data.price < 0) {
-			throw new Error("Preço inválido");
-		}
-
-		if (
-			data.durationMinutes != null &&
-			(!Number.isInteger(data.durationMinutes) || data.durationMinutes <= 0)
-		) {
-			throw new Error("Duração inválida");
-		}
-
-		if (
-			data.suggestedReturnDays != null &&
-			(!Number.isInteger(data.suggestedReturnDays) ||
-				data.suggestedReturnDays <= 0)
-		) {
-			throw new Error("Prazo de retorno sugerido inválido");
-		}
+		validateServiceInput(data);
 
 		const serviceAlreadyExists = await this.servicesRepository.findByName(
 			data.name,

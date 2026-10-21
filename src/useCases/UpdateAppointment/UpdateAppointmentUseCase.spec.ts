@@ -92,8 +92,10 @@ describe("UpdateAppointmentUseCase", () => {
 		servicesRepository = {
 			save: vi.fn(),
 			findByName: vi.fn(),
+			findById: vi.fn(),
 			findActiveById: vi.fn(),
 			listAll: vi.fn(),
+			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
 		usersRepository = {
@@ -144,6 +146,27 @@ describe("UpdateAppointmentUseCase", () => {
 		);
 
 		vi.mocked(appointmentsRepository.findById).mockResolvedValue(existing);
+		vi.mocked(appointmentsRepository.findDetailById).mockResolvedValue({
+			id: "appointment-id",
+			customerId: "customer-id",
+			customerName: "Maria",
+			userId: "user-id",
+			userName: "Pro",
+			appointmentDate: existing.appointmentDate,
+			subtotal: 50,
+			discountAmount: 0,
+			total: 50,
+			notes: null,
+			items: [
+				{
+					id: "item-id",
+					serviceId: "service-id",
+					serviceName: "Escova",
+					price: 70,
+					returnDueDate: "2026-10-16",
+				},
+			],
+		});
 		vi.mocked(
 			customerRewardsRepository.findUsedDetailByAppointmentId,
 		).mockResolvedValue(null);
@@ -224,6 +247,27 @@ describe("UpdateAppointmentUseCase", () => {
 		);
 
 		vi.mocked(appointmentsRepository.findById).mockResolvedValue(existing);
+		vi.mocked(appointmentsRepository.findDetailById).mockResolvedValue({
+			id: "appointment-id",
+			customerId: "customer-id",
+			customerName: "Maria",
+			userId: "user-id",
+			userName: "Pro",
+			appointmentDate: existing.appointmentDate,
+			subtotal: 80,
+			discountAmount: 8,
+			total: 72,
+			notes: null,
+			items: [
+				{
+					id: "item-id",
+					serviceId: "service-id",
+					serviceName: "Escova",
+					price: 70,
+					returnDueDate: "2026-10-16",
+				},
+			],
+		});
 		vi.mocked(
 			customerRewardsRepository.findUsedDetailByAppointmentId,
 		).mockResolvedValue({
@@ -278,6 +322,89 @@ describe("UpdateAppointmentUseCase", () => {
 		expect(trxCustomerRewardsRepository.update).toHaveBeenCalledTimes(1);
 		expect(usedReward.status).toBe("AVAILABLE");
 		expect(usedReward.appointmentId).toBeNull();
+	});
+
+	it("mantém return_due_date quando a data do atendimento não muda", async () => {
+		const appointmentDate = new Date("2026-10-20T15:00:00.000Z");
+		const existing = new Appointment(
+			{
+				customerId: "customer-id",
+				userId: "user-id",
+				appointmentDate,
+				subtotal: 75,
+				discountAmount: 0,
+				total: 75,
+				notes: null,
+			},
+			"appointment-id",
+		);
+
+		vi.mocked(appointmentsRepository.findById).mockResolvedValue(existing);
+		vi.mocked(appointmentsRepository.findDetailById).mockResolvedValue({
+			id: "appointment-id",
+			customerId: "customer-id",
+			customerName: "Maria",
+			userId: "user-id",
+			userName: "Pro",
+			appointmentDate,
+			subtotal: 75,
+			discountAmount: 0,
+			total: 75,
+			notes: null,
+			items: [
+				{
+					id: "item-id",
+					serviceId: "service-id",
+					serviceName: "Escova",
+					price: 75,
+					returnDueDate: "2026-11-04",
+				},
+			],
+		});
+		vi.mocked(
+			customerRewardsRepository.findUsedDetailByAppointmentId,
+		).mockResolvedValue(null);
+		vi.mocked(customersRepository.findActiveById).mockResolvedValue(
+			new Customer(
+				{
+					name: "Maria",
+					phone: "11999990000",
+					dateOfBirth: null,
+					leadSource: "INSTAGRAM",
+					active: true,
+				},
+				"customer-id",
+			),
+		);
+		vi.mocked(usersRepository.findById).mockResolvedValue(
+			new User({ name: "Pro", email: "a@b.com", password: "hash" }, "user-id"),
+		);
+		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
+			new Service(
+				{
+					name: "Escova",
+					description: null,
+					price: 70,
+					durationMinutes: null,
+					suggestedReturnDays: 30,
+					active: true,
+				},
+				"service-id",
+			),
+		);
+
+		await sut.execute({
+			id: "appointment-id",
+			customerId: "customer-id",
+			appointmentDate: "2026-10-20T15:00:00.000Z",
+			loggedUserId: "user-id",
+			items: [{ serviceId: "service-id", price: 75 }],
+		});
+
+		const [, items] =
+			vi.mocked(trxAppointmentsRepository.updateWithItems).mock.calls[0] ?? [];
+
+		expect(items?.[0]?.returnDueDate).toBe("2026-11-04");
 	});
 
 	it("lança erro quando o atendimento não existe", async () => {

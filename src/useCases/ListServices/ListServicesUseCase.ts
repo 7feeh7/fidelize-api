@@ -11,7 +11,9 @@ export class ListServicesUseCase {
 			data: services.map((service) => ({
 				id: service.id as string,
 				name: service.name,
+				description: service.description,
 				price: service.price,
+				durationMinutes: service.durationMinutes,
 				suggestedReturnDays: service.suggestedReturnDays,
 				active: service.active,
 			})),

@@ -144,8 +144,10 @@ describe("CreateAppointmentUseCase", () => {
 		servicesRepository = {
 			save: vi.fn(),
 			findByName: vi.fn(),
+			findById: vi.fn(),
 			findActiveById: vi.fn(),
 			listAll: vi.fn(),
+			update: vi.fn(),
 			deactivate: vi.fn(),
 		};
 		usersRepository = {
