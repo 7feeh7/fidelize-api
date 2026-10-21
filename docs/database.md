@@ -2,6 +2,10 @@
 
 A aplicação usa PostgreSQL com [Knex](https://knexjs.org/) como query builder.
 
+## Diagrama de Entidade-Relacionamento
+
+![Diagrama de Entidade-Relacionamento](../assets/der.png)
+
 ## Migrations
 
 As migrations ficam em `src/database/migrations/`.

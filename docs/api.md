@@ -4,7 +4,7 @@
 
 A API usa JWT no header `Authorization: Bearer <access_token>`.
 
-A única rota HTTP pública além do login é `POST /login`.
+A única rota HTTP pública é a `POST /login`.
 
 ### Rotas protegidas
 

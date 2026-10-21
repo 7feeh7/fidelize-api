@@ -1,8 +1,9 @@
-# fidelize-api
+# fidelizei-api
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-Fidelize é um projeto Node.js que permite aos usuários gerenciar clientes, atendimento, serviços e programas de fidelidade.
+**Fidelizei** é um projeto Node.js que permite aos usuários gerenciar clientes, atendimentos, serviços e programas de fidelidade.
+visando fidelizar clientes e conquistar novos..
 
 ## Tecnologias
 
@@ -61,7 +62,11 @@ Para parar os containers preservando os dados:
 docker compose down
 ```
 
-O servidor agora deve estar em execução em http://localhost:3000 (porta definida em `PORT` no `.env`, padrão `3333` no código).
+O servidor agora deve estar em execução em http://localhost:3000 (porta definida em `PORT` no `.env`, padrão `3000` no código).
+
+## Diagrama de Entidade-Relacionamento
+
+![Diagrama de Entidade-Relacionamento](assets/der.png)
 
 ## Pipeline CI/CD
 
