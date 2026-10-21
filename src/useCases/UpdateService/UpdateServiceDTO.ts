@@ -5,4 +5,5 @@ export interface IUpdateServiceRequestDTO {
 	price: number;
 	durationMinutes?: number | null;
 	suggestedReturnDays?: number | null;
+	active: boolean;
 }

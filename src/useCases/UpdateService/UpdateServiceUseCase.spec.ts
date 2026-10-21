@@ -43,6 +43,7 @@ describe("UpdateServiceUseCase", () => {
 			price: 55,
 			durationMinutes: 45,
 			suggestedReturnDays: 28,
+			active: true,
 		});
 
 		expect(servicesRepository.update).toHaveBeenCalledTimes(1);
@@ -60,9 +61,25 @@ describe("UpdateServiceUseCase", () => {
 			id: "service-id",
 			name: "Corte masculino",
 			price: 50,
+			active: true,
 		});
 
 		expect(servicesRepository.update).toHaveBeenCalledTimes(1);
+	});
+
+	it("inativa serviço quando active é false", async () => {
+		vi.mocked(servicesRepository.findById).mockResolvedValue(existingService);
+		vi.mocked(servicesRepository.findByName).mockResolvedValue(null);
+
+		await sut.execute({
+			id: "service-id",
+			name: "Corte masculino",
+			price: 45.9,
+			active: false,
+		});
+
+		const updated = vi.mocked(servicesRepository.update).mock.calls[0]?.[0];
+		expect(updated?.active).toBe(false);
 	});
 
 	it("lança erro quando o serviço não existe", async () => {
@@ -73,6 +90,7 @@ describe("UpdateServiceUseCase", () => {
 				id: "missing",
 				name: "Corte",
 				price: 40,
+				active: true,
 			}),
 		).rejects.toThrow("Serviço não encontrado");
 
@@ -100,6 +118,7 @@ describe("UpdateServiceUseCase", () => {
 				id: "service-id",
 				name: "Barba",
 				price: 45.9,
+				active: true,
 			}),
 		).rejects.toThrow("O serviço já existe");
 
@@ -112,6 +131,7 @@ describe("UpdateServiceUseCase", () => {
 				id: "service-id",
 				name: "Corte masculino",
 				price: -1,
+				active: true,
 			}),
 		).rejects.toThrow("Preço inválido");
 
