@@ -56,7 +56,7 @@ export class PostgresServicesRepository implements IServicesRepository {
 	async listAll(): Promise<Service[]> {
 		const rows = await this.connection("services")
 			.select("*")
-			.orderBy("name", "asc");
+			.orderBy("created_at", "desc");
 
 		return rows.map((row) => mapRowToService(row));
 	}
