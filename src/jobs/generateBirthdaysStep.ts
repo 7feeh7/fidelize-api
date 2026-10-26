@@ -1,6 +1,7 @@
 import type { Knex } from "knex";
 import { CustomerReward } from "@/entities/CustomerReward";
 import { Message } from "@/entities/Message";
+import { logger } from "@/providers/implementations/PinoLogger";
 import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresBirthdaysRepository } from "@/repositories/implementations/PostgresBirthdaysRepository";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
@@ -45,14 +46,16 @@ export async function generateBirthdaysStep(
 	const skippedNoActiveRule = birthdayRules.length === 0;
 
 	if (skippedNoActiveTemplate) {
-		console.warn(
-			"[daily-routine] Aniversários: nenhum modelo BIRTHDAY ativo — mensagens não serão geradas",
+		logger.warn(
+			{ step: "birthdays", reason: "no-active-birthday-template" },
+			"Aniversarios: nenhum modelo BIRTHDAY ativo - mensagens nao serao geradas",
 		);
 	}
 
 	if (skippedNoActiveRule) {
-		console.warn(
-			"[daily-routine] Aniversários: nenhuma regra BIRTHDAY ativa — benefícios não serão concedidos",
+		logger.warn(
+			{ step: "birthdays", reason: "no-active-birthday-rule" },
+			"Aniversarios: nenhuma regra BIRTHDAY ativa - beneficios nao serao concedidos",
 		);
 	}
 
