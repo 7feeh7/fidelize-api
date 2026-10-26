@@ -82,6 +82,20 @@ Nada muda:
 
 A rotina diária só roda em produção via EventBridge Scheduler, que invoca a Lambda com `{ "action": "daily-routine" }` (handler em [`src/lambda.ts`](../src/lambda.ts), fora do Express). Em desenvolvimento local, dispare manualmente invocando a Lambda empacotada ou executando `runDailyRoutine` em script/teste apontando ao banco local.
 
+## Logs (Pino)
+
+A API usa um logger singleton ([`PinoLogger`](../src/providers/implementations/PinoLogger.ts)) com saída JSON no stdout. Na Lambda, esses logs vão para o CloudWatch.
+
+| Contexto | Formato | Nível padrão |
+| -------- | ------- | ------------ |
+| Lambda / produção | JSON | `info` |
+| Local com `NODE_ENV=development` | `pino-pretty` (legível no terminal) | `info` |
+| Testes (`vitest`) | silenciado | `silent` (a menos que `LOG_LEVEL` esteja definido) |
+
+Variável opcional no `.env` local: `LOG_LEVEL` (`trace`, `debug`, `info`, `warn`, `error`, `fatal`, `silent`). Na Lambda não há variável dedicada no Terraform; o padrão `info` vale.
+
+O middleware HTTP ([`httpLogger`](../src/middlewares/httpLogger.ts)) registra, ao fim de cada requisição, `method`, `path`, `statusCode` e `durationMs`. Corpo e headers (incluindo `Authorization`) não são logados.
+
 ## Build do pacote Lambda
 
 Requer **Docker** (para compilar o `bcrypt` no Amazon Linux 2023):

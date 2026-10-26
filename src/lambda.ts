@@ -1,5 +1,6 @@
 import type { Context } from "aws-lambda";
 import serverless from "serverless-http";
+import { logger } from "@/providers/implementations/PinoLogger";
 import { app } from "./app";
 import { connection } from "./database/connection";
 import { runDailyRoutine } from "./jobs/dailyRoutine";
@@ -15,12 +16,28 @@ export async function handler(
 	context.callbackWaitsForEmptyEventLoop = false;
 
 	if (isDailyRoutineEvent(event)) {
-		await runDailyRoutine(connection);
+		try {
+			await runDailyRoutine(connection);
 
-		return {
-			statusCode: 200,
-			body: JSON.stringify({ message: "Rotina diária executada com sucesso" }),
-		};
+			logger.info(
+				{ event: "daily-routine" },
+				"Rotina diaria executada com sucesso",
+			);
+
+			return {
+				statusCode: 200,
+				body: JSON.stringify({
+					message: "Rotina diária executada com sucesso",
+				}),
+			};
+		} catch (error) {
+			logger.error(
+				{ err: error, event: "daily-routine" },
+				"Falha na rotina diaria",
+			);
+
+			throw error;
+		}
 	}
 
 	return serverlessHandler(event as Record<string, unknown>, context);

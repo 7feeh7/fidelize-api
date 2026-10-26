@@ -9,6 +9,7 @@ visando fidelizar clientes e conquistar novos..
 
 - [Node](https://nodejs.org/en/)
 - [Express](https://expressjs.com/pt-br/)
+- [Pino](https://getpino.io/)
 - [Knex](https://knexjs.org/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Vitest](https://vitest.dev/)

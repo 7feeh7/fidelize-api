@@ -1,4 +1,5 @@
 import type { Knex } from "knex";
+import { logger } from "@/providers/implementations/PinoLogger";
 import { expireCustomerRewardsStep } from "./expireCustomerRewardsStep";
 import { generateBirthdaysStep } from "./generateBirthdaysStep";
 import { generateReturnRemindersStep } from "./generateReturnRemindersStep";
@@ -16,32 +17,52 @@ export async function runDailyRoutine(
 	const returnReminders = await generateReturnRemindersStep(connection);
 	const birthdays = await generateBirthdaysStep(connection);
 
-	console.info(
-		`[daily-routine] Benefícios expirados: ${expireCustomerRewards.expiredCount} (executado em ${expireCustomerRewards.executedAt.toISOString()})`,
+	logger.info(
+		{
+			step: "expire-customer-rewards",
+			expiredCount: expireCustomerRewards.expiredCount,
+			executedAt: expireCustomerRewards.executedAt.toISOString(),
+		},
+		"Beneficios expirados na rotina diaria",
 	);
-	console.info(
-		`[daily-routine] Lembretes de retorno gerados: ${returnReminders.generatedCount} (executado em ${returnReminders.executedAt.toISOString()})`,
+
+	logger.info(
+		{
+			step: "return-reminders",
+			generatedCount: returnReminders.generatedCount,
+			executedAt: returnReminders.executedAt.toISOString(),
+		},
+		"Lembretes de retorno gerados na rotina diaria",
 	);
 
 	if (returnReminders.skippedNoActiveTemplate) {
-		console.warn(
-			"[daily-routine] Etapa de lembretes de retorno concluída sem modelo ativo",
+		logger.warn(
+			{ step: "return-reminders", reason: "no-active-template" },
+			"Etapa de lembretes de retorno concluida sem modelo ativo",
 		);
 	}
 
-	console.info(
-		`[daily-routine] Aniversários: ${birthdays.generatedCount} mensagem(ns), ${birthdays.grantedCount} benefício(s) (executado em ${birthdays.executedAt.toISOString()})`,
+	logger.info(
+		{
+			step: "birthdays",
+			generatedCount: birthdays.generatedCount,
+			grantedCount: birthdays.grantedCount,
+			executedAt: birthdays.executedAt.toISOString(),
+		},
+		"Aniversarios processados na rotina diaria",
 	);
 
 	if (birthdays.skippedNoActiveTemplate) {
-		console.warn(
-			"[daily-routine] Etapa de aniversários concluída sem modelo BIRTHDAY ativo",
+		logger.warn(
+			{ step: "birthdays", reason: "no-active-birthday-template" },
+			"Etapa de aniversarios concluida sem modelo BIRTHDAY ativo",
 		);
 	}
 
 	if (birthdays.skippedNoActiveRule) {
-		console.warn(
-			"[daily-routine] Etapa de aniversários concluída sem regra BIRTHDAY ativa",
+		logger.warn(
+			{ step: "birthdays", reason: "no-active-birthday-rule" },
+			"Etapa de aniversarios concluida sem regra BIRTHDAY ativa",
 		);
 	}
 

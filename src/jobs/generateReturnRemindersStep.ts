@@ -1,5 +1,6 @@
 import type { Knex } from "knex";
 import { Message } from "@/entities/Message";
+import { logger } from "@/providers/implementations/PinoLogger";
 import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
@@ -30,8 +31,9 @@ export async function generateReturnRemindersStep(
 		await templatesRepository.findActiveAutomaticByType("RETURN_REMINDER");
 
 	if (!activeTemplate) {
-		console.warn(
-			"[daily-routine] Lembretes de retorno ignorados: nenhum modelo RETURN_REMINDER ativo",
+		logger.warn(
+			{ step: "return-reminders", reason: "no-active-template" },
+			"Lembretes de retorno ignorados: nenhum modelo RETURN_REMINDER ativo",
 		);
 
 		return {
