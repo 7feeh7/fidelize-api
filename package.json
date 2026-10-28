@@ -29,7 +29,7 @@
 		"typescript": "7.0.2"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "2.5.15",
+		"@biomejs/biome": "2.6.3",
 		"@types/aws-lambda": "^8.10.164",
 		"@types/bcrypt": "6.0.0",
 		"@types/cors": "2.8.17",
