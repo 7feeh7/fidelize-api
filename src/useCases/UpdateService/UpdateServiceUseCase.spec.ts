@@ -3,6 +3,8 @@ import { Service } from "@/entities/Service";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import { UpdateServiceUseCase } from "./UpdateServiceUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("UpdateServiceUseCase", () => {
 	let servicesRepository: IServicesRepository;
 	let sut: UpdateServiceUseCase;
@@ -36,7 +38,7 @@ describe("UpdateServiceUseCase", () => {
 		vi.mocked(servicesRepository.findById).mockResolvedValue(existingService);
 		vi.mocked(servicesRepository.findByName).mockResolvedValue(null);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "service-id",
 			name: "Corte masculino premium",
 			description: "Com finalização",
@@ -47,7 +49,7 @@ describe("UpdateServiceUseCase", () => {
 		});
 
 		expect(servicesRepository.update).toHaveBeenCalledTimes(1);
-		const updated = vi.mocked(servicesRepository.update).mock.calls[0]?.[0];
+		const updated = vi.mocked(servicesRepository.update).mock.calls[0]?.[1];
 		expect(updated?.name).toBe("Corte masculino premium");
 		expect(updated?.price).toBe(55);
 		expect(updated?.active).toBe(true);
@@ -57,7 +59,7 @@ describe("UpdateServiceUseCase", () => {
 		vi.mocked(servicesRepository.findById).mockResolvedValue(existingService);
 		vi.mocked(servicesRepository.findByName).mockResolvedValue(existingService);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "service-id",
 			name: "Corte masculino",
 			price: 50,
@@ -71,14 +73,14 @@ describe("UpdateServiceUseCase", () => {
 		vi.mocked(servicesRepository.findById).mockResolvedValue(existingService);
 		vi.mocked(servicesRepository.findByName).mockResolvedValue(null);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "service-id",
 			name: "Corte masculino",
 			price: 45.9,
 			active: false,
 		});
 
-		const updated = vi.mocked(servicesRepository.update).mock.calls[0]?.[0];
+		const updated = vi.mocked(servicesRepository.update).mock.calls[0]?.[1];
 		expect(updated?.active).toBe(false);
 	});
 
@@ -86,7 +88,7 @@ describe("UpdateServiceUseCase", () => {
 		vi.mocked(servicesRepository.findById).mockResolvedValue(null);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "missing",
 				name: "Corte",
 				price: 40,
@@ -114,7 +116,7 @@ describe("UpdateServiceUseCase", () => {
 		);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "service-id",
 				name: "Barba",
 				price: 45.9,
@@ -127,7 +129,7 @@ describe("UpdateServiceUseCase", () => {
 
 	it("lança erro quando o preço é negativo", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "service-id",
 				name: "Corte masculino",
 				price: -1,

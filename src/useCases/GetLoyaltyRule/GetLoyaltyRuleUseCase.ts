@@ -9,9 +9,13 @@ export class GetLoyaltyRuleUseCase {
 	constructor(private loyaltyRulesRepository: ILoyaltyRulesRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IGetLoyaltyRuleRequestDTO,
 	): Promise<IGetLoyaltyRuleResponseDTO> {
-		const record = await this.loyaltyRulesRepository.findById(data.id);
+		const record = await this.loyaltyRulesRepository.findById(
+			tenantId,
+			data.id,
+		);
 
 		if (!record) {
 			throw new Error("Regra de fidelidade não encontrada");

@@ -8,14 +8,17 @@ export class CreateCustomerController {
 		try {
 			const { name, phone, dateOfBirth, leadSource, referrerId } = request.body;
 
-			const { grantedRewards } = await this.createCustomerUseCase.execute({
-				name,
-				phone,
-				dateOfBirth,
-				leadSource,
-				referrerId,
-				isExistingCustomer: Boolean(request.body.isExistingCustomer),
-			});
+			const { grantedRewards } = await this.createCustomerUseCase.execute(
+				request.auth.tenantId,
+				{
+					name,
+					phone,
+					dateOfBirth,
+					leadSource,
+					referrerId,
+					isExistingCustomer: Boolean(request.body.isExistingCustomer),
+				},
+			);
 
 			return response.status(201).json({ grantedRewards });
 		} catch (err: unknown) {

@@ -1,6 +1,10 @@
+import type { UserRole } from "@/entities/User";
+
 export interface ITokenPayload {
 	sub: string;
 	email: string;
+	tenantId: string;
+	role: UserRole;
 }
 
 export interface ITokenProvider {

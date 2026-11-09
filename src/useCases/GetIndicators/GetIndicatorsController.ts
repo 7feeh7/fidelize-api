@@ -14,10 +14,13 @@ export class GetIndicatorsController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.getIndicatorsUseCase.execute({
-				startDate: parseOptionalDate(request.query.startDate),
-				endDate: parseOptionalDate(request.query.endDate),
-			});
+			const result = await this.getIndicatorsUseCase.execute(
+				request.auth.tenantId,
+				{
+					startDate: parseOptionalDate(request.query.startDate),
+					endDate: parseOptionalDate(request.query.endDate),
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

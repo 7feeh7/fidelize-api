@@ -10,6 +10,7 @@ export class GetMessageWhatsAppLinkController {
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
 			const result = await this.getMessageWhatsAppLinkUseCase.execute(
+				request.auth.tenantId,
 				readRouteParam(request.params.id, "id"),
 			);
 

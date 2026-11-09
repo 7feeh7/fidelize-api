@@ -25,11 +25,12 @@ export class PostgresReturnRemindersRepository
 {
 	constructor(private connection: Knex) {}
 
-	private openReturnObligationsQuery() {
+	private openReturnObligationsQuery(tenantId: string) {
 		return this.connection("appointment_items as ai")
 			.join("appointments as a", "a.id", "ai.appointment_id")
 			.join("customers as c", "c.id", "a.customer_id")
 			.join("services as s", "s.id", "ai.service_id")
+			.where("a.tenant_id", tenantId)
 			.where("c.active", true)
 			.whereNotNull("ai.return_due_date")
 			.whereRaw(`
@@ -45,6 +46,7 @@ export class PostgresReturnRemindersRepository
 	}
 
 	async listEligibleForReminders(
+		tenantId: string,
 		asOfDate: string,
 		maxOverdueDays: number,
 	): Promise<ReturnReminderCandidate[]> {
@@ -53,7 +55,7 @@ export class PostgresReturnRemindersRepository
 			maxOverdueDays,
 		);
 
-		const rows = await this.openReturnObligationsQuery()
+		const rows = await this.openReturnObligationsQuery(tenantId)
 			.where("ai.return_due_date", "<=", asOfDate)
 			.where("ai.return_due_date", ">=", earliestReturnDueDate)
 			.whereRaw(`
@@ -77,8 +79,8 @@ export class PostgresReturnRemindersRepository
 		return rows.map((row) => mapRowToCandidate(row));
 	}
 
-	private overdueWithoutContactQuery(asOfDate: string) {
-		return this.openReturnObligationsQuery()
+	private overdueWithoutContactQuery(tenantId: string, asOfDate: string) {
+		return this.openReturnObligationsQuery(tenantId)
 			.where("ai.return_due_date", "<=", asOfDate)
 			.whereRaw(`
 				NOT EXISTS (
@@ -93,11 +95,12 @@ export class PostgresReturnRemindersRepository
 	}
 
 	async listOverdueWithoutContactAfterAppointment(
+		tenantId: string,
 		asOfDate: string,
 		page: number,
 		perPage: number,
 	): Promise<ListOverdueReturnsResult> {
-		const baseQuery = this.overdueWithoutContactQuery(asOfDate);
+		const baseQuery = this.overdueWithoutContactQuery(tenantId, asOfDate);
 
 		const countRow = await baseQuery
 			.clone()
@@ -152,10 +155,11 @@ export class PostgresReturnRemindersRepository
 	}
 
 	async findNextSuggestedReturnDueDate(
+		tenantId: string,
 		customerId: string,
 		_asOfDate: string,
 	): Promise<string | null> {
-		const row = await this.openReturnObligationsQuery()
+		const row = await this.openReturnObligationsQuery(tenantId)
 			.where("a.customer_id", customerId)
 			.select("ai.return_due_date")
 			.orderBy("ai.return_due_date", "asc")

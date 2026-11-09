@@ -8,12 +8,13 @@ export class ListAppointmentsUseCase {
 	constructor(private appointmentsRepository: IAppointmentsRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IListAppointmentsRequestDTO,
 	): Promise<IListAppointmentsResponseDTO> {
 		const page = data.page < 1 ? 1 : data.page;
 		const perPage = data.perPage < 1 ? 10 : data.perPage;
 
-		const { items, total } = await this.appointmentsRepository.list({
+		const { items, total } = await this.appointmentsRepository.list(tenantId, {
 			page,
 			perPage,
 			customerId: data.customerId,

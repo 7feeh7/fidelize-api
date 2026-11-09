@@ -13,6 +13,7 @@ export interface PrepareAppointmentItemsOptions {
 }
 
 export async function prepareAppointmentItems(
+	tenantId: string,
 	servicesRepository: IServicesRepository,
 	appointmentDate: Date,
 	requestItems: AppointmentItemInput[],
@@ -39,10 +40,13 @@ export async function prepareAppointmentItems(
 	const items: AppointmentItem[] = [];
 
 	for (const item of requestItems) {
-		let service = await servicesRepository.findActiveById(item.serviceId);
+		let service = await servicesRepository.findActiveById(
+			tenantId,
+			item.serviceId,
+		);
 
 		if (!service) {
-			service = await servicesRepository.findById(item.serviceId);
+			service = await servicesRepository.findById(tenantId, item.serviceId);
 
 			if (
 				!service ||

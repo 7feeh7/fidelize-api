@@ -4,13 +4,19 @@ import type { IDeactivateCustomerRequestDTO } from "./DeactivateCustomerDTO";
 export class DeactivateCustomerUseCase {
 	constructor(private customersRepository: ICustomersRepository) {}
 
-	async execute({ id }: IDeactivateCustomerRequestDTO): Promise<void> {
-		const customer = await this.customersRepository.findActiveById(id);
+	async execute(
+		tenantId: string,
+		{ id }: IDeactivateCustomerRequestDTO,
+	): Promise<void> {
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			id,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
 		}
 
-		await this.customersRepository.deactivate(id);
+		await this.customersRepository.deactivate(tenantId, id);
 	}
 }

@@ -9,6 +9,7 @@ export class ListReferralsUseCase {
 	constructor(private referralsRepository: IReferralsRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IListReferralsRequestDTO,
 	): Promise<IListReferralsResponseDTO> {
 		if (data.status && !REFERRAL_STATUSES.includes(data.status)) {
@@ -18,7 +19,7 @@ export class ListReferralsUseCase {
 		const page = data.page < 1 ? 1 : data.page;
 		const perPage = data.perPage < 1 ? 10 : data.perPage;
 
-		const { items, total } = await this.referralsRepository.list({
+		const { items, total } = await this.referralsRepository.list(tenantId, {
 			page,
 			perPage,
 			status: data.status,

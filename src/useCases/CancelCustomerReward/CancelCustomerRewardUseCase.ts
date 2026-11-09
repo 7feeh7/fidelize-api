@@ -8,7 +8,10 @@ export class CancelCustomerRewardUseCase {
 		private customersRepository: ICustomersRepository,
 	) {}
 
-	async execute(data: ICancelCustomerRewardRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: ICancelCustomerRewardRequestDTO,
+	): Promise<void> {
 		const customerId = data.customerId?.trim();
 		const rewardId = data.rewardId?.trim();
 
@@ -16,13 +19,19 @@ export class CancelCustomerRewardUseCase {
 			throw new Error("Benefício não encontrado");
 		}
 
-		const customer = await this.customersRepository.findActiveById(customerId);
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			customerId,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
 		}
 
-		const reward = await this.customerRewardsRepository.findById(rewardId);
+		const reward = await this.customerRewardsRepository.findById(
+			tenantId,
+			rewardId,
+		);
 
 		if (!reward || reward.customerId !== customerId) {
 			throw new Error("Benefício não encontrado");
@@ -33,6 +42,6 @@ export class CancelCustomerRewardUseCase {
 		}
 
 		reward.status = "CANCELED";
-		await this.customerRewardsRepository.update(reward);
+		await this.customerRewardsRepository.update(tenantId, reward);
 	}
 }

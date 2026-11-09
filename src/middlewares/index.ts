@@ -1,6 +1,7 @@
 import type { SignOptions } from "jsonwebtoken";
 import { JwtTokenProvider } from "@/providers/implementations/JwtTokenProvider";
 import { createEnsureAuthenticated } from "./ensureAuthenticated";
+import { ensureRole } from "./ensureRole";
 
 const jwtTokenProvider = new JwtTokenProvider(
 	process.env.JWT_SECRET ?? "",
@@ -10,4 +11,4 @@ const jwtTokenProvider = new JwtTokenProvider(
 
 const ensureAuthenticated = createEnsureAuthenticated(jwtTokenProvider);
 
-export { ensureAuthenticated };
+export { ensureAuthenticated, ensureRole };

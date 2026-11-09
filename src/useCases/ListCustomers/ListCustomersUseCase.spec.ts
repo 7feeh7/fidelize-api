@@ -3,6 +3,8 @@ import { Customer } from "@/entities/Customer";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import { ListCustomersUseCase } from "./ListCustomersUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("ListCustomersUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let sut: ListCustomersUseCase;
@@ -44,9 +46,13 @@ describe("ListCustomersUseCase", () => {
 			total: 11,
 		});
 
-		const result = await sut.execute({ page: 2, perPage: 10, search: "ana" });
+		const result = await sut.execute(TENANT_ID, {
+			page: 2,
+			perPage: 10,
+			search: "ana",
+		});
 
-		expect(customersRepository.list).toHaveBeenCalledWith({
+		expect(customersRepository.list).toHaveBeenCalledWith(TENANT_ID, {
 			page: 2,
 			perPage: 10,
 			search: "ana",
@@ -75,9 +81,9 @@ describe("ListCustomersUseCase", () => {
 			total: 0,
 		});
 
-		const result = await sut.execute({ page: 0, perPage: 0 });
+		const result = await sut.execute(TENANT_ID, { page: 0, perPage: 0 });
 
-		expect(customersRepository.list).toHaveBeenCalledWith({
+		expect(customersRepository.list).toHaveBeenCalledWith(TENANT_ID, {
 			page: 1,
 			perPage: 10,
 			search: undefined,

@@ -5,14 +5,20 @@ import type { IGetMessageWhatsAppLinkResponseDTO } from "./GetMessageWhatsAppLin
 export class GetMessageWhatsAppLinkUseCase {
 	constructor(private messagesRepository: IMessagesRepository) {}
 
-	async execute(id: string): Promise<IGetMessageWhatsAppLinkResponseDTO> {
+	async execute(
+		tenantId: string,
+		id: string,
+	): Promise<IGetMessageWhatsAppLinkResponseDTO> {
 		const messageId = id?.trim();
 
 		if (!messageId) {
 			throw new Error("Informe a mensagem");
 		}
 
-		const listItem = await this.messagesRepository.findListItemById(messageId);
+		const listItem = await this.messagesRepository.findListItemById(
+			tenantId,
+			messageId,
+		);
 
 		if (!listItem) {
 			throw new Error("Mensagem não encontrada");

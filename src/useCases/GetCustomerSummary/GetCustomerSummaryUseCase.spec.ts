@@ -6,6 +6,8 @@ import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import type { IReturnRemindersRepository } from "@/repositories/IReturnRemindersRepository";
 import { GetCustomerSummaryUseCase } from "./GetCustomerSummaryUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("GetCustomerSummaryUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let appointmentsRepository: IAppointmentsRepository;
@@ -86,7 +88,7 @@ describe("GetCustomerSummaryUseCase", () => {
 			customerRewardsRepository.listAvailableExpiringWithinDays,
 		).mockResolvedValue([]);
 
-		const result = await sut.execute("cust-1");
+		const result = await sut.execute(TENANT_ID, "cust-1");
 
 		expect(result.name).toBe("Ana Lima");
 		expect(result.indicators.totalVisits).toBe(4);
@@ -102,7 +104,7 @@ describe("GetCustomerSummaryUseCase", () => {
 			null,
 		);
 
-		await expect(sut.execute("missing")).rejects.toThrow(
+		await expect(sut.execute(TENANT_ID, "missing")).rejects.toThrow(
 			"Cliente não encontrado",
 		);
 	});

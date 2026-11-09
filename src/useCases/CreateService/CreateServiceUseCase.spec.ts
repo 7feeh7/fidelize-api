@@ -3,6 +3,8 @@ import { Service } from "@/entities/Service";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import { CreateServiceUseCase } from "./CreateServiceUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("CreateServiceUseCase", () => {
 	let servicesRepository: IServicesRepository;
 	let sut: CreateServiceUseCase;
@@ -32,14 +34,15 @@ describe("CreateServiceUseCase", () => {
 
 		vi.mocked(servicesRepository.findByName).mockResolvedValue(null);
 
-		await sut.execute(request);
+		await sut.execute(TENANT_ID, request);
 
 		expect(servicesRepository.findByName).toHaveBeenCalledWith(
+			TENANT_ID,
 			"Corte masculino",
 		);
 		expect(servicesRepository.save).toHaveBeenCalledTimes(1);
 
-		const savedService = vi.mocked(servicesRepository.save).mock.calls[0]?.[0];
+		const savedService = vi.mocked(servicesRepository.save).mock.calls[0]?.[1];
 		expect(savedService).toBeInstanceOf(Service);
 		expect(savedService?.name).toBe("Corte masculino");
 		expect(savedService?.description).toBe("Corte tradicional");
@@ -52,12 +55,12 @@ describe("CreateServiceUseCase", () => {
 	it("persiste serviço com campos opcionais nulos e active padrão true", async () => {
 		vi.mocked(servicesRepository.findByName).mockResolvedValue(null);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			name: "Barba",
 			price: 25,
 		});
 
-		const savedService = vi.mocked(servicesRepository.save).mock.calls[0]?.[0];
+		const savedService = vi.mocked(servicesRepository.save).mock.calls[0]?.[1];
 		expect(savedService?.description).toBeNull();
 		expect(savedService?.durationMinutes).toBeNull();
 		expect(savedService?.suggestedReturnDays).toBeNull();
@@ -80,7 +83,7 @@ describe("CreateServiceUseCase", () => {
 		vi.mocked(servicesRepository.findByName).mockResolvedValue(existingService);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "Corte masculino",
 				price: 45.9,
 			}),
@@ -91,7 +94,7 @@ describe("CreateServiceUseCase", () => {
 
 	it("lança erro quando o preço é negativo", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "Corte masculino",
 				price: -1,
 			}),
@@ -103,7 +106,7 @@ describe("CreateServiceUseCase", () => {
 
 	it("lança erro quando a duração é inválida", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "Corte masculino",
 				price: 45.9,
 				durationMinutes: 0,
@@ -116,7 +119,7 @@ describe("CreateServiceUseCase", () => {
 
 	it("lança erro quando o prazo de retorno sugerido é inválido", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "Corte masculino",
 				price: 45.9,
 				suggestedReturnDays: -5,

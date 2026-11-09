@@ -8,7 +8,7 @@ export class CreateReferralController {
 		try {
 			const { referrerId, referredId } = request.body;
 
-			await this.createReferralUseCase.execute({
+			await this.createReferralUseCase.execute(request.auth.tenantId, {
 				referrerId,
 				referredId,
 			});

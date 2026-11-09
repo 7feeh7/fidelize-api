@@ -9,11 +9,13 @@ export class GetIndicatorsUseCase {
 	constructor(private indicatorsRepository: IIndicatorsRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IGetIndicatorsRequestDTO = {},
 	): Promise<IGetIndicatorsResponseDTO> {
 		const { startDate, endDate } = resolveIndicatorsDateRange(data);
 
 		const totals = await this.indicatorsRepository.getTotals(
+			tenantId,
 			startDate,
 			endDate,
 		);

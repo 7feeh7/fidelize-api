@@ -13,7 +13,7 @@ export class UpdateCustomerController {
 				throw new Error("Cliente inválido");
 			}
 
-			await this.updateCustomerUseCase.execute({
+			await this.updateCustomerUseCase.execute(request.auth.tenantId, {
 				id,
 				name,
 				phone,

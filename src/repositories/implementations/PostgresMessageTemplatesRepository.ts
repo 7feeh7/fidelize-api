@@ -25,8 +25,9 @@ export class PostgresMessageTemplatesRepository
 {
 	constructor(private connection: Knex) {}
 
-	async save(template: MessageTemplate): Promise<void> {
+	async save(tenantId: string, template: MessageTemplate): Promise<void> {
 		await this.connection("message_templates").insert({
+			tenant_id: tenantId,
 			id: template.id,
 			name: template.name,
 			type: template.type,
@@ -35,9 +36,12 @@ export class PostgresMessageTemplatesRepository
 		});
 	}
 
-	async findById(id: string): Promise<MessageTemplate | null> {
+	async findById(
+		tenantId: string,
+		id: string,
+	): Promise<MessageTemplate | null> {
 		const row = await this.connection("message_templates")
-			.where({ id })
+			.where({ tenant_id: tenantId, id })
 			.first();
 
 		if (!row) {
@@ -48,10 +52,11 @@ export class PostgresMessageTemplatesRepository
 	}
 
 	async findActiveAutomaticByType(
+		tenantId: string,
 		type: AutomaticMessageTemplateType,
 	): Promise<MessageTemplate | null> {
 		const row = await this.connection("message_templates")
-			.where({ type, active: true })
+			.where({ tenant_id: tenantId, type, active: true })
 			.first();
 
 		if (!row) {
@@ -61,18 +66,17 @@ export class PostgresMessageTemplatesRepository
 		return mapRowToMessageTemplate(row);
 	}
 
-	async listAll(): Promise<MessageTemplate[]> {
-		const rows = await this.connection("message_templates").orderBy(
-			"created_at",
-			"desc",
-		);
+	async listAll(tenantId: string): Promise<MessageTemplate[]> {
+		const rows = await this.connection("message_templates")
+			.where({ tenant_id: tenantId })
+			.orderBy("created_at", "desc");
 
 		return rows.map((row) => mapRowToMessageTemplate(row));
 	}
 
-	async update(template: MessageTemplate): Promise<void> {
+	async update(tenantId: string, template: MessageTemplate): Promise<void> {
 		await this.connection("message_templates")
-			.where({ id: template.id })
+			.where({ tenant_id: tenantId, id: template.id })
 			.update({
 				name: template.name,
 				content: template.content,
@@ -80,20 +84,28 @@ export class PostgresMessageTemplatesRepository
 			});
 	}
 
-	async setActive(id: string, active: boolean): Promise<void> {
-		await this.connection("message_templates").where({ id }).update({
-			active,
-			updated_at: this.connection.fn.now(),
-		});
+	async setActive(
+		tenantId: string,
+		id: string,
+		active: boolean,
+	): Promise<void> {
+		await this.connection("message_templates")
+			.where({ tenant_id: tenantId, id })
+			.update({
+				active,
+				updated_at: this.connection.fn.now(),
+			});
 	}
 
 	async deactivateActiveByAutomaticType(
+		tenantId: string,
 		type: Parameters<
 			IMessageTemplatesRepository["deactivateActiveByAutomaticType"]
-		>[0],
+		>[1],
 		exceptId?: string,
 	): Promise<void> {
 		let query = this.connection("message_templates").where({
+			tenant_id: tenantId,
 			type,
 			active: true,
 		});

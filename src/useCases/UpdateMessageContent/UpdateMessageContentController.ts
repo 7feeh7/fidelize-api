@@ -11,10 +11,13 @@ export class UpdateMessageContentController {
 		try {
 			const { content } = request.body;
 
-			const result = await this.updateMessageContentUseCase.execute({
-				id: readRouteParam(request.params.id, "id"),
-				content,
-			});
+			const result = await this.updateMessageContentUseCase.execute(
+				request.auth.tenantId,
+				{
+					id: readRouteParam(request.params.id, "id"),
+					content,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

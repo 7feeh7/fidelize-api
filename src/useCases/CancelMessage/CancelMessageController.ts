@@ -8,6 +8,7 @@ export class CancelMessageController {
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
 			await this.cancelMessageUseCase.execute(
+				request.auth.tenantId,
 				readRouteParam(request.params.id, "id"),
 			);
 

@@ -12,6 +12,7 @@ export class ListMessagesUseCase {
 	constructor(private messagesRepository: IMessagesRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IListMessagesRequestDTO,
 	): Promise<IListMessagesResponseDTO> {
 		if (data.status && !MESSAGE_STATUSES.includes(data.status)) {
@@ -33,7 +34,7 @@ export class ListMessagesUseCase {
 		const perPage =
 			data.perPage != null && data.perPage > 0 ? data.perPage : undefined;
 
-		const { items, total } = await this.messagesRepository.list({
+		const { items, total } = await this.messagesRepository.list(tenantId, {
 			status,
 			type: data.type,
 			customerId,
@@ -44,7 +45,10 @@ export class ListMessagesUseCase {
 			sort: isCustomerHistory ? "recent_desc" : "scheduled_asc",
 		});
 
-		const pendingCount = await this.messagesRepository.countPendingUntil(today);
+		const pendingCount = await this.messagesRepository.countPendingUntil(
+			tenantId,
+			today,
+		);
 		const resolvedPage = page ?? 1;
 		const resolvedPerPage = perPage ?? Math.max(total, 1);
 		const totalPages = total === 0 ? 0 : Math.ceil(total / resolvedPerPage);

@@ -7,9 +7,12 @@ export class GetAppointmentController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.getAppointmentUseCase.execute({
-				id: readRouteParam(request.params.id, "id"),
-			});
+			const result = await this.getAppointmentUseCase.execute(
+				request.auth.tenantId,
+				{
+					id: readRouteParam(request.params.id, "id"),
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

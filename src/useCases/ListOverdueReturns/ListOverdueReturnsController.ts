@@ -14,10 +14,13 @@ export class ListOverdueReturnsController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.listOverdueReturnsUseCase.execute({
-				page: parsePositiveInt(request.query.page, 1),
-				perPage: parsePositiveInt(request.query.perPage, 5),
-			});
+			const result = await this.listOverdueReturnsUseCase.execute(
+				request.auth.tenantId,
+				{
+					page: parsePositiveInt(request.query.page, 1),
+					perPage: parsePositiveInt(request.query.perPage, 5),
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

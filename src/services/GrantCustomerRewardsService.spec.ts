@@ -8,6 +8,8 @@ import type {
 } from "@/repositories/ILoyaltyRulesRepository";
 import { GrantCustomerRewardsService } from "./GrantCustomerRewardsService";
 
+const TENANT_ID = "tenant-1";
+
 describe("GrantCustomerRewardsService", () => {
 	let loyaltyRulesRepository: ILoyaltyRulesRepository;
 	let customerRewardsRepository: ICustomerRewardsRepository;
@@ -67,7 +69,7 @@ describe("GrantCustomerRewardsService", () => {
 			false,
 		);
 
-		const granted = await sut.grantFirstVisit("customer-id");
+		const granted = await sut.grantFirstVisit(TENANT_ID, "customer-id");
 
 		expect(granted).toHaveLength(1);
 		expect(granted[0]?.ruleName).toBe("Boas-vindas");
@@ -82,7 +84,7 @@ describe("GrantCustomerRewardsService", () => {
 			true,
 		);
 
-		const granted = await sut.grantFirstVisit("customer-id");
+		const granted = await sut.grantFirstVisit(TENANT_ID, "customer-id");
 
 		expect(granted).toHaveLength(0);
 		expect(customerRewardsRepository.save).not.toHaveBeenCalled();
@@ -114,7 +116,7 @@ describe("GrantCustomerRewardsService", () => {
 			false,
 		);
 
-		const granted = await sut.grantVisitCount("customer-id", 4);
+		const granted = await sut.grantVisitCount(TENANT_ID, "customer-id", 4);
 
 		expect(granted).toHaveLength(1);
 		expect(customerRewardsRepository.save).toHaveBeenCalledTimes(1);
@@ -156,9 +158,10 @@ describe("GrantCustomerRewardsService", () => {
 			"referral-id",
 		);
 
-		await sut.grantForNewReferral(referral);
+		await sut.grantForNewReferral(TENANT_ID, referral);
 
 		expect(customerRewardsRepository.existsByGrantKey).toHaveBeenCalledWith(
+			TENANT_ID,
 			"referred-id",
 			"rule-referral-received",
 			"referral-id",

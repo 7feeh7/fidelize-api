@@ -25,13 +25,20 @@ export interface ListReferralsResult {
 }
 
 export interface IReferralsRepository {
-	save(referral: Referral): Promise<void>;
-	findByReferredId(referredId: string): Promise<Referral | null>;
-	findById(id: string): Promise<Referral | null>;
-	update(referral: Referral): Promise<void>;
-	list(params: ListReferralsParams): Promise<ListReferralsResult>;
-	countByReferrerId(referrerId: string): Promise<number>;
+	save(tenantId: string, referral: Referral): Promise<void>;
+	findByReferredId(
+		tenantId: string,
+		referredId: string,
+	): Promise<Referral | null>;
+	findById(tenantId: string, id: string): Promise<Referral | null>;
+	update(tenantId: string, referral: Referral): Promise<void>;
+	list(
+		tenantId: string,
+		params: ListReferralsParams,
+	): Promise<ListReferralsResult>;
+	countByReferrerId(tenantId: string, referrerId: string): Promise<number>;
 	convertPendingByReferredId(
+		tenantId: string,
 		referredId: string,
 		convertedAt: Date,
 		trx?: Knex.Transaction,

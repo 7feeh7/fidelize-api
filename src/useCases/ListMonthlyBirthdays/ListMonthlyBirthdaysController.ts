@@ -22,10 +22,13 @@ export class ListMonthlyBirthdaysController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.listMonthlyBirthdaysUseCase.execute({
-				year: parseOptionalInteger(request.query.year),
-				month: parseOptionalInteger(request.query.month),
-			});
+			const result = await this.listMonthlyBirthdaysUseCase.execute(
+				request.auth.tenantId,
+				{
+					year: parseOptionalInteger(request.query.year),
+					month: parseOptionalInteger(request.query.month),
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

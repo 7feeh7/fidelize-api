@@ -3,6 +3,8 @@ import { Referral } from "@/entities/Referral";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import { CancelReferralUseCase } from "./CancelReferralUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("CancelReferralUseCase", () => {
 	let referralsRepository: IReferralsRepository;
 	let sut: CancelReferralUseCase;
@@ -33,11 +35,11 @@ describe("CancelReferralUseCase", () => {
 
 		vi.mocked(referralsRepository.findById).mockResolvedValue(referral);
 
-		await sut.execute({ id: "referral-id" });
+		await sut.execute(TENANT_ID, { id: "referral-id" });
 
 		expect(referralsRepository.update).toHaveBeenCalledTimes(1);
 		const updatedReferral = vi.mocked(referralsRepository.update).mock
-			.calls[0]?.[0];
+			.calls[0]?.[1];
 		expect(updatedReferral?.status).toBe("CANCELED");
 	});
 
@@ -54,7 +56,7 @@ describe("CancelReferralUseCase", () => {
 			),
 		);
 
-		await expect(sut.execute({ id: "referral-id" })).rejects.toThrow(
+		await expect(sut.execute(TENANT_ID, { id: "referral-id" })).rejects.toThrow(
 			"Somente indicações pendentes podem ser canceladas",
 		);
 

@@ -57,21 +57,33 @@ export interface CustomerAppointmentStats {
 
 export interface IAppointmentsRepository {
 	saveWithItems(
+		tenantId: string,
 		appointment: Appointment,
 		items: AppointmentItem[],
 		trx?: Knex.Transaction,
 	): Promise<void>;
 	updateWithItems(
+		tenantId: string,
 		appointment: Appointment,
 		items: AppointmentItem[],
 		trx?: Knex.Transaction,
 	): Promise<void>;
-	findById(id: string): Promise<Appointment | null>;
-	findDetailById(id: string): Promise<AppointmentDetail | null>;
-	list(params: ListAppointmentsParams): Promise<ListAppointmentsResult>;
+	findById(tenantId: string, id: string): Promise<Appointment | null>;
+	findDetailById(
+		tenantId: string,
+		id: string,
+	): Promise<AppointmentDetail | null>;
+	list(
+		tenantId: string,
+		params: ListAppointmentsParams,
+	): Promise<ListAppointmentsResult>;
 	countByCustomerId(
+		tenantId: string,
 		customerId: string,
 		trx?: Knex.Transaction,
 	): Promise<number>;
-	getStatsByCustomerId(customerId: string): Promise<CustomerAppointmentStats>;
+	getStatsByCustomerId(
+		tenantId: string,
+		customerId: string,
+	): Promise<CustomerAppointmentStats>;
 }

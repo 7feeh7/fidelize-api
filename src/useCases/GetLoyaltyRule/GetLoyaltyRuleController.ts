@@ -12,7 +12,10 @@ export class GetLoyaltyRuleController {
 				throw new Error("Regra de fidelidade inválida");
 			}
 
-			const data = await this.getLoyaltyRuleUseCase.execute({ id });
+			const data = await this.getLoyaltyRuleUseCase.execute(
+				request.auth.tenantId,
+				{ id },
+			);
 
 			return response.status(200).json(data);
 		} catch (err: unknown) {

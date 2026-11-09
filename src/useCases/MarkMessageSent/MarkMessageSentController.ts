@@ -7,12 +7,13 @@ export class MarkMessageSentController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { loggedUserId } = request.body;
-
-			const result = await this.markMessageSentUseCase.execute({
-				id: readRouteParam(request.params.id, "id"),
-				loggedUserId,
-			});
+			const result = await this.markMessageSentUseCase.execute(
+				request.auth.tenantId,
+				{
+					id: readRouteParam(request.params.id, "id"),
+					loggedUserId: request.auth.userId,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

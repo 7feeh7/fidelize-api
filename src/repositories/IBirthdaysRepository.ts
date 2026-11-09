@@ -6,6 +6,13 @@ export interface BirthdayCustomerRecord {
 }
 
 export interface IBirthdaysRepository {
-	listCandidatesForDate(asOfDate: string): Promise<BirthdayCustomerRecord[]>;
-	listInMonth(year: number, month: number): Promise<BirthdayCustomerRecord[]>;
+	listCandidatesForDate(
+		tenantId: string,
+		asOfDate: string,
+	): Promise<BirthdayCustomerRecord[]>;
+	listInMonth(
+		tenantId: string,
+		year: number,
+		month: number,
+	): Promise<BirthdayCustomerRecord[]>;
 }

@@ -6,5 +6,9 @@ export interface IndicatorsTotals {
 }
 
 export interface IIndicatorsRepository {
-	getTotals(startDate: string, endDate: string): Promise<IndicatorsTotals>;
+	getTotals(
+		tenantId: string,
+		startDate: string,
+		endDate: string,
+	): Promise<IndicatorsTotals>;
 }

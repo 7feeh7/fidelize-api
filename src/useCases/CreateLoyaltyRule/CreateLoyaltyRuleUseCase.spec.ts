@@ -5,6 +5,8 @@ import type { ILoyaltyRulesRepository } from "@/repositories/ILoyaltyRulesReposi
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import { CreateLoyaltyRuleUseCase } from "./CreateLoyaltyRuleUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("CreateLoyaltyRuleUseCase", () => {
 	let loyaltyRulesRepository: ILoyaltyRulesRepository;
 	let servicesRepository: IServicesRepository;
@@ -35,7 +37,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 	});
 
 	it("persiste regra de aniversário com desconto percentual", async () => {
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			name: "Aniversário",
 			triggerType: "BIRTHDAY",
 			rewardType: "PERCENT_DISCOUNT",
@@ -46,7 +48,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 		expect(servicesRepository.findActiveById).not.toHaveBeenCalled();
 		expect(loyaltyRulesRepository.save).toHaveBeenCalledTimes(1);
 
-		const savedRule = vi.mocked(loyaltyRulesRepository.save).mock.calls[0]?.[0];
+		const savedRule = vi.mocked(loyaltyRulesRepository.save).mock.calls[0]?.[1];
 		expect(savedRule).toBeInstanceOf(LoyaltyRule);
 		expect(savedRule?.name).toBe("Aniversário");
 		expect(savedRule?.triggerType).toBe("BIRTHDAY");
@@ -70,7 +72,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(service);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			name: "5ª visita",
 			triggerType: "VISIT_COUNT",
 			visitCount: 5,
@@ -79,6 +81,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 		});
 
 		expect(servicesRepository.findActiveById).toHaveBeenCalledWith(
+			TENANT_ID,
 			"service-id",
 		);
 		expect(loyaltyRulesRepository.save).toHaveBeenCalledTimes(1);
@@ -88,7 +91,7 @@ describe("CreateLoyaltyRuleUseCase", () => {
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(null);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "5ª visita",
 				triggerType: "VISIT_COUNT",
 				visitCount: 5,

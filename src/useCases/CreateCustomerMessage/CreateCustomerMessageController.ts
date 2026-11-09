@@ -11,12 +11,15 @@ export class CreateCustomerMessageController {
 		try {
 			const { templateId, content, scheduledFor } = request.body;
 
-			const result = await this.createCustomerMessageUseCase.execute({
-				customerId: readRouteParam(request.params.customerId, "customerId"),
-				templateId,
-				content,
-				scheduledFor,
-			});
+			const result = await this.createCustomerMessageUseCase.execute(
+				request.auth.tenantId,
+				{
+					customerId: readRouteParam(request.params.customerId, "customerId"),
+					templateId,
+					content,
+					scheduledFor,
+				},
+			);
 
 			return response.status(201).json(result);
 		} catch (err: unknown) {

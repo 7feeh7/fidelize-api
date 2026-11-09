@@ -8,7 +8,9 @@ export class CancelReferralController {
 		try {
 			const { id } = request.params;
 
-			await this.cancelReferralUseCase.execute({ id: String(id) });
+			await this.cancelReferralUseCase.execute(request.auth.tenantId, {
+				id: String(id),
+			});
 
 			return response.status(204).send();
 		} catch (err: unknown) {

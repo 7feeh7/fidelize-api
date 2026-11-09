@@ -28,33 +28,45 @@ export interface ListCustomerRewardsResult {
 }
 
 export interface ICustomerRewardsRepository {
-	save(reward: CustomerReward): Promise<void>;
+	save(tenantId: string, reward: CustomerReward): Promise<void>;
 	existsByGrantKey(
+		tenantId: string,
 		customerId: string,
 		loyaltyRuleId: string,
 		referralId: string | null,
 	): Promise<boolean>;
 	existsBirthdayGrantForYear(
+		tenantId: string,
 		customerId: string,
 		loyaltyRuleId: string,
 		grantYear: number,
 	): Promise<boolean>;
-	findById(id: string): Promise<CustomerReward | null>;
-	findDetailById(id: string): Promise<CustomerRewardListItem | null>;
+	findById(tenantId: string, id: string): Promise<CustomerReward | null>;
+	findDetailById(
+		tenantId: string,
+		id: string,
+	): Promise<CustomerRewardListItem | null>;
 	findUsedDetailByAppointmentId(
+		tenantId: string,
 		appointmentId: string,
 	): Promise<CustomerRewardListItem | null>;
-	expireAvailablePastDue(referenceDate: Date): Promise<number>;
+	expireAvailablePastDue(
+		tenantId: string,
+		referenceDate: Date,
+	): Promise<number>;
 	listByCustomerId(
+		tenantId: string,
 		params: ListCustomerRewardsParams,
 	): Promise<ListCustomerRewardsResult>;
 	listAvailableExpiringWithinDays(
+		tenantId: string,
 		customerId: string,
 		referenceDate: Date,
 		withinDays: number,
 	): Promise<CustomerRewardListItem[]>;
 	findSoonestExpiringAvailable(
+		tenantId: string,
 		customerId: string,
 	): Promise<CustomerRewardListItem | null>;
-	update(reward: CustomerReward): Promise<void>;
+	update(tenantId: string, reward: CustomerReward): Promise<void>;
 }

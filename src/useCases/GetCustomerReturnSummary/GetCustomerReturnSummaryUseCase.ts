@@ -10,6 +10,7 @@ export class GetCustomerReturnSummaryUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		customerId: string,
 	): Promise<IGetCustomerReturnSummaryResponseDTO> {
 		const normalizedCustomerId = customerId?.trim();
@@ -18,8 +19,10 @@ export class GetCustomerReturnSummaryUseCase {
 			throw new Error("Informe o cliente");
 		}
 
-		const customer =
-			await this.customersRepository.findActiveById(normalizedCustomerId);
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			normalizedCustomerId,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
@@ -27,6 +30,7 @@ export class GetCustomerReturnSummaryUseCase {
 
 		const nextSuggestedReturnDate =
 			await this.returnRemindersRepository.findNextSuggestedReturnDueDate(
+				tenantId,
 				normalizedCustomerId,
 				getTodayDateOnly(),
 			);

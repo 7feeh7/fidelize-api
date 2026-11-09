@@ -41,7 +41,7 @@ export class UpdateUserUseCase {
 			throw new Error(FORBIDDEN_MESSAGE);
 		}
 
-		const user = await this.usersRepository.findById(userId);
+		const user = await this.usersRepository.findById(payload.tenantId, userId);
 
 		if (!user?.id) {
 			throw new Error(USER_NOT_FOUND_MESSAGE);
@@ -62,7 +62,7 @@ export class UpdateUserUseCase {
 			user.password = await this.hashProvider.generateHash(plainPassword);
 		}
 
-		await this.usersRepository.update(user);
+		await this.usersRepository.update(payload.tenantId, user);
 	}
 }
 

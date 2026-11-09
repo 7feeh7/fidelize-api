@@ -2,6 +2,7 @@
 
 import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Tenant } from "@/entities/Tenant";
 import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { PostgresCustomersRepository } from "@/repositories/implementations/PostgresCustomersRepository";
@@ -47,6 +48,11 @@ vi.mock(
 	() => ({
 		PostgresCustomerRewardsRepository: vi.fn(),
 	}),
+);
+
+const TENANT = new Tenant(
+	{ name: "Salão Teste", slug: "salao-teste", status: "ACTIVE" },
+	"tenant-1",
 );
 
 describe("generateReturnRemindersStep", () => {
@@ -95,7 +101,11 @@ describe("generateReturnRemindersStep", () => {
 
 	it("não gera lembretes quando não há modelo ativo", async () => {
 		const referenceDate = new Date("2026-10-17T03:00:00.000Z");
-		const result = await generateReturnRemindersStep(connection, referenceDate);
+		const result = await generateReturnRemindersStep(
+			connection,
+			TENANT,
+			referenceDate,
+		);
 
 		expect(result.generatedCount).toBe(0);
 		expect(result.skippedNoActiveTemplate).toBe(true);
@@ -121,11 +131,58 @@ describe("generateReturnRemindersStep", () => {
 			},
 		);
 
-		await generateReturnRemindersStep(connection, referenceDate);
+		await generateReturnRemindersStep(connection, TENANT, referenceDate);
 
 		expect(listEligibleForReminders).toHaveBeenCalledWith(
+			"tenant-1",
 			"2026-10-17",
 			RETURN_REMINDER_MAX_OVERDUE_DAYS,
 		);
+	});
+
+	it("gera a mensagem com o modelo e o nome do próprio negócio", async () => {
+		const referenceDate = new Date("2026-10-17T03:00:00.000Z");
+		const findActiveAutomaticByType = vi.fn().mockResolvedValue({
+			id: "template-1",
+			content: "Oi {nome}, aqui é o {negocio}!",
+		});
+		vi.mocked(PostgresMessageTemplatesRepository).mockImplementation(
+			function () {
+				return { findActiveAutomaticByType } as never;
+			},
+		);
+		vi.mocked(PostgresReturnRemindersRepository).mockImplementation(
+			function () {
+				return {
+					listEligibleForReminders: vi.fn().mockResolvedValue([
+						{
+							appointmentItemId: "item-1",
+							customerId: "customer-1",
+							customerName: "Maria Silva",
+							serviceName: "Corte",
+							appointmentDate: "2026-09-01",
+							returnDueDate: "2026-10-01",
+						},
+					]),
+				} as never;
+			},
+		);
+
+		const result = await generateReturnRemindersStep(
+			connection,
+			TENANT,
+			referenceDate,
+		);
+
+		expect(result.generatedCount).toBe(1);
+		expect(findActiveAutomaticByType).toHaveBeenCalledWith(
+			"tenant-1",
+			"RETURN_REMINDER",
+		);
+
+		const [tenantId, message] =
+			saveIgnoringAppointmentItemConflict.mock.calls[0] ?? [];
+		expect(tenantId).toBe("tenant-1");
+		expect(message.content).toBe("Oi Maria, aqui é o Salão Teste!");
 	});
 });

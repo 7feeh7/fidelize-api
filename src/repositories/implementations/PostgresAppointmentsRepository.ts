@@ -27,12 +27,14 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 	constructor(private connection: Knex) {}
 
 	async saveWithItems(
+		tenantId: string,
 		appointment: Appointment,
 		items: AppointmentItem[],
 		trx?: Knex.Transaction,
 	): Promise<void> {
 		const persist = async (executor: Knex.Transaction) => {
 			await executor("appointments").insert({
+				tenant_id: tenantId,
 				id: appointment.id,
 				customer_id: appointment.customerId,
 				user_id: appointment.userId,
@@ -47,6 +49,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 				await executor("appointment_items").insert(
 					items.map((item) => ({
 						id: item.id,
+						tenant_id: tenantId,
 						appointment_id: appointment.id,
 						service_id: item.serviceId,
 						price: item.price,
@@ -65,24 +68,27 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 	}
 
 	async updateWithItems(
+		tenantId: string,
 		appointment: Appointment,
 		items: AppointmentItem[],
 		trx?: Knex.Transaction,
 	): Promise<void> {
 		const persist = async (executor: Knex.Transaction) => {
-			await executor("appointments").where({ id: appointment.id }).update({
-				customer_id: appointment.customerId,
-				user_id: appointment.userId,
-				appointment_date: appointment.appointmentDate,
-				subtotal: appointment.subtotal,
-				discount_amount: appointment.discountAmount,
-				total: appointment.total,
-				notes: appointment.notes,
-				updated_at: executor.fn.now(),
-			});
+			await executor("appointments")
+				.where({ tenant_id: tenantId, id: appointment.id })
+				.update({
+					customer_id: appointment.customerId,
+					user_id: appointment.userId,
+					appointment_date: appointment.appointmentDate,
+					subtotal: appointment.subtotal,
+					discount_amount: appointment.discountAmount,
+					total: appointment.total,
+					notes: appointment.notes,
+					updated_at: executor.fn.now(),
+				});
 
 			const existingRows = await executor("appointment_items")
-				.where({ appointment_id: appointment.id })
+				.where({ tenant_id: tenantId, appointment_id: appointment.id })
 				.select("id", "service_id");
 			const existingIdByServiceId = new Map(
 				existingRows.map((row) => [row.service_id as string, row.id as string]),
@@ -94,14 +100,17 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 
 				if (existingId) {
 					keptIds.push(existingId);
-					await executor("appointment_items").where({ id: existingId }).update({
-						price: item.price,
-						return_due_date: item.returnDueDate,
-					});
+					await executor("appointment_items")
+						.where({ tenant_id: tenantId, id: existingId })
+						.update({
+							price: item.price,
+							return_due_date: item.returnDueDate,
+						});
 					continue;
 				}
 
 				await executor("appointment_items").insert({
+					tenant_id: tenantId,
 					id: item.id,
 					appointment_id: appointment.id,
 					service_id: item.serviceId,
@@ -111,6 +120,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 			}
 
 			const deleteQuery = executor("appointment_items").where({
+				tenant_id: tenantId,
 				appointment_id: appointment.id,
 			});
 
@@ -129,8 +139,10 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 		await this.connection.transaction(persist);
 	}
 
-	async findById(id: string): Promise<Appointment | null> {
-		const row = await this.connection("appointments").where({ id }).first();
+	async findById(tenantId: string, id: string): Promise<Appointment | null> {
+		const row = await this.connection("appointments")
+			.where({ tenant_id: tenantId, id })
+			.first();
 
 		if (!row) {
 			return null;
@@ -139,10 +151,14 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 		return mapRowToAppointment(row);
 	}
 
-	async findDetailById(id: string): Promise<AppointmentDetail | null> {
+	async findDetailById(
+		tenantId: string,
+		id: string,
+	): Promise<AppointmentDetail | null> {
 		const row = await this.connection("appointments as a")
 			.leftJoin("customers as c", "c.id", "a.customer_id")
 			.leftJoin("users as u", "u.id", "a.user_id")
+			.where("a.tenant_id", tenantId)
 			.where("a.id", id)
 			.select("a.*", "c.name as customer_name", "u.name as user_name")
 			.first();
@@ -153,6 +169,7 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 
 		const itemRows = await this.connection("appointment_items as ai")
 			.join("services as s", "s.id", "ai.service_id")
+			.where("ai.tenant_id", tenantId)
 			.where("ai.appointment_id", id)
 			.select(
 				"ai.id",
@@ -184,17 +201,15 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 		};
 	}
 
-	async list({
-		page,
-		perPage,
-		customerId,
-		startDate,
-		endDate,
-	}: ListAppointmentsParams): Promise<ListAppointmentsResult> {
+	async list(
+		tenantId: string,
+		{ page, perPage, customerId, startDate, endDate }: ListAppointmentsParams,
+	): Promise<ListAppointmentsResult> {
 		const buildQuery = () => {
 			const query = this.connection("appointments as a")
 				.join("customers as c", "c.id", "a.customer_id")
-				.leftJoin("users as u", "u.id", "a.user_id");
+				.leftJoin("users as u", "u.id", "a.user_id")
+				.where("a.tenant_id", tenantId);
 
 			if (customerId) {
 				query.where("a.customer_id", customerId);
@@ -249,21 +264,22 @@ export class PostgresAppointmentsRepository implements IAppointmentsRepository {
 	}
 
 	async countByCustomerId(
+		tenantId: string,
 		customerId: string,
 		trx?: Knex.Transaction,
 	): Promise<number> {
 		const executor = trx ?? this.connection;
 		const row = await executor("appointments")
-			.where({ customer_id: customerId })
+			.where({ tenant_id: tenantId, customer_id: customerId })
 			.count<{ count: string }>("id as count")
 			.first();
 
 		return Number(row?.count ?? 0);
 	}
 
-	async getStatsByCustomerId(customerId: string) {
+	async getStatsByCustomerId(tenantId: string, customerId: string) {
 		const row = await this.connection("appointments")
-			.where({ customer_id: customerId })
+			.where({ tenant_id: tenantId, customer_id: customerId })
 			.select(
 				this.connection.raw("count(*)::int as total_visits"),
 				this.connection.raw("coalesce(sum(total), 0) as total_spent"),

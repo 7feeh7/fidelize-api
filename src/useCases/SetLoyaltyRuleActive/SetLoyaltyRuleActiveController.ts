@@ -15,7 +15,10 @@ export class SetLoyaltyRuleActiveController {
 				throw new Error("Regra de fidelidade inválida");
 			}
 
-			await this.setLoyaltyRuleActiveUseCase.execute({ id, active });
+			await this.setLoyaltyRuleActiveUseCase.execute(request.auth.tenantId, {
+				id,
+				active,
+			});
 
 			return response.status(204).send();
 		} catch (err: unknown) {

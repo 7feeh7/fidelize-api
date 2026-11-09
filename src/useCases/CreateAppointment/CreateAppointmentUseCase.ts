@@ -42,6 +42,7 @@ export class CreateAppointmentUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: ICreateAppointmentRequestDTO,
 	): Promise<ICreateAppointmentResponseDTO> {
 		if (!data.customerId?.trim()) {
@@ -53,6 +54,7 @@ export class CreateAppointmentUseCase {
 		}
 
 		const customer = await this.customersRepository.findActiveById(
+			tenantId,
 			data.customerId,
 		);
 
@@ -61,7 +63,7 @@ export class CreateAppointmentUseCase {
 		}
 
 		const resolvedUserId = data.userId?.trim() || data.loggedUserId;
-		const user = await this.usersRepository.findById(resolvedUserId);
+		const user = await this.usersRepository.findById(tenantId, resolvedUserId);
 
 		if (!user) {
 			throw new Error("Usuário não encontrado");
@@ -69,6 +71,7 @@ export class CreateAppointmentUseCase {
 
 		const appointmentDate = parseAppointmentDate(data.appointmentDate);
 		const items = await prepareAppointmentItems(
+			tenantId,
 			this.servicesRepository,
 			appointmentDate,
 			data.items,
@@ -78,6 +81,7 @@ export class CreateAppointmentUseCase {
 			this.rewardUsageServiceForTests ?? new CustomerRewardUsageService();
 		const { rewardItem, discountAmount } =
 			await resolveAppointmentCustomerReward({
+				tenantId,
 				customerRewardId: data.customerRewardId,
 				customerId: data.customerId,
 				subtotal,
@@ -119,9 +123,15 @@ export class CreateAppointmentUseCase {
 				this.grantCustomerRewardsServiceForTests ??
 				createGrantCustomerRewardsService(trx);
 
-			await appointmentsRepository.saveWithItems(appointment, items, trx);
+			await appointmentsRepository.saveWithItems(
+				tenantId,
+				appointment,
+				items,
+				trx,
+			);
 
 			await syncAppointmentCustomerReward({
+				tenantId,
 				appointmentId: appointment.id as string,
 				previousReward: null,
 				nextReward: rewardItem,
@@ -131,12 +141,14 @@ export class CreateAppointmentUseCase {
 			});
 
 			const appointmentCount = await appointmentsRepository.countByCustomerId(
+				tenantId,
 				data.customerId,
 				trx,
 			);
 
 			grantedRewards.push(
 				...(await grantService.grantVisitCount(
+					tenantId,
 					data.customerId,
 					appointmentCount,
 				)),
@@ -145,6 +157,7 @@ export class CreateAppointmentUseCase {
 			if (appointmentCount === 1) {
 				const convertedReferrals =
 					await referralsRepository.convertPendingByReferredId(
+						tenantId,
 						data.customerId,
 						appointmentDate,
 						trx,
@@ -152,6 +165,7 @@ export class CreateAppointmentUseCase {
 
 				grantedRewards.push(
 					...(await grantService.grantForConvertedReferrals(
+						tenantId,
 						convertedReferrals,
 					)),
 				);

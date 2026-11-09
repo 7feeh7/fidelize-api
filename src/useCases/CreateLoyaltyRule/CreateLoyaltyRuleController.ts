@@ -17,7 +17,7 @@ export class CreateLoyaltyRuleController {
 				validDays,
 			} = request.body;
 
-			await this.createLoyaltyRuleUseCase.execute({
+			await this.createLoyaltyRuleUseCase.execute(request.auth.tenantId, {
 				name,
 				description,
 				triggerType,

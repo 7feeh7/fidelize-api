@@ -1,8 +1,8 @@
-import { getBusinessName } from "@/config/businessName";
 import type { LoyaltyRewardType } from "@/entities/LoyaltyRule";
 import type { IAppointmentsRepository } from "@/repositories/IAppointmentsRepository";
 import type { ICustomerRewardsRepository } from "@/repositories/ICustomerRewardsRepository";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
+import type { ITenantsRepository } from "@/repositories/ITenantsRepository";
 import { daysBetweenDateOnly } from "@/utils/dateOnly";
 import {
 	extractFirstName,
@@ -10,15 +10,23 @@ import {
 } from "@/utils/fillMessageTemplateVariables";
 import { formatLoyaltyRuleRewardSummary } from "@/utils/loyaltyRulePresentation";
 
-export const SAMPLE_MESSAGE_TEMPLATE_VARIABLES: MessageTemplateVariableValues =
-	{
+export interface MessageTemplateTenant {
+	id?: string;
+	name: string;
+}
+
+function buildSampleVariables(
+	businessName: string,
+): MessageTemplateVariableValues {
+	return {
 		nome: "Maria",
 		servico: "hidratação",
 		dias: "30",
 		beneficio: "hidratação grátis",
 		validade: "31/12",
-		negocio: getBusinessName(),
+		negocio: businessName,
 	};
+}
 
 function formatDayMonth(date: Date): string {
 	const day = String(date.getDate()).padStart(2, "0");
@@ -31,17 +39,28 @@ export class BuildMessageTemplateVariableValuesService {
 		private customersRepository: ICustomersRepository,
 		private appointmentsRepository: IAppointmentsRepository,
 		private customerRewardsRepository: ICustomerRewardsRepository,
+		private tenantsRepository: ITenantsRepository,
 	) {}
 
 	async execute(
+		tenantId: string,
 		customerId?: string,
 		referenceDate = new Date(),
 	): Promise<MessageTemplateVariableValues> {
-		if (!customerId) {
-			return { ...SAMPLE_MESSAGE_TEMPLATE_VARIABLES };
+		const tenant = await this.tenantsRepository.findById(tenantId);
+
+		if (!tenant) {
+			throw new Error("Negócio não encontrado");
 		}
 
-		const customer = await this.customersRepository.findActiveById(customerId);
+		if (!customerId) {
+			return buildSampleVariables(tenant.name);
+		}
+
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			customerId,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
@@ -49,10 +68,10 @@ export class BuildMessageTemplateVariableValuesService {
 
 		const values: MessageTemplateVariableValues = {
 			nome: extractFirstName(customer.name),
-			negocio: getBusinessName(),
+			negocio: tenant.name,
 		};
 
-		const appointments = await this.appointmentsRepository.list({
+		const appointments = await this.appointmentsRepository.list(tenantId, {
 			page: 1,
 			perPage: 1,
 			customerId,
@@ -60,8 +79,10 @@ export class BuildMessageTemplateVariableValuesService {
 
 		const latestAppointmentId = appointments.items[0]?.id;
 		if (latestAppointmentId) {
-			const detail =
-				await this.appointmentsRepository.findDetailById(latestAppointmentId);
+			const detail = await this.appointmentsRepository.findDetailById(
+				tenantId,
+				latestAppointmentId,
+			);
 
 			if (detail) {
 				const primaryItem = detail.items[0];
@@ -78,18 +99,21 @@ export class BuildMessageTemplateVariableValuesService {
 			}
 		}
 
-		await this.applySoonestAvailableReward(values, customerId);
+		await this.applySoonestAvailableReward(tenantId, values, customerId);
 
 		return values;
 	}
 
-	async buildForReturnReminder(input: {
-		customerId: string;
-		customerName: string;
-		serviceName: string;
-		appointmentDate: string;
-		referenceDate?: Date;
-	}): Promise<{
+	async buildForReturnReminder(
+		tenant: MessageTemplateTenant,
+		input: {
+			customerId: string;
+			customerName: string;
+			serviceName: string;
+			appointmentDate: string;
+			referenceDate?: Date;
+		},
+	): Promise<{
 		variables: MessageTemplateVariableValues;
 		customerRewardId: string | null;
 	}> {
@@ -102,10 +126,11 @@ export class BuildMessageTemplateVariableValuesService {
 			dias: String(
 				daysBetweenDateOnly(input.appointmentDate, referenceDateOnly),
 			),
-			negocio: getBusinessName(),
+			negocio: tenant.name,
 		};
 
 		const customerRewardId = await this.applySoonestAvailableReward(
+			tenant.id as string,
 			variables,
 			input.customerId,
 		);
@@ -113,25 +138,30 @@ export class BuildMessageTemplateVariableValuesService {
 		return { variables, customerRewardId };
 	}
 
-	async buildForBirthday(input: {
-		customerId: string;
-		customerName: string;
-		customerRewardId?: string | null;
-		referenceDate?: Date;
-	}): Promise<{
+	async buildForBirthday(
+		tenant: MessageTemplateTenant,
+		input: {
+			customerId: string;
+			customerName: string;
+			customerRewardId?: string | null;
+			referenceDate?: Date;
+		},
+	): Promise<{
 		variables: MessageTemplateVariableValues;
 		customerRewardId: string | null;
 	}> {
 		const variables: MessageTemplateVariableValues = {
 			nome: extractFirstName(input.customerName),
-			negocio: getBusinessName(),
+			negocio: tenant.name,
 		};
 
 		let customerRewardId = input.customerRewardId ?? null;
 
 		if (customerRewardId) {
-			const reward =
-				await this.customerRewardsRepository.findDetailById(customerRewardId);
+			const reward = await this.customerRewardsRepository.findDetailById(
+				tenant.id as string,
+				customerRewardId,
+			);
 
 			if (reward) {
 				variables.beneficio = formatLoyaltyRuleRewardSummary({
@@ -146,6 +176,7 @@ export class BuildMessageTemplateVariableValuesService {
 			}
 		} else {
 			customerRewardId = await this.applySoonestAvailableReward(
+				tenant.id as string,
 				variables,
 				input.customerId,
 			);
@@ -155,11 +186,13 @@ export class BuildMessageTemplateVariableValuesService {
 	}
 
 	private async applySoonestAvailableReward(
+		tenantId: string,
 		values: MessageTemplateVariableValues,
 		customerId: string,
 	): Promise<string | null> {
 		const reward =
 			await this.customerRewardsRepository.findSoonestExpiringAvailable(
+				tenantId,
 				customerId,
 			);
 

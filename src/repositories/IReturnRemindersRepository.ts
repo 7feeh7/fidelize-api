@@ -25,15 +25,18 @@ export interface ListOverdueReturnsResult {
 
 export interface IReturnRemindersRepository {
 	listEligibleForReminders(
+		tenantId: string,
 		asOfDate: string,
 		maxOverdueDays: number,
 	): Promise<ReturnReminderCandidate[]>;
 	listOverdueWithoutContactAfterAppointment(
+		tenantId: string,
 		asOfDate: string,
 		page: number,
 		perPage: number,
 	): Promise<ListOverdueReturnsResult>;
 	findNextSuggestedReturnDueDate(
+		tenantId: string,
 		customerId: string,
 		asOfDate: string,
 	): Promise<string | null>;

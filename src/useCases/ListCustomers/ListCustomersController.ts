@@ -21,11 +21,14 @@ export class ListCustomersController {
 					? request.query.search
 					: undefined;
 
-			const result = await this.listCustomersUseCase.execute({
-				page,
-				perPage,
-				search,
-			});
+			const result = await this.listCustomersUseCase.execute(
+				request.auth.tenantId,
+				{
+					page,
+					perPage,
+					search,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

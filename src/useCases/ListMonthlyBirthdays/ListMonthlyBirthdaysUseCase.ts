@@ -10,6 +10,7 @@ export class ListMonthlyBirthdaysUseCase {
 	constructor(private birthdaysRepository: IBirthdaysRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IListMonthlyBirthdaysRequestDTO = {},
 	): Promise<IListMonthlyBirthdaysResponseDTO> {
 		const today = getTodayDateOnly();
@@ -26,7 +27,11 @@ export class ListMonthlyBirthdaysUseCase {
 			throw new Error("Mês inválido");
 		}
 
-		const records = await this.birthdaysRepository.listInMonth(year, month);
+		const records = await this.birthdaysRepository.listInMonth(
+			tenantId,
+			year,
+			month,
+		);
 		const ageReferenceDate = getTodayDateOnly();
 
 		return {

@@ -4,9 +4,11 @@ import type { ListServicesUseCase } from "./ListServicesUseCase";
 export class ListServicesController {
 	constructor(private listServicesUseCase: ListServicesUseCase) {}
 
-	async handle(_request: Request, response: Response): Promise<Response> {
+	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.listServicesUseCase.execute();
+			const result = await this.listServicesUseCase.execute(
+				request.auth.tenantId,
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

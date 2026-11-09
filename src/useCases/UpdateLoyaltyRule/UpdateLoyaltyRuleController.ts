@@ -22,7 +22,7 @@ export class UpdateLoyaltyRuleController {
 				throw new Error("Regra de fidelidade inválida");
 			}
 
-			await this.updateLoyaltyRuleUseCase.execute({
+			await this.updateLoyaltyRuleUseCase.execute(request.auth.tenantId, {
 				id,
 				name,
 				description,

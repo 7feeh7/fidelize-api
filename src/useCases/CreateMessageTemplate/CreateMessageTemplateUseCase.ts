@@ -14,7 +14,10 @@ export class CreateMessageTemplateUseCase {
 		private messageTemplatesRepository: IMessageTemplatesRepository,
 	) {}
 
-	async execute(data: ICreateMessageTemplateRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: ICreateMessageTemplateRequestDTO,
+	): Promise<void> {
 		validateMessageTemplateInput(data);
 		const normalized = normalizeMessageTemplateInput(data);
 
@@ -25,10 +28,11 @@ export class CreateMessageTemplateUseCase {
 
 		if (isAutomaticMessageTemplateType(template.type)) {
 			await this.messageTemplatesRepository.deactivateActiveByAutomaticType(
+				tenantId,
 				template.type,
 			);
 		}
 
-		await this.messageTemplatesRepository.save(template);
+		await this.messageTemplatesRepository.save(tenantId, template);
 	}
 }

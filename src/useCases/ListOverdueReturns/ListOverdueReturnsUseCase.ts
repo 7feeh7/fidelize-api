@@ -12,6 +12,7 @@ export class ListOverdueReturnsUseCase {
 	constructor(private returnRemindersRepository: IReturnRemindersRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IListOverdueReturnsRequestDTO = {},
 		referenceDate = new Date(),
 	): Promise<IListOverdueReturnsResponseDTO> {
@@ -28,6 +29,7 @@ export class ListOverdueReturnsUseCase {
 
 		const { items, total } =
 			await this.returnRemindersRepository.listOverdueWithoutContactAfterAppointment(
+				tenantId,
 				asOfDate,
 				page,
 				perPage,

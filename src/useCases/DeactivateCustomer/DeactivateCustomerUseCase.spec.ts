@@ -3,6 +3,8 @@ import { Customer } from "@/entities/Customer";
 import type { ICustomersRepository } from "@/repositories/ICustomersRepository";
 import { DeactivateCustomerUseCase } from "./DeactivateCustomerUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("DeactivateCustomerUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let sut: DeactivateCustomerUseCase;
@@ -34,18 +36,22 @@ describe("DeactivateCustomerUseCase", () => {
 
 		vi.mocked(customersRepository.findActiveById).mockResolvedValue(customer);
 
-		await sut.execute({ id: "customer-id" });
+		await sut.execute(TENANT_ID, { id: "customer-id" });
 
 		expect(customersRepository.findActiveById).toHaveBeenCalledWith(
+			TENANT_ID,
 			"customer-id",
 		);
-		expect(customersRepository.deactivate).toHaveBeenCalledWith("customer-id");
+		expect(customersRepository.deactivate).toHaveBeenCalledWith(
+			TENANT_ID,
+			"customer-id",
+		);
 	});
 
 	it("lança erro quando o cliente não existe ou já está inativo", async () => {
 		vi.mocked(customersRepository.findActiveById).mockResolvedValue(null);
 
-		await expect(sut.execute({ id: "missing-id" })).rejects.toThrow(
+		await expect(sut.execute(TENANT_ID, { id: "missing-id" })).rejects.toThrow(
 			"Cliente não encontrado",
 		);
 

@@ -2,6 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import { ListReferralsUseCase } from "./ListReferralsUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("ListReferralsUseCase", () => {
 	let referralsRepository: IReferralsRepository;
 	let sut: ListReferralsUseCase;
@@ -36,9 +38,9 @@ describe("ListReferralsUseCase", () => {
 			total: 1,
 		});
 
-		const result = await sut.execute({ page: 1, perPage: 10 });
+		const result = await sut.execute(TENANT_ID, { page: 1, perPage: 10 });
 
-		expect(referralsRepository.list).toHaveBeenCalledWith({
+		expect(referralsRepository.list).toHaveBeenCalledWith(TENANT_ID, {
 			page: 1,
 			perPage: 10,
 			status: undefined,

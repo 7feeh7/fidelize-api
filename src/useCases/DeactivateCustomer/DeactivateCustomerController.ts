@@ -12,7 +12,9 @@ export class DeactivateCustomerController {
 				throw new Error("Cliente inválido");
 			}
 
-			await this.deactivateCustomerUseCase.execute({ id });
+			await this.deactivateCustomerUseCase.execute(request.auth.tenantId, {
+				id,
+			});
 
 			return response.status(204).send();
 		} catch (err: unknown) {

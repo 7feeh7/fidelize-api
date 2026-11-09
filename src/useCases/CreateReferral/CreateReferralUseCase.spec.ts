@@ -21,6 +21,8 @@ vi.mock("@/services/createGrantCustomerRewardsService", () => ({
 	})),
 }));
 
+const TENANT_ID = "tenant-1";
+
 describe("CreateReferralUseCase", () => {
 	let referralsRepository: IReferralsRepository;
 	let customersRepository: ICustomersRepository;
@@ -81,7 +83,7 @@ describe("CreateReferralUseCase", () => {
 	it("registra indicação pendente quando dados são válidos", async () => {
 		vi.mocked(referralsRepository.findByReferredId).mockResolvedValue(null);
 		vi.mocked(customersRepository.findActiveById).mockImplementation(
-			async (id) => {
+			async (_tenantId: string, id: string) => {
 				if (id === "referrer-id") {
 					return referrer;
 				}
@@ -92,14 +94,14 @@ describe("CreateReferralUseCase", () => {
 			},
 		);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			referrerId: "referrer-id",
 			referredId: "referred-id",
 		});
 
 		expect(referralsRepository.save).toHaveBeenCalledTimes(1);
 		const savedReferral = vi.mocked(referralsRepository.save).mock
-			.calls[0]?.[0];
+			.calls[0]?.[1];
 		expect(savedReferral).toBeInstanceOf(Referral);
 		expect(savedReferral?.status).toBe("PENDING");
 		expect(savedReferral?.referrerId).toBe("referrer-id");
@@ -108,7 +110,7 @@ describe("CreateReferralUseCase", () => {
 
 	it("rejeita autoindicação", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				referrerId: "same-id",
 				referredId: "same-id",
 			}),
@@ -128,7 +130,7 @@ describe("CreateReferralUseCase", () => {
 		);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				referrerId: "referrer-id",
 				referredId: "referred-id",
 			}),

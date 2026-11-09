@@ -19,13 +19,14 @@ export class PostgresBirthdaysRepository implements IBirthdaysRepository {
 	constructor(private connection: Knex) {}
 
 	async listCandidatesForDate(
+		tenantId: string,
 		asOfDate: string,
 	): Promise<BirthdayCustomerRecord[]> {
 		const month = Number(asOfDate.slice(5, 7));
 		const day = Number(asOfDate.slice(8, 10));
 
 		const rows = await this.connection("customers")
-			.where({ active: true })
+			.where({ tenant_id: tenantId, active: true })
 			.whereNotNull("date_of_birth")
 			.whereRaw("EXTRACT(MONTH FROM date_of_birth) = ?", [month])
 			.where(function matchDay() {
@@ -46,11 +47,12 @@ export class PostgresBirthdaysRepository implements IBirthdaysRepository {
 	}
 
 	async listInMonth(
+		tenantId: string,
 		_year: number,
 		month: number,
 	): Promise<BirthdayCustomerRecord[]> {
 		const rows = await this.connection("customers")
-			.where({ active: true })
+			.where({ tenant_id: tenantId, active: true })
 			.whereNotNull("date_of_birth")
 			.whereRaw("EXTRACT(MONTH FROM date_of_birth) = ?", [month])
 			.select("id", "name", "phone", "date_of_birth")

@@ -4,8 +4,8 @@ import type { IListServicesResponseDTO } from "./ListServicesDTO";
 export class ListServicesUseCase {
 	constructor(private servicesRepository: IServicesRepository) {}
 
-	async execute(): Promise<IListServicesResponseDTO> {
-		const services = await this.servicesRepository.listAll();
+	async execute(tenantId: string): Promise<IListServicesResponseDTO> {
+		const services = await this.servicesRepository.listAll(tenantId);
 
 		return {
 			data: services.map((service) => ({

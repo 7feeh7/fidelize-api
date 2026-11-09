@@ -7,8 +7,8 @@ export class ListMessageTemplatesUseCase {
 		private messageTemplatesRepository: IMessageTemplatesRepository,
 	) {}
 
-	async execute(): Promise<IListMessageTemplatesResponseDTO> {
-		const templates = await this.messageTemplatesRepository.listAll();
+	async execute(tenantId: string): Promise<IListMessageTemplatesResponseDTO> {
+		const templates = await this.messageTemplatesRepository.listAll(tenantId);
 
 		return {
 			data: templates.map((template) => mapMessageTemplateToDTO(template)),

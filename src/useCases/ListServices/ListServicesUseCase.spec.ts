@@ -3,6 +3,8 @@ import { Service } from "@/entities/Service";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import { ListServicesUseCase } from "./ListServicesUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("ListServicesUseCase", () => {
 	let servicesRepository: IServicesRepository;
 	let sut: ListServicesUseCase;
@@ -49,7 +51,7 @@ describe("ListServicesUseCase", () => {
 			inactiveService,
 		]);
 
-		const result = await sut.execute();
+		const result = await sut.execute(TENANT_ID);
 
 		expect(servicesRepository.listAll).toHaveBeenCalledTimes(1);
 		expect(result).toEqual({

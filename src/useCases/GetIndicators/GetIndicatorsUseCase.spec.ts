@@ -3,6 +3,8 @@ import type { IIndicatorsRepository } from "@/repositories/IIndicatorsRepository
 import { getTodayDateOnly } from "@/utils/getTodayDateOnly";
 import { GetIndicatorsUseCase } from "./GetIndicatorsUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("GetIndicatorsUseCase", () => {
 	let indicatorsRepository: IIndicatorsRepository;
 	let sut: GetIndicatorsUseCase;
@@ -25,12 +27,13 @@ describe("GetIndicatorsUseCase", () => {
 		const today = getTodayDateOnly();
 		const startDate = `${today.slice(0, 7)}-01`;
 
-		const result = await sut.execute({
+		const result = await sut.execute(TENANT_ID, {
 			startDate,
 			endDate: today,
 		});
 
 		expect(indicatorsRepository.getTotals).toHaveBeenCalledWith(
+			TENANT_ID,
 			startDate,
 			today,
 		);
@@ -46,7 +49,7 @@ describe("GetIndicatorsUseCase", () => {
 
 	it("rejeita intervalos inválidos", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				startDate: "2026-10-31",
 				endDate: "2026-10-01",
 			}),

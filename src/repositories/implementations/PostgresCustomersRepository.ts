@@ -24,8 +24,9 @@ function mapRowToCustomer(row: Record<string, unknown>): Customer {
 export class PostgresCustomersRepository implements ICustomersRepository {
 	constructor(private connection: Knex) {}
 
-	async save(customer: Customer): Promise<void> {
+	async save(tenantId: string, customer: Customer): Promise<void> {
 		await this.connection("customers").insert({
+			tenant_id: tenantId,
 			id: customer.id,
 			name: customer.name,
 			phone: customer.phone,
@@ -35,13 +36,13 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 		});
 	}
 
-	async list({
-		page,
-		perPage,
-		search,
-	}: ListCustomersParams): Promise<ListCustomersResult> {
+	async list(
+		tenantId: string,
+		{ page, perPage, search }: ListCustomersParams,
+	): Promise<ListCustomersResult> {
 		const buildQuery = () => {
 			const query = this.connection("customers").where({
+				"customers.tenant_id": tenantId,
 				"customers.active": true,
 			});
 			const term = search?.trim();
@@ -94,8 +95,10 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 		return { items, total };
 	}
 
-	async findByPhone(phone: string): Promise<Customer | null> {
-		const row = await this.connection("customers").where({ phone }).first();
+	async findByPhone(tenantId: string, phone: string): Promise<Customer | null> {
+		const row = await this.connection("customers")
+			.where({ tenant_id: tenantId, phone })
+			.first();
 
 		if (!row) {
 			return null;
@@ -104,9 +107,9 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 		return mapRowToCustomer(row);
 	}
 
-	async findActiveById(id: string): Promise<Customer | null> {
+	async findActiveById(tenantId: string, id: string): Promise<Customer | null> {
 		const row = await this.connection("customers")
-			.where({ id, active: true })
+			.where({ tenant_id: tenantId, id, active: true })
 			.first();
 
 		if (!row) {
@@ -117,10 +120,15 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 	}
 
 	async findActiveProfileById(
+		tenantId: string,
 		id: string,
 	): Promise<CustomerProfileRecord | null> {
 		const row = await this.connection("customers")
-			.where({ "customers.id": id, "customers.active": true })
+			.where({
+				"customers.tenant_id": tenantId,
+				"customers.id": id,
+				"customers.active": true,
+			})
 			.select(
 				"customers.*",
 				"referrals.referrer_id",
@@ -150,9 +158,9 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 		};
 	}
 
-	async update(customer: Customer): Promise<void> {
+	async update(tenantId: string, customer: Customer): Promise<void> {
 		await this.connection("customers")
-			.where({ id: customer.id, active: true })
+			.where({ tenant_id: tenantId, id: customer.id, active: true })
 			.update({
 				name: customer.name,
 				phone: customer.phone,
@@ -162,10 +170,12 @@ export class PostgresCustomersRepository implements ICustomersRepository {
 			});
 	}
 
-	async deactivate(id: string): Promise<void> {
-		await this.connection("customers").where({ id, active: true }).update({
-			active: false,
-			updated_at: this.connection.fn.now(),
-		});
+	async deactivate(tenantId: string, id: string): Promise<void> {
+		await this.connection("customers")
+			.where({ tenant_id: tenantId, id, active: true })
+			.update({
+				active: false,
+				updated_at: this.connection.fn.now(),
+			});
 	}
 }
