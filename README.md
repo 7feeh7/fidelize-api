@@ -7,14 +7,16 @@ visando fidelizar clientes e conquistar novos.
 
 ## Tecnologias
 
-- [Node](https://nodejs.org/en/)
-- [Express](https://expressjs.com/pt-br/)
-- [Pino](https://getpino.io/)
-- [Knex](https://knexjs.org/)
-- [PostgreSQL](https://www.postgresql.org/)
-- [Vitest](https://vitest.dev/)
-- [Biome](https://biomejs.dev/pt-br/)
-- [Terraform](https://developer.hashicorp.com/terraform)
+<p>
+  <a href="https://nodejs.org/en/" target="_blank"><img src="https://img.shields.io/badge/Node.js-339933?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node.js" /></a>
+  <a href="https://expressjs.com/pt-br/" target="_blank"><img src="https://img.shields.io/badge/Express-000000?style=flat-square&logo=express&logoColor=white" alt="Express" /></a>
+  <a href="https://getpino.io/" target="_blank"><img src="https://img.shields.io/badge/Pino-687634?style=flat-square&logo=pino&logoColor=white" alt="Pino" /></a>
+  <a href="https://knexjs.org/" target="_blank"><img src="https://img.shields.io/badge/Knex-D26B38?style=flat-square&logo=knexdotjs&logoColor=white" alt="Knex" /></a>
+  <a href="https://www.postgresql.org/" target="_blank"><img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=flat-square&logo=postgresql&logoColor=white" alt="PostgreSQL" /></a>
+  <a href="https://vitest.dev/" target="_blank"><img src="https://img.shields.io/badge/Vitest-6E9F18?style=flat-square&logo=vitest&logoColor=white" alt="Vitest" /></a>
+  <a href="https://biomejs.dev/pt-br/" target="_blank"><img src="https://img.shields.io/badge/Biome-60A5FA?style=flat-square&logo=biome&logoColor=white" alt="Biome" /></a>
+  <a href="https://developer.hashicorp.com/terraform" target="_blank"><img src="https://img.shields.io/badge/Terraform-7B42BC?style=flat-square&logo=terraform&logoColor=white" alt="Terraform" /></a>
+</p>
 
 ## Arquitetura
 
