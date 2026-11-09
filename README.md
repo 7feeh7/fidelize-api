@@ -2,8 +2,8 @@
 
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
-**Fidelizei** é um projeto Node.js que permite aos usuários gerenciar clientes, atendimentos, serviços e programas de fidelidade.
-visando fidelizar clientes e conquistar novos..
+**Fidelizei** é um projeto Node.js seguindo a arquitetura multi-tenant que permite aos usuários gerenciar clientes, atendimentos, serviços e programas de fidelidade.
+visando fidelizar clientes e conquistar novos.
 
 ## Tecnologias
 
