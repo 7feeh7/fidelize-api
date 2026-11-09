@@ -37,12 +37,15 @@ export class ListReferralsController {
 					? request.query.referrerId
 					: undefined;
 
-			const result = await this.listReferralsUseCase.execute({
-				page,
-				perPage,
-				status,
-				referrerId,
-			});
+			const result = await this.listReferralsUseCase.execute(
+				request.auth.tenantId,
+				{
+					page,
+					perPage,
+					status,
+					referrerId,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

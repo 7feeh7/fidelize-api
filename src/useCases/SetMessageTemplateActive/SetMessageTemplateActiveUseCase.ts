@@ -7,12 +7,18 @@ export class SetMessageTemplateActiveUseCase {
 		private messageTemplatesRepository: IMessageTemplatesRepository,
 	) {}
 
-	async execute(data: ISetMessageTemplateActiveRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: ISetMessageTemplateActiveRequestDTO,
+	): Promise<void> {
 		if (typeof data.active !== "boolean") {
 			throw new Error("Status inválido");
 		}
 
-		const existing = await this.messageTemplatesRepository.findById(data.id);
+		const existing = await this.messageTemplatesRepository.findById(
+			tenantId,
+			data.id,
+		);
 
 		if (!existing) {
 			throw new Error("Modelo de mensagem não encontrado");
@@ -24,11 +30,16 @@ export class SetMessageTemplateActiveUseCase {
 
 		if (data.active && isAutomaticMessageTemplateType(existing.type)) {
 			await this.messageTemplatesRepository.deactivateActiveByAutomaticType(
+				tenantId,
 				existing.type,
 				existing.id,
 			);
 		}
 
-		await this.messageTemplatesRepository.setActive(data.id, data.active);
+		await this.messageTemplatesRepository.setActive(
+			tenantId,
+			data.id,
+			data.active,
+		);
 	}
 }

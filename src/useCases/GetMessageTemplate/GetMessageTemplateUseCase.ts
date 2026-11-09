@@ -11,9 +11,13 @@ export class GetMessageTemplateUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: IGetMessageTemplateRequestDTO,
 	): Promise<IGetMessageTemplateResponseDTO> {
-		const template = await this.messageTemplatesRepository.findById(data.id);
+		const template = await this.messageTemplatesRepository.findById(
+			tenantId,
+			data.id,
+		);
 
 		if (!template) {
 			throw new Error("Modelo de mensagem não encontrado");

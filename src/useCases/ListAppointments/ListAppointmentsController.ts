@@ -29,13 +29,16 @@ export class ListAppointmentsController {
 					? request.query.endDate
 					: undefined;
 
-			const result = await this.listAppointmentsUseCase.execute({
-				page,
-				perPage,
-				customerId,
-				startDate,
-				endDate,
-			});
+			const result = await this.listAppointmentsUseCase.execute(
+				request.auth.tenantId,
+				{
+					page,
+					perPage,
+					customerId,
+					startDate,
+					endDate,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

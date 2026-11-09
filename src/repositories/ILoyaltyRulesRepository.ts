@@ -6,12 +6,13 @@ export interface LoyaltyRuleRecord {
 }
 
 export interface ILoyaltyRulesRepository {
-	save(rule: LoyaltyRule): Promise<void>;
-	findById(id: string): Promise<LoyaltyRuleRecord | null>;
-	listAll(): Promise<LoyaltyRuleRecord[]>;
-	update(rule: LoyaltyRule): Promise<void>;
-	setActive(id: string, active: boolean): Promise<void>;
+	save(tenantId: string, rule: LoyaltyRule): Promise<void>;
+	findById(tenantId: string, id: string): Promise<LoyaltyRuleRecord | null>;
+	listAll(tenantId: string): Promise<LoyaltyRuleRecord[]>;
+	update(tenantId: string, rule: LoyaltyRule): Promise<void>;
+	setActive(tenantId: string, id: string, active: boolean): Promise<void>;
 	listActiveByTriggerType(
+		tenantId: string,
 		triggerType: LoyaltyTriggerType,
 	): Promise<LoyaltyRuleRecord[]>;
 }

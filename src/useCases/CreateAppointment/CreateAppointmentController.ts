@@ -9,7 +9,6 @@ export class CreateAppointmentController {
 			const {
 				customerId,
 				appointmentDate,
-				loggedUserId,
 				userId,
 				discountAmount,
 				customerRewardId,
@@ -17,16 +16,19 @@ export class CreateAppointmentController {
 				items,
 			} = request.body;
 
-			const { grantedRewards } = await this.createAppointmentUseCase.execute({
-				customerId,
-				appointmentDate,
-				loggedUserId,
-				userId,
-				discountAmount,
-				customerRewardId,
-				notes,
-				items,
-			});
+			const { grantedRewards } = await this.createAppointmentUseCase.execute(
+				request.auth.tenantId,
+				{
+					customerId,
+					appointmentDate,
+					loggedUserId: request.auth.userId,
+					userId,
+					discountAmount,
+					customerRewardId,
+					notes,
+					items,
+				},
+			);
 
 			return response.status(201).json({ grantedRewards });
 		} catch (err: unknown) {

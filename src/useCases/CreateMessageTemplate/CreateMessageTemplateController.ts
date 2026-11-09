@@ -11,7 +11,7 @@ export class CreateMessageTemplateController {
 		try {
 			const { name, type, content } = request.body;
 
-			await this.createMessageTemplateUseCase.execute({
+			await this.createMessageTemplateUseCase.execute(request.auth.tenantId, {
 				name,
 				type: type as MessageTemplateType,
 				content,

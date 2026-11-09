@@ -21,11 +21,17 @@ export interface ListCustomersResult {
 }
 
 export interface ICustomersRepository {
-	save(customer: Customer): Promise<void>;
-	findByPhone(phone: string): Promise<Customer | null>;
-	findActiveById(id: string): Promise<Customer | null>;
-	findActiveProfileById(id: string): Promise<CustomerProfileRecord | null>;
-	list(params: ListCustomersParams): Promise<ListCustomersResult>;
-	update(customer: Customer): Promise<void>;
-	deactivate(id: string): Promise<void>;
+	save(tenantId: string, customer: Customer): Promise<void>;
+	findByPhone(tenantId: string, phone: string): Promise<Customer | null>;
+	findActiveById(tenantId: string, id: string): Promise<Customer | null>;
+	findActiveProfileById(
+		tenantId: string,
+		id: string,
+	): Promise<CustomerProfileRecord | null>;
+	list(
+		tenantId: string,
+		params: ListCustomersParams,
+	): Promise<ListCustomersResult>;
+	update(tenantId: string, customer: Customer): Promise<void>;
+	deactivate(tenantId: string, id: string): Promise<void>;
 }

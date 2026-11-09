@@ -57,12 +57,6 @@ variable "cors_origin" {
   type = string
 }
 
-# Nome do negócio usado nas mensagens.
-variable "business_name" {
-  type    = string
-  default = "Fidelizei"
-}
-
 # ---------- Rotina diária (horário de São Paulo) ----------
 
 variable "daily_routine_hour" {

@@ -2,6 +2,7 @@
 
 import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Tenant } from "@/entities/Tenant";
 import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresBirthdaysRepository } from "@/repositories/implementations/PostgresBirthdaysRepository";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
@@ -49,6 +50,11 @@ vi.mock(
 	() => ({
 		PostgresAppointmentsRepository: vi.fn(),
 	}),
+);
+
+const TENANT = new Tenant(
+	{ name: "Salão Teste", slug: "salao-teste", status: "ACTIVE" },
+	"tenant-1",
 );
 
 describe("generateBirthdaysStep", () => {
@@ -109,7 +115,11 @@ describe("generateBirthdaysStep", () => {
 
 	it("não processa aniversários quando não há modelo nem regra ativos", async () => {
 		const referenceDate = new Date("2026-10-17T03:00:00.000Z");
-		const result = await generateBirthdaysStep(connection, referenceDate);
+		const result = await generateBirthdaysStep(
+			connection,
+			TENANT,
+			referenceDate,
+		);
 
 		expect(result.generatedCount).toBe(0);
 		expect(result.grantedCount).toBe(0);

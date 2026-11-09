@@ -14,6 +14,7 @@ export class ListCustomerRewardsUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: IListCustomerRewardsRequestDTO,
 	): Promise<IListCustomerRewardsResponseDTO> {
 		if (data.status && !CUSTOMER_REWARD_STATUSES.includes(data.status)) {
@@ -26,7 +27,10 @@ export class ListCustomerRewardsUseCase {
 			throw new Error("Informe o cliente");
 		}
 
-		const customer = await this.customersRepository.findActiveById(customerId);
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			customerId,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
@@ -37,7 +41,7 @@ export class ListCustomerRewardsUseCase {
 			data.perPage != null && data.perPage > 0 ? data.perPage : undefined;
 
 		const { items, total } =
-			await this.customerRewardsRepository.listByCustomerId({
+			await this.customerRewardsRepository.listByCustomerId(tenantId, {
 				customerId,
 				status: data.status,
 				page,

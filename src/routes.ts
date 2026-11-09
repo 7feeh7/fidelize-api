@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { ensureAuthenticated } from "./middlewares";
+import { ensureAuthenticated, ensureRole } from "./middlewares";
 import { authenticateUserController } from "./useCases/AuthenticateUser";
 import { cancelCustomerRewardController } from "./useCases/CancelCustomerReward";
 import { cancelMessageController } from "./useCases/CancelMessage";
@@ -11,6 +11,7 @@ import { createLoyaltyRuleController } from "./useCases/CreateLoyaltyRule";
 import { createMessageTemplateController } from "./useCases/CreateMessageTemplate";
 import { createReferralController } from "./useCases/CreateReferral";
 import { createServiceController } from "./useCases/CreateService";
+import { createTenantController } from "./useCases/CreateTenant";
 import { createUserController } from "./useCases/CreateUser";
 import { deactivateCustomerController } from "./useCases/DeactivateCustomer";
 import { deactivateServiceController } from "./useCases/DeactivateService";
@@ -67,7 +68,11 @@ router.get("/overdue-returns", (request, response) => {
 	listOverdueReturnsController.handle(request, response);
 });
 
-router.post("/users", (request, response) => {
+router.post("/tenants", ensureRole("PLATFORM_ADMIN"), (request, response) => {
+	createTenantController.handle(request, response);
+});
+
+router.post("/users", ensureRole("PLATFORM_ADMIN"), (request, response) => {
 	createUserController.handle(request, response);
 });
 

@@ -12,7 +12,9 @@ export class DeactivateServiceController {
 				throw new Error("Serviço inválido");
 			}
 
-			await this.deactivateServiceUseCase.execute({ id });
+			await this.deactivateServiceUseCase.execute(request.auth.tenantId, {
+				id,
+			});
 
 			return response.status(204).send();
 		} catch (err: unknown) {

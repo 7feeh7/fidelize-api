@@ -11,25 +11,35 @@ export class UpdateCustomerUseCase {
 		private createReferralUseCase: CreateReferralUseCase,
 	) {}
 
-	async execute(data: IUpdateCustomerRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: IUpdateCustomerRequestDTO,
+	): Promise<void> {
 		if (!LEAD_SOURCES.includes(data.leadSource)) {
 			throw new Error("Origem do lead inválida");
 		}
 
-		const customer = await this.customersRepository.findActiveById(data.id);
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			data.id,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
 		}
 
 		if (data.phone !== customer.phone) {
-			const phoneInUse = await this.customersRepository.findByPhone(data.phone);
+			const phoneInUse = await this.customersRepository.findByPhone(
+				tenantId,
+				data.phone,
+			);
 			if (phoneInUse && phoneInUse.id !== customer.id) {
 				throw new Error("O cliente já existe");
 			}
 		}
 
 		const existingReferral = await this.referralsRepository.findByReferredId(
+			tenantId,
 			data.id,
 		);
 
@@ -46,14 +56,14 @@ export class UpdateCustomerUseCase {
 		customer.dateOfBirth = data.dateOfBirth ?? null;
 		customer.leadSource = data.leadSource;
 
-		await this.customersRepository.update(customer);
+		await this.customersRepository.update(tenantId, customer);
 
 		if (
 			data.leadSource === "INDICACAO" &&
 			!existingReferral &&
 			data.referrerId?.trim()
 		) {
-			await this.createReferralUseCase.execute({
+			await this.createReferralUseCase.execute(tenantId, {
 				referrerId: data.referrerId.trim(),
 				referredId: data.id,
 			});

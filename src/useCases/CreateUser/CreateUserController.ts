@@ -6,12 +6,14 @@ export class CreateUserController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const { name, email, password } = request.body;
+			const { name, email, password, tenantId, role } = request.body;
 
 			await this.createUserUseCase.execute({
 				name,
 				email,
 				password,
+				tenantId,
+				role,
 			});
 
 			return response.status(201).json();

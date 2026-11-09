@@ -4,13 +4,16 @@ import type { IDeactivateServiceRequestDTO } from "./DeactivateServiceDTO";
 export class DeactivateServiceUseCase {
 	constructor(private servicesRepository: IServicesRepository) {}
 
-	async execute({ id }: IDeactivateServiceRequestDTO): Promise<void> {
-		const service = await this.servicesRepository.findActiveById(id);
+	async execute(
+		tenantId: string,
+		{ id }: IDeactivateServiceRequestDTO,
+	): Promise<void> {
+		const service = await this.servicesRepository.findActiveById(tenantId, id);
 
 		if (!service) {
 			throw new Error("Serviço não encontrado");
 		}
 
-		await this.servicesRepository.deactivate(id);
+		await this.servicesRepository.deactivate(tenantId, id);
 	}
 }

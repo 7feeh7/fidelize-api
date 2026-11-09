@@ -5,8 +5,9 @@ import type { IGetMessagePendingCountResponseDTO } from "./GetMessagePendingCoun
 export class GetMessagePendingCountUseCase {
 	constructor(private messagesRepository: IMessagesRepository) {}
 
-	async execute(): Promise<IGetMessagePendingCountResponseDTO> {
+	async execute(tenantId: string): Promise<IGetMessagePendingCountResponseDTO> {
 		const pendingCount = await this.messagesRepository.countPendingUntil(
+			tenantId,
 			getTodayDateOnly(),
 		);
 

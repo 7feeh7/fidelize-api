@@ -5,9 +5,10 @@ import type { IIndicatorsRepository } from "../IIndicatorsRepository";
 export class PostgresIndicatorsRepository implements IIndicatorsRepository {
 	constructor(private connection: Knex) {}
 
-	async getTotals(startDate: string, endDate: string) {
+	async getTotals(tenantId: string, startDate: string, endDate: string) {
 		const [appointmentsRow, customersRow, referralsRow] = await Promise.all([
 			this.connection("appointments")
+				.where({ tenant_id: tenantId })
 				.whereRaw(
 					"appointment_date::date >= ? and appointment_date::date <= ?",
 					[startDate, endDate],
@@ -18,6 +19,7 @@ export class PostgresIndicatorsRepository implements IIndicatorsRepository {
 				)
 				.first(),
 			this.connection("customers")
+				.where({ tenant_id: tenantId })
 				.whereRaw("created_at::date >= ? and created_at::date <= ?", [
 					startDate,
 					endDate,
@@ -25,7 +27,7 @@ export class PostgresIndicatorsRepository implements IIndicatorsRepository {
 				.count<{ count: string }>("id as count")
 				.first(),
 			this.connection("referrals")
-				.where({ status: "CONVERTED" })
+				.where({ tenant_id: tenantId, status: "CONVERTED" })
 				.whereRaw("converted_at::date >= ? and converted_at::date <= ?", [
 					startDate,
 					endDate,

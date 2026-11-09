@@ -9,6 +9,7 @@ import type {
 import { normalizeDiscountAmount } from "@/utils/prepareAppointmentItems";
 
 export interface ResolveAppointmentCustomerRewardParams {
+	tenantId: string;
 	customerRewardId?: string | null;
 	customerId: string;
 	appointmentId?: string;
@@ -68,8 +69,10 @@ export async function resolveAppointmentCustomerReward(
 		};
 	}
 
-	const rewardItem =
-		await params.customerRewardsRepository.findDetailById(customerRewardId);
+	const rewardItem = await params.customerRewardsRepository.findDetailById(
+		params.tenantId,
+		customerRewardId,
+	);
 
 	if (!rewardItem) {
 		throw new Error("Benefício não encontrado");

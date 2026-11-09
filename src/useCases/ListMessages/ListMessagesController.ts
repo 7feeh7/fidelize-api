@@ -27,22 +27,28 @@ export class ListMessagesController {
 				perPage,
 			} = request.query;
 
-			const result = await this.listMessagesUseCase.execute({
-				status:
-					typeof status === "string" ? (status as MessageStatus) : undefined,
-				type:
-					typeof type === "string" ? (type as MessageTemplateType) : undefined,
-				customerId: typeof customerId === "string" ? customerId : undefined,
-				scheduledUntil:
-					typeof scheduledUntil === "string" ? scheduledUntil : undefined,
-				scheduledFrom:
-					typeof scheduledFrom === "string" ? scheduledFrom : undefined,
-				page: typeof page === "string" ? parsePositiveInt(page, 1) : undefined,
-				perPage:
-					typeof perPage === "string"
-						? parsePositiveInt(perPage, 10)
-						: undefined,
-			});
+			const result = await this.listMessagesUseCase.execute(
+				request.auth.tenantId,
+				{
+					status:
+						typeof status === "string" ? (status as MessageStatus) : undefined,
+					type:
+						typeof type === "string"
+							? (type as MessageTemplateType)
+							: undefined,
+					customerId: typeof customerId === "string" ? customerId : undefined,
+					scheduledUntil:
+						typeof scheduledUntil === "string" ? scheduledUntil : undefined,
+					scheduledFrom:
+						typeof scheduledFrom === "string" ? scheduledFrom : undefined,
+					page:
+						typeof page === "string" ? parsePositiveInt(page, 1) : undefined,
+					perPage:
+						typeof perPage === "string"
+							? parsePositiveInt(perPage, 10)
+							: undefined,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

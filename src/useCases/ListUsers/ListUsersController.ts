@@ -4,9 +4,9 @@ import type { ListUsersUseCase } from "./ListUsersUseCase";
 export class ListUsersController {
 	constructor(private listUsersUseCase: ListUsersUseCase) {}
 
-	async handle(_request: Request, response: Response): Promise<Response> {
+	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.listUsersUseCase.execute();
+			const result = await this.listUsersUseCase.execute(request.auth.tenantId);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

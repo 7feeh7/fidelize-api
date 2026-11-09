@@ -15,6 +15,7 @@ export class GrantManualCustomerRewardUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: IGrantManualCustomerRewardRequestDTO,
 	): Promise<IGrantManualCustomerRewardResponseDTO> {
 		const customerId = data.customerId?.trim();
@@ -28,20 +29,27 @@ export class GrantManualCustomerRewardUseCase {
 			throw new Error("Informe a regra de fidelidade");
 		}
 
-		const customer = await this.customersRepository.findActiveById(customerId);
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			customerId,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
 		}
 
 		const granted = await this.grantCustomerRewardsService.grantManual(
+			tenantId,
 			customerId,
 			loyaltyRuleId,
 		);
 
-		const { items } = await this.customerRewardsRepository.listByCustomerId({
-			customerId,
-		});
+		const { items } = await this.customerRewardsRepository.listByCustomerId(
+			tenantId,
+			{
+				customerId,
+			},
+		);
 		const rewardItem = items.find((item) => item.reward.id === granted.id);
 
 		if (!rewardItem) {

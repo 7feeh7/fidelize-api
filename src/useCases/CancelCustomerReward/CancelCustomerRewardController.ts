@@ -9,7 +9,7 @@ export class CancelCustomerRewardController {
 
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			await this.cancelCustomerRewardUseCase.execute({
+			await this.cancelCustomerRewardUseCase.execute(request.auth.tenantId, {
 				customerId: readRouteParam(request.params.customerId, "customerId"),
 				rewardId: readRouteParam(request.params.rewardId, "rewardId"),
 			});

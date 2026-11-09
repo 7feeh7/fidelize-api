@@ -14,17 +14,24 @@ export class CreateLoyaltyRuleUseCase {
 		private servicesRepository: IServicesRepository,
 	) {}
 
-	async execute(data: ICreateLoyaltyRuleRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: ICreateLoyaltyRuleRequestDTO,
+	): Promise<void> {
 		validateLoyaltyRuleInput(data);
 		const normalized = normalizeLoyaltyRuleInput(data);
 
-		await ensureFreeServiceForLoyaltyRule(normalized, this.servicesRepository);
+		await ensureFreeServiceForLoyaltyRule(
+			tenantId,
+			normalized,
+			this.servicesRepository,
+		);
 
 		const rule = new LoyaltyRule({
 			...normalized,
 			active: true,
 		});
 
-		await this.loyaltyRulesRepository.save(rule);
+		await this.loyaltyRulesRepository.save(tenantId, rule);
 	}
 }

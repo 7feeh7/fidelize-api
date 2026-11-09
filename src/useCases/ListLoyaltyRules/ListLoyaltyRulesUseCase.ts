@@ -5,8 +5,8 @@ import type { IListLoyaltyRulesResponseDTO } from "./ListLoyaltyRulesDTO";
 export class ListLoyaltyRulesUseCase {
 	constructor(private loyaltyRulesRepository: ILoyaltyRulesRepository) {}
 
-	async execute(): Promise<IListLoyaltyRulesResponseDTO> {
-		const records = await this.loyaltyRulesRepository.listAll();
+	async execute(tenantId: string): Promise<IListLoyaltyRulesResponseDTO> {
+		const records = await this.loyaltyRulesRepository.listAll(tenantId);
 
 		return {
 			data: records.map((record) => mapLoyaltyRuleToDTO(record)),

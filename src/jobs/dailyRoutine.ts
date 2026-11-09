@@ -1,24 +1,38 @@
 import type { Knex } from "knex";
+import type { Tenant } from "@/entities/Tenant";
 import { logger } from "@/providers/implementations/PinoLogger";
+import { PostgresTenantsRepository } from "@/repositories/implementations/PostgresTenantsRepository";
 import { expireCustomerRewardsStep } from "./expireCustomerRewardsStep";
 import { generateBirthdaysStep } from "./generateBirthdaysStep";
 import { generateReturnRemindersStep } from "./generateReturnRemindersStep";
 
-export interface DailyRoutineResult {
+export interface TenantDailyRoutineResult {
+	tenantId: string;
 	expireCustomerRewards: Awaited<ReturnType<typeof expireCustomerRewardsStep>>;
 	returnReminders: Awaited<ReturnType<typeof generateReturnRemindersStep>>;
 	birthdays: Awaited<ReturnType<typeof generateBirthdaysStep>>;
 }
 
-export async function runDailyRoutine(
+export interface DailyRoutineResult {
+	tenants: TenantDailyRoutineResult[];
+	failedTenantIds: string[];
+}
+
+async function runTenantDailyRoutine(
 	connection: Knex,
-): Promise<DailyRoutineResult> {
-	const expireCustomerRewards = await expireCustomerRewardsStep(connection);
-	const returnReminders = await generateReturnRemindersStep(connection);
-	const birthdays = await generateBirthdaysStep(connection);
+	tenant: Tenant,
+): Promise<TenantDailyRoutineResult> {
+	const tenantId = tenant.id as string;
+	const expireCustomerRewards = await expireCustomerRewardsStep(
+		connection,
+		tenant,
+	);
+	const returnReminders = await generateReturnRemindersStep(connection, tenant);
+	const birthdays = await generateBirthdaysStep(connection, tenant);
 
 	logger.info(
 		{
+			tenantId,
 			step: "expire-customer-rewards",
 			expiredCount: expireCustomerRewards.expiredCount,
 			executedAt: expireCustomerRewards.executedAt.toISOString(),
@@ -28,6 +42,7 @@ export async function runDailyRoutine(
 
 	logger.info(
 		{
+			tenantId,
 			step: "return-reminders",
 			generatedCount: returnReminders.generatedCount,
 			executedAt: returnReminders.executedAt.toISOString(),
@@ -35,15 +50,9 @@ export async function runDailyRoutine(
 		"Lembretes de retorno gerados na rotina diaria",
 	);
 
-	if (returnReminders.skippedNoActiveTemplate) {
-		logger.warn(
-			{ step: "return-reminders", reason: "no-active-template" },
-			"Etapa de lembretes de retorno concluida sem modelo ativo",
-		);
-	}
-
 	logger.info(
 		{
+			tenantId,
 			step: "birthdays",
 			generatedCount: birthdays.generatedCount,
 			grantedCount: birthdays.grantedCount,
@@ -52,19 +61,35 @@ export async function runDailyRoutine(
 		"Aniversarios processados na rotina diaria",
 	);
 
-	if (birthdays.skippedNoActiveTemplate) {
-		logger.warn(
-			{ step: "birthdays", reason: "no-active-birthday-template" },
-			"Etapa de aniversarios concluida sem modelo BIRTHDAY ativo",
+	return { tenantId, expireCustomerRewards, returnReminders, birthdays };
+}
+
+export async function runDailyRoutine(
+	connection: Knex,
+): Promise<DailyRoutineResult> {
+	const tenantsRepository = new PostgresTenantsRepository(connection);
+	const tenants = await tenantsRepository.listWithAccess();
+	const results: TenantDailyRoutineResult[] = [];
+	const failedTenantIds: string[] = [];
+
+	for (const tenant of tenants) {
+		try {
+			results.push(await runTenantDailyRoutine(connection, tenant));
+		} catch (error) {
+			failedTenantIds.push(tenant.id as string);
+			logger.error(
+				{ err: error, tenantId: tenant.id },
+				"Falha na rotina diaria do negocio",
+			);
+		}
+	}
+
+	// Mantém a invocação marcada como erro, depois de tentar todos os negócios.
+	if (failedTenantIds.length > 0) {
+		throw new Error(
+			`Rotina diária falhou em ${failedTenantIds.length} de ${tenants.length} negócios`,
 		);
 	}
 
-	if (birthdays.skippedNoActiveRule) {
-		logger.warn(
-			{ step: "birthdays", reason: "no-active-birthday-rule" },
-			"Etapa de aniversarios concluida sem regra BIRTHDAY ativa",
-		);
-	}
-
-	return { expireCustomerRewards, returnReminders, birthdays };
+	return { tenants: results, failedTenantIds };
 }

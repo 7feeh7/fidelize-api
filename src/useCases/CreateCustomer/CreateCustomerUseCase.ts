@@ -19,6 +19,7 @@ export class CreateCustomerUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: ICreateCustomerRequestDTO,
 	): Promise<ICreateCustomerResponseDTO> {
 		if (!LEAD_SOURCES.includes(data.leadSource)) {
@@ -30,6 +31,7 @@ export class CreateCustomerUseCase {
 		}
 
 		const customerAlreadyExists = await this.customersRepository.findByPhone(
+			tenantId,
 			data.phone,
 		);
 		if (customerAlreadyExists) {
@@ -47,10 +49,11 @@ export class CreateCustomerUseCase {
 
 		await this.connection.transaction(async (trx) => {
 			const customersRepository = new PostgresCustomersRepository(trx);
-			await customersRepository.save(customer);
+			await customersRepository.save(tenantId, customer);
 
 			if (data.leadSource === "INDICACAO" && data.referrerId?.trim()) {
 				const referralResult = await this.createReferralUseCase.execute(
+					tenantId,
 					{
 						referrerId: data.referrerId.trim(),
 						referredId: customer.id as string,
@@ -63,7 +66,10 @@ export class CreateCustomerUseCase {
 			if (!data.isExistingCustomer) {
 				const grantService = createGrantCustomerRewardsService(trx);
 				grantedRewards.push(
-					...(await grantService.grantFirstVisit(customer.id as string)),
+					...(await grantService.grantFirstVisit(
+						tenantId,
+						customer.id as string,
+					)),
 				);
 			}
 		});

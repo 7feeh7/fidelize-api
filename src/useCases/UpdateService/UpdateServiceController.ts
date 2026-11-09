@@ -20,7 +20,7 @@ export class UpdateServiceController {
 				throw new Error("Serviço inválido");
 			}
 
-			await this.updateServiceUseCase.execute({
+			await this.updateServiceUseCase.execute(request.auth.tenantId, {
 				id,
 				name,
 				description,

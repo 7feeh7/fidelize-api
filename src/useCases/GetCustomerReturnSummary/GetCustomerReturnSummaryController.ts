@@ -10,6 +10,7 @@ export class GetCustomerReturnSummaryController {
 	async handle(request: Request, response: Response): Promise<Response> {
 		try {
 			const result = await this.getCustomerReturnSummaryUseCase.execute(
+				request.auth.tenantId,
 				readRouteParam(request.params.customerId, "customerId"),
 			);
 			return response.status(200).json(result);

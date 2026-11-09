@@ -69,7 +69,7 @@ resource "aws_lambda_function" "api" {
   runtime       = "nodejs24.x"
   handler       = "index.handler" # arquivo index.js, função exportada "handler"
   memory_size   = 512             # MB
-  timeout       = 120             # segundos (o API Gateway corta requisições HTTP em 30s; os 120s servem para a rotina diária)
+  timeout       = 900             # segundos (o API Gateway corta requisições HTTP em 30s; os 900s servem para a rotina diária, que percorre todos os negócios)
 
   filename         = data.archive_file.placeholder.output_path
   source_code_hash = data.archive_file.placeholder.output_base64sha256
@@ -87,7 +87,6 @@ resource "aws_lambda_function" "api" {
       JWT_EXPIRES_IN         = var.jwt_expires_in
       JWT_REFRESH_EXPIRES_IN = var.jwt_refresh_expires_in
       CORS_ORIGIN            = var.cors_origin
-      BUSINESS_NAME          = var.business_name
     }
   }
 

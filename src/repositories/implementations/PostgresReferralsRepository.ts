@@ -24,8 +24,9 @@ function mapRowToReferral(row: Record<string, unknown>): Referral {
 export class PostgresReferralsRepository implements IReferralsRepository {
 	constructor(private connection: Knex) {}
 
-	async save(referral: Referral): Promise<void> {
+	async save(tenantId: string, referral: Referral): Promise<void> {
 		await this.connection("referrals").insert({
+			tenant_id: tenantId,
 			id: referral.id,
 			referrer_id: referral.referrerId,
 			referred_id: referral.referredId,
@@ -34,9 +35,12 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 		});
 	}
 
-	async findByReferredId(referredId: string): Promise<Referral | null> {
+	async findByReferredId(
+		tenantId: string,
+		referredId: string,
+	): Promise<Referral | null> {
 		const row = await this.connection("referrals")
-			.where({ referred_id: referredId })
+			.where({ tenant_id: tenantId, referred_id: referredId })
 			.first();
 
 		if (!row) {
@@ -46,8 +50,10 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 		return mapRowToReferral(row);
 	}
 
-	async findById(id: string): Promise<Referral | null> {
-		const row = await this.connection("referrals").where({ id }).first();
+	async findById(tenantId: string, id: string): Promise<Referral | null> {
+		const row = await this.connection("referrals")
+			.where({ tenant_id: tenantId, id })
+			.first();
 
 		if (!row) {
 			return null;
@@ -56,23 +62,24 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 		return mapRowToReferral(row);
 	}
 
-	async update(referral: Referral): Promise<void> {
-		await this.connection("referrals").where({ id: referral.id }).update({
-			status: referral.status,
-			converted_at: referral.convertedAt,
-		});
+	async update(tenantId: string, referral: Referral): Promise<void> {
+		await this.connection("referrals")
+			.where({ tenant_id: tenantId, id: referral.id })
+			.update({
+				status: referral.status,
+				converted_at: referral.convertedAt,
+			});
 	}
 
-	async list({
-		page,
-		perPage,
-		status,
-		referrerId,
-	}: ListReferralsParams): Promise<ListReferralsResult> {
+	async list(
+		tenantId: string,
+		{ page, perPage, status, referrerId }: ListReferralsParams,
+	): Promise<ListReferralsResult> {
 		const buildQuery = () => {
 			const query = this.connection("referrals as r")
 				.join("customers as referrer", "referrer.id", "r.referrer_id")
-				.join("customers as referred", "referred.id", "r.referred_id");
+				.join("customers as referred", "referred.id", "r.referred_id")
+				.where("r.tenant_id", tenantId);
 
 			if (status) {
 				query.where("r.status", status);
@@ -121,9 +128,12 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 		return { items, total };
 	}
 
-	async countByReferrerId(referrerId: string): Promise<number> {
+	async countByReferrerId(
+		tenantId: string,
+		referrerId: string,
+	): Promise<number> {
 		const row = await this.connection("referrals")
-			.where({ referrer_id: referrerId })
+			.where({ tenant_id: tenantId, referrer_id: referrerId })
 			.whereNot({ status: "CANCELED" })
 			.count<{ count: string }>("id as count")
 			.first();
@@ -132,13 +142,18 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 	}
 
 	async convertPendingByReferredId(
+		tenantId: string,
 		referredId: string,
 		convertedAt: Date,
 		trx?: Knex.Transaction,
 	): Promise<Referral[]> {
 		const executor = trx ?? this.connection;
 		const pendingRows = await executor("referrals")
-			.where({ referred_id: referredId, status: "PENDING" })
+			.where({
+				tenant_id: tenantId,
+				referred_id: referredId,
+				status: "PENDING",
+			})
 			.select("*");
 
 		if (pendingRows.length === 0) {
@@ -146,7 +161,11 @@ export class PostgresReferralsRepository implements IReferralsRepository {
 		}
 
 		await executor("referrals")
-			.where({ referred_id: referredId, status: "PENDING" })
+			.where({
+				tenant_id: tenantId,
+				referred_id: referredId,
+				status: "PENDING",
+			})
 			.update({
 				status: "CONVERTED",
 				converted_at: convertedAt,

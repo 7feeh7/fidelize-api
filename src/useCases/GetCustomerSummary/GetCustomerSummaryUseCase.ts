@@ -18,17 +18,20 @@ export class GetCustomerSummaryUseCase {
 		private customerRewardsRepository: ICustomerRewardsRepository,
 	) {}
 
-	async execute(customerId: string): Promise<IGetCustomerSummaryResponseDTO> {
+	async execute(
+		tenantId: string,
+		customerId: string,
+	): Promise<IGetCustomerSummaryResponseDTO> {
 		const normalizedCustomerId = customerId?.trim();
 
 		if (!normalizedCustomerId) {
 			throw new Error("Informe o cliente");
 		}
 
-		const profile =
-			await this.customersRepository.findActiveProfileById(
-				normalizedCustomerId,
-			);
+		const profile = await this.customersRepository.findActiveProfileById(
+			tenantId,
+			normalizedCustomerId,
+		);
 
 		if (!profile) {
 			throw new Error("Cliente não encontrado");
@@ -37,12 +40,17 @@ export class GetCustomerSummaryUseCase {
 		const today = getTodayDateOnly();
 		const [stats, nextSuggestedReturnDate, expiringSoonRewards] =
 			await Promise.all([
-				this.appointmentsRepository.getStatsByCustomerId(normalizedCustomerId),
+				this.appointmentsRepository.getStatsByCustomerId(
+					tenantId,
+					normalizedCustomerId,
+				),
 				this.returnRemindersRepository.findNextSuggestedReturnDueDate(
+					tenantId,
 					normalizedCustomerId,
 					today,
 				),
 				this.customerRewardsRepository.listAvailableExpiringWithinDays(
+					tenantId,
 					normalizedCustomerId,
 					new Date(`${today}T12:00:00.000Z`),
 					REWARDS_EXPIRING_SOON_DAYS,

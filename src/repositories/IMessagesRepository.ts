@@ -30,16 +30,31 @@ export interface MessageListItem {
 }
 
 export interface IMessagesRepository {
-	save(message: Message): Promise<void>;
-	saveIgnoringAppointmentItemConflict(message: Message): Promise<boolean>;
-	findById(id: string): Promise<Message | null>;
-	findListItemById(id: string): Promise<MessageListItem | null>;
-	list(filters: MessageListFilters): Promise<MessageListResult>;
-	countPendingUntil(scheduledUntil: string): Promise<number>;
-	updateContent(id: string, content: string): Promise<void>;
-	markSent(id: string, sentBy: string, sentAt: Date): Promise<void>;
-	cancel(id: string): Promise<void>;
+	save(tenantId: string, message: Message): Promise<void>;
+	saveIgnoringAppointmentItemConflict(
+		tenantId: string,
+		message: Message,
+	): Promise<boolean>;
+	findById(tenantId: string, id: string): Promise<Message | null>;
+	findListItemById(
+		tenantId: string,
+		id: string,
+	): Promise<MessageListItem | null>;
+	list(
+		tenantId: string,
+		filters: MessageListFilters,
+	): Promise<MessageListResult>;
+	countPendingUntil(tenantId: string, scheduledUntil: string): Promise<number>;
+	updateContent(tenantId: string, id: string, content: string): Promise<void>;
+	markSent(
+		tenantId: string,
+		id: string,
+		sentBy: string,
+		sentAt: Date,
+	): Promise<void>;
+	cancel(tenantId: string, id: string): Promise<void>;
 	existsBirthdayMessageForYear(
+		tenantId: string,
 		customerId: string,
 		calendarYear: number,
 	): Promise<boolean>;

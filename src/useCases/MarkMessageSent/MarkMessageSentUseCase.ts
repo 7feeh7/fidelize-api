@@ -13,6 +13,7 @@ export class MarkMessageSentUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: IMarkMessageSentRequestDTO,
 	): Promise<IMarkMessageSentResponseDTO> {
 		const id = data.id?.trim();
@@ -26,13 +27,13 @@ export class MarkMessageSentUseCase {
 			throw new Error("Informe o usuário logado");
 		}
 
-		const user = await this.usersRepository.findById(loggedUserId);
+		const user = await this.usersRepository.findById(tenantId, loggedUserId);
 
 		if (!user) {
 			throw new Error("Usuário não encontrado");
 		}
 
-		const message = await this.messagesRepository.findById(id);
+		const message = await this.messagesRepository.findById(tenantId, id);
 
 		if (!message) {
 			throw new Error("Mensagem não encontrada");
@@ -45,9 +46,12 @@ export class MarkMessageSentUseCase {
 		}
 
 		const sentAt = new Date();
-		await this.messagesRepository.markSent(id, loggedUserId, sentAt);
+		await this.messagesRepository.markSent(tenantId, id, loggedUserId, sentAt);
 
-		const listItem = await this.messagesRepository.findListItemById(id);
+		const listItem = await this.messagesRepository.findListItemById(
+			tenantId,
+			id,
+		);
 
 		if (!listItem) {
 			throw new Error("Não foi possível carregar a mensagem atualizada");

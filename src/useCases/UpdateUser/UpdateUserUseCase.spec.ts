@@ -5,6 +5,13 @@ import type { ITokenProvider } from "@/providers/ITokenProvider";
 import type { IUsersRepository } from "@/repositories/IUsersRepository";
 import { UpdateUserUseCase } from "./UpdateUserUseCase";
 
+const TOKEN_PAYLOAD = {
+	sub: "user-id-1",
+	email: "maria@example.com",
+	tenantId: "tenant-1",
+	role: "TENANT_ADMIN" as const,
+};
+
 describe("UpdateUserUseCase", () => {
 	let usersRepository: IUsersRepository;
 	let tokenProvider: ITokenProvider;
@@ -13,9 +20,12 @@ describe("UpdateUserUseCase", () => {
 
 	const loggedUser = new User(
 		{
+			tenantId: "tenant-1",
+			role: "TENANT_ADMIN",
 			name: "Maria Silva",
 			email: "maria@example.com",
 			password: "senha-antiga",
+			firstLoginAt: null,
 		},
 		"user-id-1",
 	);
@@ -27,6 +37,7 @@ describe("UpdateUserUseCase", () => {
 			findById: vi.fn(),
 			listAll: vi.fn(),
 			update: vi.fn(),
+			markFirstLogin: vi.fn(),
 		};
 		tokenProvider = {
 			generateAccessToken: vi.fn(),
@@ -41,10 +52,7 @@ describe("UpdateUserUseCase", () => {
 	});
 
 	it("atualiza nome e e-mail do usuário autenticado", async () => {
-		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue({
-			sub: "user-id-1",
-			email: "maria@example.com",
-		});
+		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue(TOKEN_PAYLOAD);
 		vi.mocked(usersRepository.findById).mockResolvedValue(loggedUser);
 		vi.mocked(usersRepository.findByEmail).mockResolvedValue(null);
 
@@ -55,7 +63,12 @@ describe("UpdateUserUseCase", () => {
 			email: "maria.santos@example.com",
 		});
 
+		expect(usersRepository.findById).toHaveBeenCalledWith(
+			"tenant-1",
+			"user-id-1",
+		);
 		expect(usersRepository.update).toHaveBeenCalledWith(
+			"tenant-1",
 			expect.objectContaining({
 				id: "user-id-1",
 				name: "Maria Santos",
@@ -67,10 +80,7 @@ describe("UpdateUserUseCase", () => {
 	});
 
 	it("atualiza a senha quando informada", async () => {
-		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue({
-			sub: "user-id-1",
-			email: "maria@example.com",
-		});
+		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue(TOKEN_PAYLOAD);
 		vi.mocked(usersRepository.findById).mockResolvedValue(loggedUser);
 		vi.mocked(hashProvider.generateHash).mockResolvedValue("senha-nova-hash");
 
@@ -84,6 +94,7 @@ describe("UpdateUserUseCase", () => {
 
 		expect(hashProvider.generateHash).toHaveBeenCalledWith("nova-senha");
 		expect(usersRepository.update).toHaveBeenCalledWith(
+			"tenant-1",
 			expect.objectContaining({
 				password: "senha-nova-hash",
 			}),
@@ -92,8 +103,8 @@ describe("UpdateUserUseCase", () => {
 
 	it("rejeita atualização de outro usuário", async () => {
 		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue({
-			sub: "user-id-1",
-			email: "maria@example.com",
+			...TOKEN_PAYLOAD,
+			role: "PLATFORM_ADMIN",
 		});
 
 		await expect(
@@ -112,17 +123,17 @@ describe("UpdateUserUseCase", () => {
 	it("lança erro quando o e-mail já está em uso", async () => {
 		const otherUser = new User(
 			{
+				tenantId: "tenant-2",
+				role: "ATTENDANT",
 				name: "João",
 				email: "joao@example.com",
 				password: "hash",
+				firstLoginAt: null,
 			},
 			"user-id-2",
 		);
 
-		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue({
-			sub: "user-id-1",
-			email: "maria@example.com",
-		});
+		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue(TOKEN_PAYLOAD);
 		vi.mocked(usersRepository.findById).mockResolvedValue(loggedUser);
 		vi.mocked(usersRepository.findByEmail).mockResolvedValue(otherUser);
 

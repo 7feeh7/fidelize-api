@@ -6,8 +6,15 @@ export class FillMessageTemplateService {
 		private buildVariableValuesService: BuildMessageTemplateVariableValuesService,
 	) {}
 
-	async execute(content: string, customerId?: string): Promise<string> {
-		const variables = await this.buildVariableValuesService.execute(customerId);
+	async execute(
+		tenantId: string,
+		content: string,
+		customerId?: string,
+	): Promise<string> {
+		const variables = await this.buildVariableValuesService.execute(
+			tenantId,
+			customerId,
+		);
 		return fillMessageTemplateVariables(content, variables);
 	}
 }

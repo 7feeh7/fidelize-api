@@ -13,17 +13,27 @@ export class UpdateLoyaltyRuleUseCase {
 		private servicesRepository: IServicesRepository,
 	) {}
 
-	async execute(data: IUpdateLoyaltyRuleRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: IUpdateLoyaltyRuleRequestDTO,
+	): Promise<void> {
 		validateLoyaltyRuleInput(data);
 		const normalized = normalizeLoyaltyRuleInput(data);
 
-		const existing = await this.loyaltyRulesRepository.findById(data.id);
+		const existing = await this.loyaltyRulesRepository.findById(
+			tenantId,
+			data.id,
+		);
 
 		if (!existing) {
 			throw new Error("Regra de fidelidade não encontrada");
 		}
 
-		await ensureFreeServiceForLoyaltyRule(normalized, this.servicesRepository);
+		await ensureFreeServiceForLoyaltyRule(
+			tenantId,
+			normalized,
+			this.servicesRepository,
+		);
 
 		const { rule } = existing;
 		rule.name = normalized.name;
@@ -35,6 +45,6 @@ export class UpdateLoyaltyRuleUseCase {
 		rule.freeServiceId = normalized.freeServiceId;
 		rule.validDays = normalized.validDays;
 
-		await this.loyaltyRulesRepository.update(rule);
+		await this.loyaltyRulesRepository.update(tenantId, rule);
 	}
 }

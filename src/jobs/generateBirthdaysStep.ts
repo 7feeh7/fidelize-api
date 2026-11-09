@@ -1,6 +1,7 @@
 import type { Knex } from "knex";
 import { CustomerReward } from "@/entities/CustomerReward";
 import { Message } from "@/entities/Message";
+import type { Tenant } from "@/entities/Tenant";
 import { logger } from "@/providers/implementations/PinoLogger";
 import { PostgresAppointmentsRepository } from "@/repositories/implementations/PostgresAppointmentsRepository";
 import { PostgresBirthdaysRepository } from "@/repositories/implementations/PostgresBirthdaysRepository";
@@ -9,6 +10,7 @@ import { PostgresCustomersRepository } from "@/repositories/implementations/Post
 import { PostgresLoyaltyRulesRepository } from "@/repositories/implementations/PostgresLoyaltyRulesRepository";
 import { PostgresMessagesRepository } from "@/repositories/implementations/PostgresMessagesRepository";
 import { PostgresMessageTemplatesRepository } from "@/repositories/implementations/PostgresMessageTemplatesRepository";
+import { PostgresTenantsRepository } from "@/repositories/implementations/PostgresTenantsRepository";
 import { BuildMessageTemplateVariableValuesService } from "@/services/BuildMessageTemplateVariableValuesService";
 import {
 	getCalendarYearFromDateOnly,
@@ -28,8 +30,10 @@ export interface GenerateBirthdaysStepResult {
 
 export async function generateBirthdaysStep(
 	connection: Knex,
+	tenant: Tenant,
 	referenceDate = new Date(),
 ): Promise<GenerateBirthdaysStepResult> {
+	const tenantId = tenant.id as string;
 	const asOfDate = getTodayDateOnly(referenceDate);
 	const calendarYear = getCalendarYearFromDateOnly(asOfDate);
 
@@ -37,24 +41,28 @@ export async function generateBirthdaysStep(
 		connection,
 	);
 	const loyaltyRulesRepository = new PostgresLoyaltyRulesRepository(connection);
-	const activeTemplate =
-		await templatesRepository.findActiveAutomaticByType("BIRTHDAY");
-	const birthdayRules =
-		await loyaltyRulesRepository.listActiveByTriggerType("BIRTHDAY");
+	const activeTemplate = await templatesRepository.findActiveAutomaticByType(
+		tenantId,
+		"BIRTHDAY",
+	);
+	const birthdayRules = await loyaltyRulesRepository.listActiveByTriggerType(
+		tenantId,
+		"BIRTHDAY",
+	);
 
 	const skippedNoActiveTemplate = !activeTemplate;
 	const skippedNoActiveRule = birthdayRules.length === 0;
 
 	if (skippedNoActiveTemplate) {
 		logger.warn(
-			{ step: "birthdays", reason: "no-active-birthday-template" },
+			{ tenantId, step: "birthdays", reason: "no-active-birthday-template" },
 			"Aniversarios: nenhum modelo BIRTHDAY ativo - mensagens nao serao geradas",
 		);
 	}
 
 	if (skippedNoActiveRule) {
 		logger.warn(
-			{ step: "birthdays", reason: "no-active-birthday-rule" },
+			{ tenantId, step: "birthdays", reason: "no-active-birthday-rule" },
 			"Aniversarios: nenhuma regra BIRTHDAY ativa - beneficios nao serao concedidos",
 		);
 	}
@@ -79,9 +87,13 @@ export async function generateBirthdaysStep(
 			new PostgresCustomersRepository(connection),
 			new PostgresAppointmentsRepository(connection),
 			customerRewardsRepository,
+			new PostgresTenantsRepository(connection),
 		);
 
-	const candidates = await birthdaysRepository.listCandidatesForDate(asOfDate);
+	const candidates = await birthdaysRepository.listCandidatesForDate(
+		tenantId,
+		asOfDate,
+	);
 	const expiresAt = getEndOfMonthExpiresAt(asOfDate);
 	const grantedAt = referenceDate;
 
@@ -96,6 +108,7 @@ export async function generateBirthdaysStep(
 				const loyaltyRuleId = ruleRecord.rule.id as string;
 				const alreadyGranted =
 					await customerRewardsRepository.existsBirthdayGrantForYear(
+						tenantId,
 						candidate.customerId,
 						loyaltyRuleId,
 						calendarYear,
@@ -118,7 +131,7 @@ export async function generateBirthdaysStep(
 				});
 
 				try {
-					await customerRewardsRepository.save(reward);
+					await customerRewardsRepository.save(tenantId, reward);
 					linkedRewardId = reward.id as string;
 					grantedCount += 1;
 				} catch (error) {
@@ -135,6 +148,7 @@ export async function generateBirthdaysStep(
 
 		const alreadyMessaged =
 			await messagesRepository.existsBirthdayMessageForYear(
+				tenantId,
 				candidate.customerId,
 				calendarYear,
 			);
@@ -144,7 +158,7 @@ export async function generateBirthdaysStep(
 		}
 
 		const { variables, customerRewardId } =
-			await buildVariableValuesService.buildForBirthday({
+			await buildVariableValuesService.buildForBirthday(tenant, {
 				customerId: candidate.customerId,
 				customerName: candidate.customerName,
 				customerRewardId: linkedRewardId,
@@ -170,7 +184,7 @@ export async function generateBirthdaysStep(
 			createdAt: new Date(),
 		});
 
-		await messagesRepository.save(message);
+		await messagesRepository.save(tenantId, message);
 		generatedCount += 1;
 	}
 

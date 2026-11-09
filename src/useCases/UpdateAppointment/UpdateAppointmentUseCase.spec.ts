@@ -28,6 +28,8 @@ vi.mock(
 	}),
 );
 
+const TENANT_ID = "tenant-1";
+
 describe("UpdateAppointmentUseCase", () => {
 	let appointmentsRepository: IAppointmentsRepository;
 	let customersRepository: ICustomersRepository;
@@ -102,6 +104,7 @@ describe("UpdateAppointmentUseCase", () => {
 			save: vi.fn(),
 			update: vi.fn(),
 			findByEmail: vi.fn(),
+			markFirstLogin: vi.fn(),
 			findById: vi.fn(),
 			listAll: vi.fn(),
 		};
@@ -183,7 +186,17 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 		vi.mocked(usersRepository.findById).mockResolvedValue(
-			new User({ name: "Pro", email: "a@b.com", password: "hash" }, "user-id"),
+			new User(
+				{
+					tenantId: TENANT_ID,
+					role: "ATTENDANT",
+					firstLoginAt: null,
+					name: "Pro",
+					email: "a@b.com",
+					password: "hash",
+				},
+				"user-id",
+			),
 		);
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
 			new Service(
@@ -199,7 +212,7 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "appointment-id",
 			customerId: "customer-id",
 			appointmentDate: "2026-10-20T15:00:00.000Z",
@@ -210,7 +223,7 @@ describe("UpdateAppointmentUseCase", () => {
 
 		expect(trxAppointmentsRepository.updateWithItems).toHaveBeenCalledTimes(1);
 
-		const [appointment, items] =
+		const [, appointment, items] =
 			vi.mocked(trxAppointmentsRepository.updateWithItems).mock.calls[0] ?? [];
 
 		expect(appointment?.subtotal).toBe(75);
@@ -294,7 +307,17 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 		vi.mocked(usersRepository.findById).mockResolvedValue(
-			new User({ name: "Pro", email: "a@b.com", password: "hash" }, "user-id"),
+			new User(
+				{
+					tenantId: TENANT_ID,
+					role: "ATTENDANT",
+					firstLoginAt: null,
+					name: "Pro",
+					email: "a@b.com",
+					password: "hash",
+				},
+				"user-id",
+			),
 		);
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
 			new Service(
@@ -310,7 +333,7 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "appointment-id",
 			customerId: "customer-id",
 			appointmentDate: "2026-10-20T15:00:00.000Z",
@@ -377,7 +400,17 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 		vi.mocked(usersRepository.findById).mockResolvedValue(
-			new User({ name: "Pro", email: "a@b.com", password: "hash" }, "user-id"),
+			new User(
+				{
+					tenantId: TENANT_ID,
+					role: "ATTENDANT",
+					firstLoginAt: null,
+					name: "Pro",
+					email: "a@b.com",
+					password: "hash",
+				},
+				"user-id",
+			),
 		);
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(
 			new Service(
@@ -393,7 +426,7 @@ describe("UpdateAppointmentUseCase", () => {
 			),
 		);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "appointment-id",
 			customerId: "customer-id",
 			appointmentDate: "2026-10-20T15:00:00.000Z",
@@ -401,7 +434,7 @@ describe("UpdateAppointmentUseCase", () => {
 			items: [{ serviceId: "service-id", price: 75 }],
 		});
 
-		const [, items] =
+		const [, , items] =
 			vi.mocked(trxAppointmentsRepository.updateWithItems).mock.calls[0] ?? [];
 
 		expect(items?.[0]?.returnDueDate).toBe("2026-11-04");
@@ -411,7 +444,7 @@ describe("UpdateAppointmentUseCase", () => {
 		vi.mocked(appointmentsRepository.findById).mockResolvedValue(null);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "missing",
 				customerId: "customer-id",
 				appointmentDate: "2026-10-20T15:00:00.000Z",

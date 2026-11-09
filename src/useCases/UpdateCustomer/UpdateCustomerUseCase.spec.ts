@@ -5,6 +5,8 @@ import type { IReferralsRepository } from "@/repositories/IReferralsRepository";
 import type { CreateReferralUseCase } from "../CreateReferral/CreateReferralUseCase";
 import { UpdateCustomerUseCase } from "./UpdateCustomerUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("UpdateCustomerUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let referralsRepository: IReferralsRepository;
@@ -59,7 +61,7 @@ describe("UpdateCustomerUseCase", () => {
 	});
 
 	it("atualiza nome, telefone, aniversário e origem do lead", async () => {
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "customer-id",
 			name: "Ana Souza",
 			phone: "11988887777",
@@ -68,15 +70,18 @@ describe("UpdateCustomerUseCase", () => {
 			referrerId: "referrer-id",
 		});
 
-		expect(customersRepository.findByPhone).toHaveBeenCalledWith("11988887777");
+		expect(customersRepository.findByPhone).toHaveBeenCalledWith(
+			TENANT_ID,
+			"11988887777",
+		);
 		expect(customersRepository.update).toHaveBeenCalledTimes(1);
-		expect(createReferralUseCase.execute).toHaveBeenCalledWith({
+		expect(createReferralUseCase.execute).toHaveBeenCalledWith(TENANT_ID, {
 			referrerId: "referrer-id",
 			referredId: "customer-id",
 		});
 
 		const updatedCustomer = vi.mocked(customersRepository.update).mock
-			.calls[0]?.[0];
+			.calls[0]?.[1];
 		expect(updatedCustomer?.name).toBe("Ana Souza");
 		expect(updatedCustomer?.phone).toBe("11988887777");
 		expect(updatedCustomer?.dateOfBirth).toBe("1991-06-20");
@@ -84,7 +89,7 @@ describe("UpdateCustomerUseCase", () => {
 	});
 
 	it("não consulta telefone quando ele não mudou", async () => {
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			id: "customer-id",
 			name: "Ana Souza",
 			phone: "11999998888",
@@ -98,7 +103,7 @@ describe("UpdateCustomerUseCase", () => {
 
 	it("lança erro quando a origem é indicação sem indicador e sem registro prévio", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "customer-id",
 				name: "Ana Souza",
 				phone: "11999998888",
@@ -124,7 +129,7 @@ describe("UpdateCustomerUseCase", () => {
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(otherCustomer);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "customer-id",
 				name: "Ana Lima",
 				phone: "11988887777",
@@ -139,7 +144,7 @@ describe("UpdateCustomerUseCase", () => {
 		vi.mocked(customersRepository.findActiveById).mockResolvedValue(null);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				id: "missing-id",
 				name: "Ana Lima",
 				phone: "11999998888",

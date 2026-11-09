@@ -13,9 +13,11 @@ export class GetAppointmentUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: IGetAppointmentRequestDTO,
 	): Promise<IGetAppointmentResponseDTO> {
 		const appointment = await this.appointmentsRepository.findDetailById(
+			tenantId,
 			data.id,
 		);
 
@@ -25,6 +27,7 @@ export class GetAppointmentUseCase {
 
 		const usedRewardDetail =
 			await this.customerRewardsRepository.findUsedDetailByAppointmentId(
+				tenantId,
 				data.id,
 			);
 		const usedReward = usedRewardDetail

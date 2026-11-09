@@ -5,6 +5,7 @@ import type {
 import type { CustomerRewardUsageService } from "@/services/CustomerRewardUsageService";
 
 export async function syncAppointmentCustomerReward(params: {
+	tenantId: string;
 	appointmentId: string;
 	previousReward: CustomerRewardListItem | null;
 	nextReward: CustomerRewardListItem | null;
@@ -20,7 +21,10 @@ export async function syncAppointmentCustomerReward(params: {
 			params.previousReward.reward,
 			params.now,
 		);
-		await params.customerRewardsRepository.update(params.previousReward.reward);
+		await params.customerRewardsRepository.update(
+			params.tenantId,
+			params.previousReward.reward,
+		);
 	}
 
 	if (nextId && nextId !== previousId && params.nextReward) {
@@ -29,6 +33,9 @@ export async function syncAppointmentCustomerReward(params: {
 			params.appointmentId,
 			params.now,
 		);
-		await params.customerRewardsRepository.update(params.nextReward.reward);
+		await params.customerRewardsRepository.update(
+			params.tenantId,
+			params.nextReward.reward,
+		);
 	}
 }

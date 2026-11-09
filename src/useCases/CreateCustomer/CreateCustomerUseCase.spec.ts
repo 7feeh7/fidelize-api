@@ -24,6 +24,8 @@ vi.mock("@/services/createGrantCustomerRewardsService", () => ({
 	})),
 }));
 
+const TENANT_ID = "tenant-1";
+
 describe("CreateCustomerUseCase", () => {
 	let customersRepository: ICustomersRepository;
 	let createReferralUseCase: CreateReferralUseCase;
@@ -76,13 +78,16 @@ describe("CreateCustomerUseCase", () => {
 
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
 
-		const result = await sut.execute(request);
+		const result = await sut.execute(TENANT_ID, request);
 
-		expect(customersRepository.findByPhone).toHaveBeenCalledWith("11999998888");
+		expect(customersRepository.findByPhone).toHaveBeenCalledWith(
+			TENANT_ID,
+			"11999998888",
+		);
 		expect(connection.transaction).toHaveBeenCalledTimes(1);
 		expect(trxCustomersRepository.save).toHaveBeenCalledTimes(1);
 		const savedCustomer = vi.mocked(trxCustomersRepository.save).mock
-			.calls[0]?.[0];
+			.calls[0]?.[1];
 		expect(savedCustomer).toBeInstanceOf(Customer);
 		expect(savedCustomer?.name).toBe("João Souza");
 		expect(savedCustomer?.phone).toBe("11999998888");
@@ -95,7 +100,7 @@ describe("CreateCustomerUseCase", () => {
 	it("cria indicação quando a origem é indicação", async () => {
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			name: "Ana Lima",
 			phone: "21988887777",
 			leadSource: "INDICACAO",
@@ -103,6 +108,7 @@ describe("CreateCustomerUseCase", () => {
 		});
 
 		expect(createReferralUseCase.execute).toHaveBeenCalledWith(
+			TENANT_ID,
 			{
 				referrerId: "referrer-id",
 				referredId: expect.any(String),
@@ -114,7 +120,7 @@ describe("CreateCustomerUseCase", () => {
 	it("não concede FIRST_VISIT quando o cliente já existia no salão", async () => {
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
 
-		const result = await sut.execute({
+		const result = await sut.execute(TENANT_ID, {
 			name: "João Souza",
 			phone: "11999998888",
 			leadSource: "PANFLETO",
@@ -128,7 +134,7 @@ describe("CreateCustomerUseCase", () => {
 	it("persiste cliente sem data de nascimento quando não informada", async () => {
 		vi.mocked(customersRepository.findByPhone).mockResolvedValue(null);
 
-		await sut.execute({
+		await sut.execute(TENANT_ID, {
 			name: "Ana Lima",
 			phone: "21988887777",
 			leadSource: "INDICACAO",
@@ -137,14 +143,14 @@ describe("CreateCustomerUseCase", () => {
 
 		expect(trxCustomersRepository.save).toHaveBeenCalledTimes(1);
 		const savedCustomer = vi.mocked(trxCustomersRepository.save).mock
-			.calls[0]?.[0];
+			.calls[0]?.[1];
 		expect(savedCustomer).toBeInstanceOf(Customer);
 		expect(savedCustomer?.dateOfBirth).toBeNull();
 	});
 
 	it("exige indicador quando a origem é indicação", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "Ana Lima",
 				phone: "21988887777",
 				leadSource: "INDICACAO",
@@ -170,7 +176,7 @@ describe("CreateCustomerUseCase", () => {
 		);
 
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "João Souza",
 				phone: "11999998888",
 				leadSource: "PANFLETO",
@@ -182,7 +188,7 @@ describe("CreateCustomerUseCase", () => {
 
 	it("lança erro quando a origem do lead é inválida", async () => {
 		await expect(
-			sut.execute({
+			sut.execute(TENANT_ID, {
 				name: "João Souza",
 				phone: "11999998888",
 				leadSource: "FACEBOOK" as "INSTAGRAM",

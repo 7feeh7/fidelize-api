@@ -6,10 +6,11 @@ import type { ICreateServiceRequestDTO } from "./CreateServiceDTO";
 export class CreateServiceUseCase {
 	constructor(private servicesRepository: IServicesRepository) {}
 
-	async execute(data: ICreateServiceRequestDTO) {
+	async execute(tenantId: string, data: ICreateServiceRequestDTO) {
 		validateServiceInput(data);
 
 		const serviceAlreadyExists = await this.servicesRepository.findByName(
+			tenantId,
 			data.name,
 		);
 		if (serviceAlreadyExists) {
@@ -25,6 +26,6 @@ export class CreateServiceUseCase {
 			active: data.active ?? true,
 		});
 
-		await this.servicesRepository.save(service);
+		await this.servicesRepository.save(tenantId, service);
 	}
 }

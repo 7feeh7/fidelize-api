@@ -19,18 +19,21 @@ export class ListCustomerRewardsController {
 		try {
 			const status = request.query.status as CustomerRewardStatus | undefined;
 
-			const result = await this.listCustomerRewardsUseCase.execute({
-				customerId: readRouteParam(request.params.customerId, "customerId"),
-				status,
-				page:
-					typeof request.query.page === "string"
-						? parsePositiveInt(request.query.page, 1)
-						: undefined,
-				perPage:
-					typeof request.query.perPage === "string"
-						? parsePositiveInt(request.query.perPage, 10)
-						: undefined,
-			});
+			const result = await this.listCustomerRewardsUseCase.execute(
+				request.auth.tenantId,
+				{
+					customerId: readRouteParam(request.params.customerId, "customerId"),
+					status,
+					page:
+						typeof request.query.page === "string"
+							? parsePositiveInt(request.query.page, 1)
+							: undefined,
+					perPage:
+						typeof request.query.perPage === "string"
+							? parsePositiveInt(request.query.perPage, 10)
+							: undefined,
+				},
+			);
 
 			return response.json(result);
 		} catch (err: unknown) {

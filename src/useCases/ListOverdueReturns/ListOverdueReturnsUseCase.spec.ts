@@ -5,6 +5,8 @@ import {
 	ListOverdueReturnsUseCase,
 } from "./ListOverdueReturnsUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("ListOverdueReturnsUseCase", () => {
 	let returnRemindersRepository: IReturnRemindersRepository;
 	let sut: ListOverdueReturnsUseCase;
@@ -39,11 +41,20 @@ describe("ListOverdueReturnsUseCase", () => {
 
 		const referenceDate = new Date("2026-10-16T12:00:00.000Z");
 
-		const result = await sut.execute({ page: 1, perPage: 5 }, referenceDate);
+		const result = await sut.execute(
+			TENANT_ID,
+			{ page: 1, perPage: 5 },
+			referenceDate,
+		);
 
 		expect(
 			returnRemindersRepository.listOverdueWithoutContactAfterAppointment,
-		).toHaveBeenCalledWith("2026-10-16", 1, LIST_OVERDUE_RETURNS_MAX_PER_PAGE);
+		).toHaveBeenCalledWith(
+			TENANT_ID,
+			"2026-10-16",
+			1,
+			LIST_OVERDUE_RETURNS_MAX_PER_PAGE,
+		);
 		expect(result).toEqual({
 			page: 1,
 			totalPages: 1,
@@ -68,12 +79,18 @@ describe("ListOverdueReturnsUseCase", () => {
 		).mockResolvedValue({ total: 0, items: [] });
 
 		await sut.execute(
+			TENANT_ID,
 			{ page: 1, perPage: 20 },
 			new Date("2026-10-16T12:00:00.000Z"),
 		);
 
 		expect(
 			returnRemindersRepository.listOverdueWithoutContactAfterAppointment,
-		).toHaveBeenCalledWith("2026-10-16", 1, LIST_OVERDUE_RETURNS_MAX_PER_PAGE);
+		).toHaveBeenCalledWith(
+			TENANT_ID,
+			"2026-10-16",
+			1,
+			LIST_OVERDUE_RETURNS_MAX_PER_PAGE,
+		);
 	});
 });

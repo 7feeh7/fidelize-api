@@ -10,7 +10,6 @@ export class UpdateAppointmentController {
 			const {
 				customerId,
 				appointmentDate,
-				loggedUserId,
 				userId,
 				discountAmount,
 				customerRewardId,
@@ -18,11 +17,11 @@ export class UpdateAppointmentController {
 				items,
 			} = request.body;
 
-			await this.updateAppointmentUseCase.execute({
+			await this.updateAppointmentUseCase.execute(request.auth.tenantId, {
 				id: readRouteParam(request.params.id, "id"),
 				customerId,
 				appointmentDate,
-				loggedUserId,
+				loggedUserId: request.auth.userId,
 				userId,
 				discountAmount,
 				customerRewardId,

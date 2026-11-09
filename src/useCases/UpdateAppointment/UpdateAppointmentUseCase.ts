@@ -28,7 +28,10 @@ export class UpdateAppointmentUseCase {
 		private rewardUsageServiceForTests?: CustomerRewardUsageService,
 	) {}
 
-	async execute(data: IUpdateAppointmentRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: IUpdateAppointmentRequestDTO,
+	): Promise<void> {
 		if (!data.customerId?.trim()) {
 			throw new Error("Informe o cliente");
 		}
@@ -38,6 +41,7 @@ export class UpdateAppointmentUseCase {
 		}
 
 		const existingAppointment = await this.appointmentsRepository.findById(
+			tenantId,
 			data.id,
 		);
 
@@ -46,10 +50,12 @@ export class UpdateAppointmentUseCase {
 		}
 
 		const existingDetail = await this.appointmentsRepository.findDetailById(
+			tenantId,
 			data.id,
 		);
 
 		const customer = await this.customersRepository.findActiveById(
+			tenantId,
 			data.customerId,
 		);
 
@@ -58,7 +64,7 @@ export class UpdateAppointmentUseCase {
 		}
 
 		const resolvedUserId = data.userId?.trim() || data.loggedUserId;
-		const user = await this.usersRepository.findById(resolvedUserId);
+		const user = await this.usersRepository.findById(tenantId, resolvedUserId);
 
 		if (!user) {
 			throw new Error("Usuário não encontrado");
@@ -66,6 +72,7 @@ export class UpdateAppointmentUseCase {
 
 		const appointmentDate = parseAppointmentDate(data.appointmentDate);
 		const items = await prepareAppointmentItems(
+			tenantId,
 			this.servicesRepository,
 			appointmentDate,
 			data.items,
@@ -79,10 +86,12 @@ export class UpdateAppointmentUseCase {
 			this.rewardUsageServiceForTests ?? new CustomerRewardUsageService();
 		const previousReward =
 			await this.customerRewardsRepository.findUsedDetailByAppointmentId(
+				tenantId,
 				data.id,
 			);
 		const { rewardItem, discountAmount } =
 			await resolveAppointmentCustomerReward({
+				tenantId,
 				customerRewardId: data.customerRewardId,
 				customerId: data.customerId,
 				appointmentId: data.id,
@@ -122,9 +131,15 @@ export class UpdateAppointmentUseCase {
 				trx,
 			);
 
-			await appointmentsRepository.updateWithItems(appointment, items, trx);
+			await appointmentsRepository.updateWithItems(
+				tenantId,
+				appointment,
+				items,
+				trx,
+			);
 
 			await syncAppointmentCustomerReward({
+				tenantId,
 				appointmentId: data.id,
 				previousReward,
 				nextReward: rewardItem,

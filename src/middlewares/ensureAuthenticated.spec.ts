@@ -25,11 +25,13 @@ describe("createEnsureAuthenticated", () => {
 		return { request, response, status, json, next };
 	}
 
-	it("chama next quando o token é válido", () => {
+	it("preenche request.auth com os dados do token e chama next", () => {
 		const { request, response, next } = createMocks("Bearer access-token");
 		vi.mocked(tokenProvider.verifyAccessToken).mockReturnValue({
 			sub: "user-id",
 			email: "user@example.com",
+			tenantId: "tenant-1",
+			role: "ATTENDANT",
 		});
 
 		sut(request, response, next);
@@ -37,6 +39,11 @@ describe("createEnsureAuthenticated", () => {
 		expect(tokenProvider.verifyAccessToken).toHaveBeenCalledWith(
 			"access-token",
 		);
+		expect(request.auth).toEqual({
+			userId: "user-id",
+			tenantId: "tenant-1",
+			role: "ATTENDANT",
+		});
 		expect(next).toHaveBeenCalled();
 	});
 

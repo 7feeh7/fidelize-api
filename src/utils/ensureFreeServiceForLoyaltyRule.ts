@@ -2,6 +2,7 @@ import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import type { NormalizedLoyaltyRuleInput } from "./loyaltyRuleValidation";
 
 export async function ensureFreeServiceForLoyaltyRule(
+	tenantId: string,
 	data: NormalizedLoyaltyRuleInput,
 	servicesRepository: IServicesRepository,
 ): Promise<string | null> {
@@ -9,7 +10,10 @@ export async function ensureFreeServiceForLoyaltyRule(
 		return null;
 	}
 
-	const service = await servicesRepository.findActiveById(data.freeServiceId);
+	const service = await servicesRepository.findActiveById(
+		tenantId,
+		data.freeServiceId,
+	);
 
 	if (!service) {
 		throw new Error("Serviço grátis inválido");

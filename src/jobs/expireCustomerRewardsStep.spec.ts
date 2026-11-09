@@ -2,6 +2,7 @@
 
 import type { Knex } from "knex";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Tenant } from "@/entities/Tenant";
 import { PostgresCustomerRewardsRepository } from "@/repositories/implementations/PostgresCustomerRewardsRepository";
 import { expireCustomerRewardsStep } from "./expireCustomerRewardsStep";
 
@@ -10,6 +11,11 @@ vi.mock(
 	() => ({
 		PostgresCustomerRewardsRepository: vi.fn(),
 	}),
+);
+
+const TENANT = new Tenant(
+	{ name: "Salão Teste", slug: "salao-teste", status: "ACTIVE" },
+	"tenant-1",
 );
 
 describe("expireCustomerRewardsStep", () => {
@@ -28,7 +34,11 @@ describe("expireCustomerRewardsStep", () => {
 
 	it("retorna a quantidade de benefícios expirados", async () => {
 		const referenceDate = new Date("2026-10-17T03:00:00.000Z");
-		const result = await expireCustomerRewardsStep(connection, referenceDate);
+		const result = await expireCustomerRewardsStep(
+			connection,
+			TENANT,
+			referenceDate,
+		);
 
 		expect(result.expiredCount).toBe(4);
 		expect(result.executedAt).toEqual(referenceDate);

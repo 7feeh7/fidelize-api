@@ -10,7 +10,7 @@ export class UpdateMessageTemplateController {
 		try {
 			const { name, content } = request.body;
 
-			await this.updateMessageTemplateUseCase.execute({
+			await this.updateMessageTemplateUseCase.execute(request.auth.tenantId, {
 				id: request.params.id as string,
 				name,
 				content,

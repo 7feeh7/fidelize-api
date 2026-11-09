@@ -14,6 +14,7 @@ export class CreateReferralUseCase {
 	constructor(private connection: Knex) {}
 
 	async execute(
+		tenantId: string,
 		data: ICreateReferralRequestDTO,
 		trx?: Knex.Transaction,
 	): Promise<ICreateReferralResponseDTO> {
@@ -38,20 +39,28 @@ export class CreateReferralUseCase {
 				throw new Error("Indicador e indicado devem ser clientes diferentes");
 			}
 
-			const existingReferral =
-				await referralsRepository.findByReferredId(referredId);
+			const existingReferral = await referralsRepository.findByReferredId(
+				tenantId,
+				referredId,
+			);
 
 			if (existingReferral) {
 				throw new Error("Este cliente já foi indicado");
 			}
 
-			const referrer = await customersRepository.findActiveById(referrerId);
+			const referrer = await customersRepository.findActiveById(
+				tenantId,
+				referrerId,
+			);
 
 			if (!referrer) {
 				throw new Error("Indicador não encontrado");
 			}
 
-			const referred = await customersRepository.findActiveById(referredId);
+			const referred = await customersRepository.findActiveById(
+				tenantId,
+				referredId,
+			);
 
 			if (!referred) {
 				throw new Error("Cliente indicado não encontrado");
@@ -64,10 +73,10 @@ export class CreateReferralUseCase {
 				convertedAt: null,
 			});
 
-			await referralsRepository.save(referral);
+			await referralsRepository.save(tenantId, referral);
 
 			const grantService = createGrantCustomerRewardsService(transaction);
-			return grantService.grantForNewReferral(referral);
+			return grantService.grantForNewReferral(tenantId, referral);
 		};
 
 		if (trx) {

@@ -10,10 +10,13 @@ export class SetMessageTemplateActiveController {
 		try {
 			const { active } = request.body;
 
-			await this.setMessageTemplateActiveUseCase.execute({
-				id: request.params.id as string,
-				active,
-			});
+			await this.setMessageTemplateActiveUseCase.execute(
+				request.auth.tenantId,
+				{
+					id: request.params.id as string,
+					active,
+				},
+			);
 
 			return response.status(200).json();
 		} catch (err: unknown) {

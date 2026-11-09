@@ -11,10 +11,13 @@ export class GrantManualCustomerRewardController {
 		try {
 			const { loyaltyRuleId } = request.body;
 
-			const result = await this.grantManualCustomerRewardUseCase.execute({
-				customerId: readRouteParam(request.params.customerId, "customerId"),
-				loyaltyRuleId,
-			});
+			const result = await this.grantManualCustomerRewardUseCase.execute(
+				request.auth.tenantId,
+				{
+					customerId: readRouteParam(request.params.customerId, "customerId"),
+					loyaltyRuleId,
+				},
+			);
 
 			return response.status(201).json(result);
 		} catch (err: unknown) {

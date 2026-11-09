@@ -9,6 +9,7 @@ export class UpdateMessageContentUseCase {
 	constructor(private messagesRepository: IMessagesRepository) {}
 
 	async execute(
+		tenantId: string,
 		data: IUpdateMessageContentRequestDTO,
 	): Promise<IUpdateMessageContentResponseDTO> {
 		const id = data.id?.trim();
@@ -22,7 +23,7 @@ export class UpdateMessageContentUseCase {
 			throw new Error("Conteúdo obrigatório");
 		}
 
-		const message = await this.messagesRepository.findById(id);
+		const message = await this.messagesRepository.findById(tenantId, id);
 
 		if (!message) {
 			throw new Error("Mensagem não encontrada");
@@ -32,9 +33,12 @@ export class UpdateMessageContentUseCase {
 			throw new Error("Somente mensagens pendentes podem ser editadas");
 		}
 
-		await this.messagesRepository.updateContent(id, content);
+		await this.messagesRepository.updateContent(tenantId, id, content);
 
-		const listItem = await this.messagesRepository.findListItemById(id);
+		const listItem = await this.messagesRepository.findListItemById(
+			tenantId,
+			id,
+		);
 
 		if (!listItem) {
 			throw new Error("Não foi possível carregar a mensagem atualizada");

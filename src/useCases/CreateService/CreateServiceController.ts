@@ -15,7 +15,7 @@ export class CreateServiceController {
 				active,
 			} = request.body;
 
-			await this.createServiceUseCase.execute({
+			await this.createServiceUseCase.execute(request.auth.tenantId, {
 				name,
 				description,
 				price,

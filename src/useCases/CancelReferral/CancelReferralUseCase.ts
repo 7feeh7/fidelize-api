@@ -4,8 +4,11 @@ import type { ICancelReferralRequestDTO } from "./CancelReferralDTO";
 export class CancelReferralUseCase {
 	constructor(private referralsRepository: IReferralsRepository) {}
 
-	async execute({ id }: ICancelReferralRequestDTO): Promise<void> {
-		const referral = await this.referralsRepository.findById(id);
+	async execute(
+		tenantId: string,
+		{ id }: ICancelReferralRequestDTO,
+	): Promise<void> {
+		const referral = await this.referralsRepository.findById(tenantId, id);
 
 		if (!referral) {
 			throw new Error("Indicação não encontrada");
@@ -16,6 +19,6 @@ export class CancelReferralUseCase {
 		}
 
 		referral.status = "CANCELED";
-		await this.referralsRepository.update(referral);
+		await this.referralsRepository.update(tenantId, referral);
 	}
 }

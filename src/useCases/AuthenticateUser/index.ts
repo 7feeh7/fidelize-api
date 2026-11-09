@@ -2,6 +2,7 @@ import type { SignOptions } from "jsonwebtoken";
 import { connection } from "@/database/connection";
 import { BcryptHashProvider } from "@/providers/implementations/BcryptHashProvider";
 import { JwtTokenProvider } from "@/providers/implementations/JwtTokenProvider";
+import { PostgresTenantsRepository } from "@/repositories/implementations/PostgresTenantsRepository";
 import { PostgresUsersRepository } from "@/repositories/implementations/PostgresUsersRepository";
 import { AuthenticateUserController } from "./AuthenticateUserController";
 import { AuthenticateUserUseCase } from "./AuthenticateUserUseCase";
@@ -18,6 +19,7 @@ const authenticateUserUseCase = new AuthenticateUserUseCase(
 	postgresUsersRepository,
 	bcryptHashProvider,
 	jwtTokenProvider,
+	new PostgresTenantsRepository(connection),
 );
 const authenticateUserController = new AuthenticateUserController(
 	authenticateUserUseCase,

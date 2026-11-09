@@ -10,8 +10,14 @@ export class UpdateMessageTemplateUseCase {
 		private messageTemplatesRepository: IMessageTemplatesRepository,
 	) {}
 
-	async execute(data: IUpdateMessageTemplateRequestDTO): Promise<void> {
-		const existing = await this.messageTemplatesRepository.findById(data.id);
+	async execute(
+		tenantId: string,
+		data: IUpdateMessageTemplateRequestDTO,
+	): Promise<void> {
+		const existing = await this.messageTemplatesRepository.findById(
+			tenantId,
+			data.id,
+		);
 
 		if (!existing) {
 			throw new Error("Modelo de mensagem não encontrado");
@@ -32,6 +38,6 @@ export class UpdateMessageTemplateUseCase {
 		existing.name = normalized.name;
 		existing.content = normalized.content;
 
-		await this.messageTemplatesRepository.update(existing);
+		await this.messageTemplatesRepository.update(tenantId, existing);
 	}
 }

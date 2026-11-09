@@ -72,17 +72,18 @@ function applyListFilters(
 export class PostgresMessagesRepository implements IMessagesRepository {
 	constructor(private connection: Knex) {}
 
-	private listJoinQuery() {
+	private listJoinQuery(tenantId: string) {
 		return this.connection("messages as m")
 			.join("customers as c", "m.customer_id", "c.id")
 			.leftJoin("users as u", "m.sent_by", "u.id")
 			.leftJoin("appointment_items as ai", "ai.id", "m.appointment_item_id")
 			.leftJoin("appointments as a", "a.id", "ai.appointment_id")
-			.leftJoin("services as s", "s.id", "ai.service_id");
+			.leftJoin("services as s", "s.id", "ai.service_id")
+			.where("m.tenant_id", tenantId);
 	}
 
-	private baseListQuery() {
-		return this.listJoinQuery().select(
+	private baseListQuery(tenantId: string) {
+		return this.listJoinQuery(tenantId).select(
 			"m.*",
 			"c.name as customer_name",
 			"c.phone as customer_phone",
@@ -95,9 +96,10 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		);
 	}
 
-	private messageInsertRow(message: Message) {
+	private messageInsertRow(tenantId: string, message: Message) {
 		return {
 			id: message.id,
+			tenant_id: tenantId,
 			customer_id: message.customerId,
 			template_id: message.templateId,
 			appointment_item_id: message.appointmentItemId,
@@ -112,29 +114,39 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		};
 	}
 
-	async save(message: Message): Promise<void> {
-		await this.connection("messages").insert(this.messageInsertRow(message));
+	async save(tenantId: string, message: Message): Promise<void> {
+		await this.connection("messages").insert(
+			this.messageInsertRow(tenantId, message),
+		);
 	}
 
 	async saveIgnoringAppointmentItemConflict(
+		tenantId: string,
 		message: Message,
 	): Promise<boolean> {
 		if (!message.appointmentItemId) {
-			await this.save(message);
+			await this.save(tenantId, message);
 			return true;
 		}
 
 		const rows = await this.connection("messages")
-			.insert(this.messageInsertRow(message))
-			.onConflict("appointment_item_id")
+			.insert(this.messageInsertRow(tenantId, message))
+			// O índice é parcial: o Postgres só o reconhece com o mesmo predicado.
+			.onConflict(
+				this.connection.raw(
+					"(appointment_item_id) WHERE appointment_item_id IS NOT NULL",
+				),
+			)
 			.ignore()
 			.returning("id");
 
 		return rows.length > 0;
 	}
 
-	async findById(id: string): Promise<Message | null> {
-		const row = await this.connection("messages").where({ id }).first();
+	async findById(tenantId: string, id: string): Promise<Message | null> {
+		const row = await this.connection("messages")
+			.where({ tenant_id: tenantId, id })
+			.first();
 
 		if (!row) {
 			return null;
@@ -143,8 +155,11 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		return mapRowToMessage(row);
 	}
 
-	async findListItemById(id: string): Promise<MessageListItem | null> {
-		const row = await this.baseListQuery().where("m.id", id).first();
+	async findListItemById(
+		tenantId: string,
+		id: string,
+	): Promise<MessageListItem | null> {
+		const row = await this.baseListQuery(tenantId).where("m.id", id).first();
 
 		if (!row) {
 			return null;
@@ -153,16 +168,16 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		return mapRowToListItem(row);
 	}
 
-	async list(filters: MessageListFilters) {
+	async list(tenantId: string, filters: MessageListFilters) {
 		const buildFilterQuery = () =>
-			applyListFilters(this.listJoinQuery(), filters);
+			applyListFilters(this.listJoinQuery(tenantId), filters);
 
 		const countRow = await buildFilterQuery()
 			.count<{ count: string }>("m.id as count")
 			.first();
 		const total = Number(countRow?.count ?? 0);
 
-		let query = applyListFilters(this.baseListQuery(), filters);
+		let query = applyListFilters(this.baseListQuery(tenantId), filters);
 
 		if (filters.sort === "recent_desc") {
 			query = query
@@ -188,9 +203,12 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		};
 	}
 
-	async countPendingUntil(scheduledUntil: string): Promise<number> {
+	async countPendingUntil(
+		tenantId: string,
+		scheduledUntil: string,
+	): Promise<number> {
 		const result = await this.connection("messages")
-			.where({ status: "PENDING" })
+			.where({ tenant_id: tenantId, status: "PENDING" })
 			.andWhere("scheduled_for", "<=", scheduledUntil)
 			.count<{ count: string }>("id as count")
 			.first();
@@ -198,33 +216,46 @@ export class PostgresMessagesRepository implements IMessagesRepository {
 		return Number(result?.count ?? 0);
 	}
 
-	async updateContent(id: string, content: string): Promise<void> {
-		await this.connection("messages").where({ id }).update({ content });
+	async updateContent(
+		tenantId: string,
+		id: string,
+		content: string,
+	): Promise<void> {
+		await this.connection("messages")
+			.where({ tenant_id: tenantId, id })
+			.update({ content });
 	}
 
-	async markSent(id: string, sentBy: string, sentAt: Date): Promise<void> {
-		await this.connection("messages").where({ id }).update({
-			status: "SENT",
-			sent_at: sentAt,
-			sent_by: sentBy,
-		});
+	async markSent(
+		tenantId: string,
+		id: string,
+		sentBy: string,
+		sentAt: Date,
+	): Promise<void> {
+		await this.connection("messages")
+			.where({ tenant_id: tenantId, id })
+			.update({
+				status: "SENT",
+				sent_at: sentAt,
+				sent_by: sentBy,
+			});
 	}
 
-	async cancel(id: string): Promise<void> {
-		await this.connection("messages").where({ id }).update({
-			status: "CANCELED",
-		});
+	async cancel(tenantId: string, id: string): Promise<void> {
+		await this.connection("messages")
+			.where({ tenant_id: tenantId, id })
+			.update({
+				status: "CANCELED",
+			});
 	}
 
 	async existsBirthdayMessageForYear(
+		tenantId: string,
 		customerId: string,
 		calendarYear: number,
 	): Promise<boolean> {
 		const row = await this.connection("messages")
-			.where({
-				customer_id: customerId,
-				type: "BIRTHDAY",
-			})
+			.where({ tenant_id: tenantId, customer_id: customerId, type: "BIRTHDAY" })
 			.whereRaw("EXTRACT(YEAR FROM scheduled_for::date) = ?", [calendarYear])
 			.first();
 

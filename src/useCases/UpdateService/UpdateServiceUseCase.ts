@@ -5,20 +5,24 @@ import type { IUpdateServiceRequestDTO } from "./UpdateServiceDTO";
 export class UpdateServiceUseCase {
 	constructor(private servicesRepository: IServicesRepository) {}
 
-	async execute(data: IUpdateServiceRequestDTO): Promise<void> {
+	async execute(
+		tenantId: string,
+		data: IUpdateServiceRequestDTO,
+	): Promise<void> {
 		validateServiceInput(data);
 
 		if (typeof data.active !== "boolean") {
 			throw new Error("Status do serviço inválido");
 		}
 
-		const existing = await this.servicesRepository.findById(data.id);
+		const existing = await this.servicesRepository.findById(tenantId, data.id);
 
 		if (!existing) {
 			throw new Error("Serviço não encontrado");
 		}
 
 		const serviceAlreadyExists = await this.servicesRepository.findByName(
+			tenantId,
 			data.name,
 		);
 
@@ -33,6 +37,6 @@ export class UpdateServiceUseCase {
 		existing.suggestedReturnDays = data.suggestedReturnDays ?? null;
 		existing.active = data.active;
 
-		await this.servicesRepository.update(existing);
+		await this.servicesRepository.update(tenantId, existing);
 	}
 }

@@ -1,5 +1,8 @@
 import type { Request, Response } from "express";
-import type { AuthenticateUserUseCase } from "./AuthenticateUserUseCase";
+import {
+	type AuthenticateUserUseCase,
+	TENANT_WITHOUT_ACCESS_MESSAGE,
+} from "./AuthenticateUserUseCase";
 
 const INVALID_CREDENTIALS_MESSAGE = "Credenciais inválidas";
 
@@ -27,6 +30,10 @@ export class AuthenticateUserController {
 
 			if (message === INVALID_CREDENTIALS_MESSAGE) {
 				return response.status(401).json({ message });
+			}
+
+			if (message === TENANT_WITHOUT_ACCESS_MESSAGE) {
+				return response.status(403).json({ message });
 			}
 
 			return response.status(400).json({ message });

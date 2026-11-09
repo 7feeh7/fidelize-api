@@ -15,7 +15,12 @@ export function createEnsureAuthenticated(tokenProvider: ITokenProvider) {
 	return (request: Request, response: Response, next: NextFunction): void => {
 		try {
 			const accessToken = readBearerToken(request.headers.authorization);
-			tokenProvider.verifyAccessToken(accessToken);
+			const payload = tokenProvider.verifyAccessToken(accessToken);
+			request.auth = {
+				userId: payload.sub,
+				tenantId: payload.tenantId,
+				role: payload.role,
+			};
 			next();
 		} catch (err: unknown) {
 			const message = (err as Error).message || INVALID_TOKEN_MESSAGE;

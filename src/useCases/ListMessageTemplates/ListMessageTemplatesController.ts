@@ -6,9 +6,11 @@ export class ListMessageTemplatesController {
 		private listMessageTemplatesUseCase: ListMessageTemplatesUseCase,
 	) {}
 
-	async handle(_request: Request, response: Response): Promise<Response> {
+	async handle(request: Request, response: Response): Promise<Response> {
 		try {
-			const result = await this.listMessageTemplatesUseCase.execute();
+			const result = await this.listMessageTemplatesUseCase.execute(
+				request.auth.tenantId,
+			);
 			return response.status(200).json(result);
 		} catch (err: unknown) {
 			return response.status(400).json({

@@ -19,6 +19,7 @@ export class CreateCustomerMessageUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: ICreateCustomerMessageRequestDTO,
 	): Promise<ICreateCustomerMessageResponseDTO> {
 		const customerId = data.customerId?.trim();
@@ -27,7 +28,10 @@ export class CreateCustomerMessageUseCase {
 			throw new Error("Informe o cliente");
 		}
 
-		const customer = await this.customersRepository.findActiveById(customerId);
+		const customer = await this.customersRepository.findActiveById(
+			tenantId,
+			customerId,
+		);
 
 		if (!customer) {
 			throw new Error("Cliente não encontrado");
@@ -38,14 +42,17 @@ export class CreateCustomerMessageUseCase {
 		let resolvedTemplateId: string | null = null;
 
 		if (templateId) {
-			const template =
-				await this.messageTemplatesRepository.findById(templateId);
+			const template = await this.messageTemplatesRepository.findById(
+				tenantId,
+				templateId,
+			);
 
 			if (!template) {
 				throw new Error("Modelo de mensagem não encontrado");
 			}
 
 			content = await this.fillMessageTemplateService.execute(
+				tenantId,
 				template.content,
 				customerId,
 			);
@@ -72,9 +79,10 @@ export class CreateCustomerMessageUseCase {
 			createdAt: new Date(),
 		});
 
-		await this.messagesRepository.save(message);
+		await this.messagesRepository.save(tenantId, message);
 
 		const listItem = await this.messagesRepository.findListItemById(
+			tenantId,
 			message.id as string,
 		);
 

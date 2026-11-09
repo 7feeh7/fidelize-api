@@ -1,4 +1,5 @@
 import jwt, { type SignOptions } from "jsonwebtoken";
+import { USER_ROLES, type UserRole } from "@/entities/User";
 import type { ITokenPayload, ITokenProvider } from "../ITokenProvider";
 
 export class JwtTokenProvider implements ITokenProvider {
@@ -31,6 +32,9 @@ export class JwtTokenProvider implements ITokenProvider {
 			if (
 				typeof decoded.sub !== "string" ||
 				typeof decoded.email !== "string" ||
+				typeof decoded.tenantId !== "string" ||
+				!decoded.tenantId.trim() ||
+				!USER_ROLES.includes(decoded.role) ||
 				!decoded.sub.trim() ||
 				!decoded.email.trim()
 			) {
@@ -40,6 +44,8 @@ export class JwtTokenProvider implements ITokenProvider {
 			return {
 				sub: decoded.sub,
 				email: decoded.email,
+				tenantId: decoded.tenantId,
+				role: decoded.role as UserRole,
 			};
 		} catch {
 			throw new Error("Token inválido");

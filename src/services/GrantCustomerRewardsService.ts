@@ -54,43 +54,53 @@ export class GrantCustomerRewardsService {
 		private customerRewardsRepository: ICustomerRewardsRepository,
 	) {}
 
-	async grantFirstVisit(customerId: string): Promise<GrantedRewardDTO[]> {
-		const rules =
-			await this.loyaltyRulesRepository.listActiveByTriggerType("FIRST_VISIT");
+	async grantFirstVisit(
+		tenantId: string,
+		customerId: string,
+	): Promise<GrantedRewardDTO[]> {
+		const rules = await this.loyaltyRulesRepository.listActiveByTriggerType(
+			tenantId,
+			"FIRST_VISIT",
+		);
 
-		return this.grantRulesForCustomer(customerId, rules, null);
+		return this.grantRulesForCustomer(tenantId, customerId, rules, null);
 	}
 
 	async grantReferralReceived(
+		tenantId: string,
 		customerId: string,
 		referralId: string,
 	): Promise<GrantedRewardDTO[]> {
-		const rules =
-			await this.loyaltyRulesRepository.listActiveByTriggerType(
-				"REFERRAL_RECEIVED",
-			);
+		const rules = await this.loyaltyRulesRepository.listActiveByTriggerType(
+			tenantId,
+			"REFERRAL_RECEIVED",
+		);
 
-		return this.grantRulesForCustomer(customerId, rules, referralId);
+		return this.grantRulesForCustomer(tenantId, customerId, rules, referralId);
 	}
 
 	async grantReferralGiven(
+		tenantId: string,
 		referrerId: string,
 		referralId: string,
 	): Promise<GrantedRewardDTO[]> {
-		const rules =
-			await this.loyaltyRulesRepository.listActiveByTriggerType(
-				"REFERRAL_GIVEN",
-			);
+		const rules = await this.loyaltyRulesRepository.listActiveByTriggerType(
+			tenantId,
+			"REFERRAL_GIVEN",
+		);
 
-		return this.grantRulesForCustomer(referrerId, rules, referralId);
+		return this.grantRulesForCustomer(tenantId, referrerId, rules, referralId);
 	}
 
 	async grantVisitCount(
+		tenantId: string,
 		customerId: string,
 		appointmentCount: number,
 	): Promise<GrantedRewardDTO[]> {
-		const rules =
-			await this.loyaltyRulesRepository.listActiveByTriggerType("VISIT_COUNT");
+		const rules = await this.loyaltyRulesRepository.listActiveByTriggerType(
+			tenantId,
+			"VISIT_COUNT",
+		);
 
 		const matchingRules = rules.filter(
 			(record) =>
@@ -98,14 +108,23 @@ export class GrantCustomerRewardsService {
 				record.rule.visitCount - 1 === appointmentCount,
 		);
 
-		return this.grantRulesForCustomer(customerId, matchingRules, null);
+		return this.grantRulesForCustomer(
+			tenantId,
+			customerId,
+			matchingRules,
+			null,
+		);
 	}
 
 	async grantManual(
+		tenantId: string,
 		customerId: string,
 		loyaltyRuleId: string,
 	): Promise<GrantedRewardDTO> {
-		const record = await this.loyaltyRulesRepository.findById(loyaltyRuleId);
+		const record = await this.loyaltyRulesRepository.findById(
+			tenantId,
+			loyaltyRuleId,
+		);
 
 		if (!record) {
 			throw new Error("Regra de fidelidade não encontrada");
@@ -116,6 +135,7 @@ export class GrantCustomerRewardsService {
 		}
 
 		const [granted] = await this.grantRulesForCustomer(
+			tenantId,
 			customerId,
 			[record],
 			null,
@@ -129,6 +149,7 @@ export class GrantCustomerRewardsService {
 	}
 
 	private async grantRulesForCustomer(
+		tenantId: string,
 		customerId: string,
 		rules: LoyaltyRuleRecord[],
 		referralId: string | null,
@@ -140,6 +161,7 @@ export class GrantCustomerRewardsService {
 			const loyaltyRuleId = record.rule.id as string;
 			const alreadyGranted =
 				await this.customerRewardsRepository.existsByGrantKey(
+					tenantId,
 					customerId,
 					loyaltyRuleId,
 					referralId,
@@ -161,27 +183,33 @@ export class GrantCustomerRewardsService {
 				usedAt: null,
 			});
 
-			await this.customerRewardsRepository.save(reward);
+			await this.customerRewardsRepository.save(tenantId, reward);
 			granted.push(toGrantedRewardDTO(record, reward.id as string));
 		}
 
 		return granted;
 	}
 
-	async grantForNewReferral(referral: Referral): Promise<GrantedRewardDTO[]> {
+	async grantForNewReferral(
+		tenantId: string,
+		referral: Referral,
+	): Promise<GrantedRewardDTO[]> {
 		return this.grantReferralReceived(
+			tenantId,
 			referral.referredId,
 			referral.id as string,
 		);
 	}
 
 	async grantForConvertedReferrals(
+		tenantId: string,
 		referrals: Referral[],
 	): Promise<GrantedRewardDTO[]> {
 		const granted: GrantedRewardDTO[] = [];
 
 		for (const referral of referrals) {
 			const items = await this.grantReferralGiven(
+				tenantId,
 				referral.referrerId,
 				referral.id as string,
 			);

@@ -10,11 +10,14 @@ export class PreviewMessageTemplateController {
 		try {
 			const { content, templateId, customerId } = request.body;
 
-			const result = await this.previewMessageTemplateUseCase.execute({
-				content,
-				templateId,
-				customerId,
-			});
+			const result = await this.previewMessageTemplateUseCase.execute(
+				request.auth.tenantId,
+				{
+					content,
+					templateId,
+					customerId,
+				},
+			);
 
 			return response.status(200).json(result);
 		} catch (err: unknown) {

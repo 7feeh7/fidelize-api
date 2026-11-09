@@ -17,7 +17,10 @@ export class GetMeUseCase {
 		}
 
 		const payload = this.tokenProvider.verifyAccessToken(accessToken);
-		const user = await this.usersRepository.findById(payload.sub);
+		const user = await this.usersRepository.findById(
+			payload.tenantId,
+			payload.sub,
+		);
 
 		if (!user?.id) {
 			throw new Error(USER_NOT_FOUND_MESSAGE);

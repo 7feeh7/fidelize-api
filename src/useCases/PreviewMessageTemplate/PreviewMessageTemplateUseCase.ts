@@ -12,12 +12,14 @@ export class PreviewMessageTemplateUseCase {
 	) {}
 
 	async execute(
+		tenantId: string,
 		data: IPreviewMessageTemplateRequestDTO,
 	): Promise<IPreviewMessageTemplateResponseDTO> {
 		let content = data.content?.trim();
 
 		if (!content && data.templateId) {
 			const template = await this.messageTemplatesRepository.findById(
+				tenantId,
 				data.templateId,
 			);
 
@@ -33,6 +35,7 @@ export class PreviewMessageTemplateUseCase {
 		}
 
 		const preview = await this.fillMessageTemplateService.execute(
+			tenantId,
 			content,
 			data.customerId,
 		);

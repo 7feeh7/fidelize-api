@@ -3,6 +3,8 @@ import { Service } from "@/entities/Service";
 import type { IServicesRepository } from "@/repositories/IServicesRepository";
 import { DeactivateServiceUseCase } from "./DeactivateServiceUseCase";
 
+const TENANT_ID = "tenant-1";
+
 describe("DeactivateServiceUseCase", () => {
 	let servicesRepository: IServicesRepository;
 	let sut: DeactivateServiceUseCase;
@@ -35,18 +37,22 @@ describe("DeactivateServiceUseCase", () => {
 
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(service);
 
-		await sut.execute({ id: "service-id" });
+		await sut.execute(TENANT_ID, { id: "service-id" });
 
 		expect(servicesRepository.findActiveById).toHaveBeenCalledWith(
+			TENANT_ID,
 			"service-id",
 		);
-		expect(servicesRepository.deactivate).toHaveBeenCalledWith("service-id");
+		expect(servicesRepository.deactivate).toHaveBeenCalledWith(
+			TENANT_ID,
+			"service-id",
+		);
 	});
 
 	it("lança erro quando o serviço não existe ou já está inativo", async () => {
 		vi.mocked(servicesRepository.findActiveById).mockResolvedValue(null);
 
-		await expect(sut.execute({ id: "missing-id" })).rejects.toThrow(
+		await expect(sut.execute(TENANT_ID, { id: "missing-id" })).rejects.toThrow(
 			"Serviço não encontrado",
 		);
 

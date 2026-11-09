@@ -48,8 +48,9 @@ export class PostgresCustomerRewardsRepository
 {
 	constructor(private connection: Knex) {}
 
-	async save(reward: CustomerReward): Promise<void> {
+	async save(tenantId: string, reward: CustomerReward): Promise<void> {
 		await this.connection("customer_rewards").insert({
+			tenant_id: tenantId,
 			id: reward.id,
 			customer_id: reward.customerId,
 			loyalty_rule_id: reward.loyaltyRuleId,
@@ -64,12 +65,14 @@ export class PostgresCustomerRewardsRepository
 	}
 
 	async existsByGrantKey(
+		tenantId: string,
 		customerId: string,
 		loyaltyRuleId: string,
 		referralId: string | null,
 	): Promise<boolean> {
 		const row = await this.connection("customer_rewards")
 			.where({
+				tenant_id: tenantId,
 				customer_id: customerId,
 				loyalty_rule_id: loyaltyRuleId,
 			})
@@ -84,12 +87,14 @@ export class PostgresCustomerRewardsRepository
 	}
 
 	async existsBirthdayGrantForYear(
+		tenantId: string,
 		customerId: string,
 		loyaltyRuleId: string,
 		grantYear: number,
 	): Promise<boolean> {
 		const row = await this.connection("customer_rewards")
 			.where({
+				tenant_id: tenantId,
 				customer_id: customerId,
 				loyalty_rule_id: loyaltyRuleId,
 				grant_year: grantYear,
@@ -99,8 +104,10 @@ export class PostgresCustomerRewardsRepository
 		return Boolean(row);
 	}
 
-	async findById(id: string): Promise<CustomerReward | null> {
-		const row = await this.connection("customer_rewards").where({ id }).first();
+	async findById(tenantId: string, id: string): Promise<CustomerReward | null> {
+		const row = await this.connection("customer_rewards")
+			.where({ tenant_id: tenantId, id })
+			.first();
 
 		if (!row) {
 			return null;
@@ -109,14 +116,15 @@ export class PostgresCustomerRewardsRepository
 		return mapRowToCustomerReward(row);
 	}
 
-	private buildDetailFromQuery() {
+	private buildDetailFromQuery(tenantId: string) {
 		return this.connection("customer_rewards as cr")
 			.join("loyalty_rules as lr", "lr.id", "cr.loyalty_rule_id")
-			.leftJoin("services", "services.id", "lr.free_service_id");
+			.leftJoin("services", "services.id", "lr.free_service_id")
+			.where("cr.tenant_id", tenantId);
 	}
 
-	private buildDetailQuery() {
-		return this.buildDetailFromQuery().select(
+	private buildDetailQuery(tenantId: string) {
+		return this.buildDetailFromQuery(tenantId).select(
 			"cr.*",
 			"lr.name as rule_name",
 			"lr.trigger_type",
@@ -129,8 +137,13 @@ export class PostgresCustomerRewardsRepository
 		);
 	}
 
-	async findDetailById(id: string): Promise<CustomerRewardListItem | null> {
-		const row = await this.buildDetailQuery().where("cr.id", id).first();
+	async findDetailById(
+		tenantId: string,
+		id: string,
+	): Promise<CustomerRewardListItem | null> {
+		const row = await this.buildDetailQuery(tenantId)
+			.where("cr.id", id)
+			.first();
 
 		if (!row) {
 			return null;
@@ -140,9 +153,10 @@ export class PostgresCustomerRewardsRepository
 	}
 
 	async findUsedDetailByAppointmentId(
+		tenantId: string,
 		appointmentId: string,
 	): Promise<CustomerRewardListItem | null> {
-		const row = await this.buildDetailQuery()
+		const row = await this.buildDetailQuery(tenantId)
 			.where("cr.appointment_id", appointmentId)
 			.where("cr.status", "USED")
 			.first();
@@ -154,9 +168,12 @@ export class PostgresCustomerRewardsRepository
 		return mapRowToListItem(row);
 	}
 
-	async expireAvailablePastDue(referenceDate: Date): Promise<number> {
+	async expireAvailablePastDue(
+		tenantId: string,
+		referenceDate: Date,
+	): Promise<number> {
 		return this.connection("customer_rewards")
-			.where("status", "AVAILABLE")
+			.where({ tenant_id: tenantId, status: "AVAILABLE" })
 			.whereNotNull("expires_at")
 			.where("expires_at", "<", referenceDate)
 			.update({
@@ -166,9 +183,10 @@ export class PostgresCustomerRewardsRepository
 	}
 
 	async findSoonestExpiringAvailable(
+		tenantId: string,
 		customerId: string,
 	): Promise<CustomerRewardListItem | null> {
-		const row = await this.buildDetailQuery()
+		const row = await this.buildDetailQuery(tenantId)
 			.where("cr.customer_id", customerId)
 			.where("cr.status", "AVAILABLE")
 			.orderByRaw("cr.expires_at ASC NULLS LAST")
@@ -182,17 +200,20 @@ export class PostgresCustomerRewardsRepository
 		return mapRowToListItem(row);
 	}
 
-	async listByCustomerId({
-		customerId,
-		status,
-		page,
-		perPage,
-	}: {
-		customerId: string;
-		status?: CustomerRewardStatus;
-		page?: number;
-		perPage?: number;
-	}) {
+	async listByCustomerId(
+		tenantId: string,
+		{
+			customerId,
+			status,
+			page,
+			perPage,
+		}: {
+			customerId: string;
+			status?: CustomerRewardStatus;
+			page?: number;
+			perPage?: number;
+		},
+	) {
 		const applyCustomerFilters = (query: Knex.QueryBuilder) => {
 			query.where("cr.customer_id", customerId);
 
@@ -203,15 +224,16 @@ export class PostgresCustomerRewardsRepository
 			return query;
 		};
 
-		const countRow = await applyCustomerFilters(this.buildDetailFromQuery())
+		const countRow = await applyCustomerFilters(
+			this.buildDetailFromQuery(tenantId),
+		)
 			.count<{ count: string }>("cr.id as count")
 			.first();
 		const total = Number(countRow?.count ?? 0);
 
-		let rowsQuery = applyCustomerFilters(this.buildDetailQuery()).orderBy(
-			"cr.granted_at",
-			"desc",
-		);
+		let rowsQuery = applyCustomerFilters(
+			this.buildDetailQuery(tenantId),
+		).orderBy("cr.granted_at", "desc");
 
 		if (page != null && perPage != null) {
 			rowsQuery = rowsQuery.limit(perPage).offset((page - 1) * perPage);
@@ -226,6 +248,7 @@ export class PostgresCustomerRewardsRepository
 	}
 
 	async listAvailableExpiringWithinDays(
+		tenantId: string,
 		customerId: string,
 		referenceDate: Date,
 		withinDays: number,
@@ -233,7 +256,7 @@ export class PostgresCustomerRewardsRepository
 		const expiresUntil = new Date(referenceDate);
 		expiresUntil.setUTCDate(expiresUntil.getUTCDate() + withinDays);
 
-		const rows = await this.buildDetailQuery()
+		const rows = await this.buildDetailQuery(tenantId)
 			.where("cr.customer_id", customerId)
 			.where("cr.status", "AVAILABLE")
 			.whereNotNull("cr.expires_at")
@@ -244,13 +267,15 @@ export class PostgresCustomerRewardsRepository
 		return rows.map((row) => mapRowToListItem(row));
 	}
 
-	async update(reward: CustomerReward): Promise<void> {
-		await this.connection("customer_rewards").where({ id: reward.id }).update({
-			status: reward.status,
-			appointment_id: reward.appointmentId,
-			used_at: reward.usedAt,
-			expires_at: reward.expiresAt,
-			updated_at: this.connection.fn.now(),
-		});
+	async update(tenantId: string, reward: CustomerReward): Promise<void> {
+		await this.connection("customer_rewards")
+			.where({ tenant_id: tenantId, id: reward.id })
+			.update({
+				status: reward.status,
+				appointment_id: reward.appointmentId,
+				used_at: reward.usedAt,
+				expires_at: reward.expiresAt,
+				updated_at: this.connection.fn.now(),
+			});
 	}
 }
